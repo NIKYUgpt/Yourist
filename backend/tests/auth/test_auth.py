@@ -2,7 +2,7 @@ from datetime import timedelta
 from uuid import uuid4
 
 from app.core.security import create_token
-from app.services.auth import VERIFY_EMAIL
+from app.modules.auth.service import VERIFY_EMAIL
 from tests.conftest import (
     PASSWORD,
     bearer,

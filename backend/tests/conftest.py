@@ -25,11 +25,11 @@ os.environ["ENV"] = "test"
 os.environ["MAIL_BACKEND"] = "console"
 os.environ["SECRET_KEY"] = "test-secret-key-that-is-long-enough-for-hs256"
 
-from app.db.base import Base  # noqa: E402
+from app.core.mail import ConsoleMailer, get_mailer  # noqa: E402
+from app.db.registry import Base  # noqa: E402
 from app.db.session import get_session  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models import Role, User  # noqa: E402
-from app.services.mail import ConsoleMailer, get_mailer  # noqa: E402
+from app.modules.auth.models import Role, User  # noqa: E402
 
 PASSWORD = "correct-horse-42"
 
