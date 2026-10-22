@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.mail import Mailer
 from app.core.security import (
+    ACCESS,
     burn_password_check,
     create_token,
     decode_token,
@@ -26,7 +27,6 @@ from app.modules.auth.schemas import RegisterIn, TokenPair
 
 logger = logging.getLogger(__name__)
 
-ACCESS = "access"
 VERIFY_EMAIL = "verify_email"
 
 INVALID_CREDENTIALS = "Неверный email или пароль"
@@ -130,7 +130,13 @@ async def issue_tokens(session: AsyncSession, user: User) -> TokenPair:
         )
     )
     await session.commit()
-    access = create_token(user.id, ACCESS, timedelta(minutes=settings.access_token_ttl_minutes))
+    # роль кладём в токен, чтобы другие сервисы (corpus) проверяли права без обращения к БД
+    access = create_token(
+        user.id,
+        ACCESS,
+        timedelta(minutes=settings.access_token_ttl_minutes),
+        role=user.role.value,
+    )
     return TokenPair(
         access_token=access,
         refresh_token=raw,
