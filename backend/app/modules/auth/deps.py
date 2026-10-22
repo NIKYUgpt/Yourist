@@ -4,19 +4,14 @@ from uuid import UUID
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_token
-from app.db.session import get_session
-from app.models import Role, User
-from app.services.auth import ACCESS
-from app.services.mail import Mailer, get_mailer
+from app.db.session import SessionDep
+from app.modules.auth.models import Role, User
+from app.modules.auth.service import ACCESS
 
 # auto_error=False — чтобы на отсутствие токена отвечать 401, а не 403
 bearer = HTTPBearer(auto_error=False)
-
-SessionDep = Annotated[AsyncSession, Depends(get_session)]
-MailerDep = Annotated[Mailer, Depends(get_mailer)]
 
 
 async def get_current_user(

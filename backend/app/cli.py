@@ -14,7 +14,7 @@ from sqlalchemy import select
 from app.core.security import hash_password
 from app.core.time import utcnow
 from app.db.session import SessionLocal, engine
-from app.models import Role, User
+from app.modules.auth.models import Role, User
 
 
 async def create_admin(email: str) -> None:

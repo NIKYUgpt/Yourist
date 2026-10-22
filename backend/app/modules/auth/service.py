@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.core.mail import Mailer
 from app.core.security import (
     burn_password_check,
     create_token,
@@ -20,9 +21,8 @@ from app.core.security import (
     verify_password,
 )
 from app.core.time import utcnow
-from app.models import RefreshToken, User
-from app.schemas.auth import RegisterIn, TokenPair
-from app.services.mail import Mailer
+from app.modules.auth.models import RefreshToken, User
+from app.modules.auth.schemas import RegisterIn, TokenPair
 
 logger = logging.getLogger(__name__)
 
