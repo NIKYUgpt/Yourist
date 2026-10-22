@@ -25,11 +25,11 @@ os.environ["ENV"] = "test"
 os.environ["MAIL_BACKEND"] = "console"
 os.environ["SECRET_KEY"] = "test-secret-key-that-is-long-enough-for-hs256"
 
-from app.db.base import Base  # noqa: E402
+from app.core.mail import ConsoleMailer, get_mailer  # noqa: E402
+from app.db.registry import Base  # noqa: E402
 from app.db.session import get_session  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models import Role, User  # noqa: E402
-from app.services.mail import ConsoleMailer, get_mailer  # noqa: E402
+from app.modules.auth.models import Role, User  # noqa: E402
 
 PASSWORD = "correct-horse-42"
 
@@ -49,8 +49,12 @@ async def _ensure_database(url: str) -> None:
 async def _prepare() -> None:
     await _ensure_database(TEST_DATABASE_URL)
     engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
+    schemas = {"public"} | {t.schema for t in Base.metadata.tables.values() if t.schema}
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        # тестовую БД каждый раз собираем с нуля, схемы модулей — тоже
+        for schema in sorted(schemas):
+            await conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))
+            await conn.execute(text(f'CREATE SCHEMA "{schema}"'))
         await conn.run_sync(Base.metadata.create_all)
     await engine.dispose()
 
@@ -64,7 +68,7 @@ async def engine() -> AsyncIterator[AsyncEngine]:
     # NullPool: у каждого теста свой event loop, переиспользовать соединения нельзя
     eng = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
     yield eng
-    tables = ", ".join(t.name for t in Base.metadata.sorted_tables)
+    tables = ", ".join(t.fullname for t in Base.metadata.sorted_tables)
     async with eng.begin() as conn:
         await conn.execute(text(f"TRUNCATE {tables} CASCADE"))
     await eng.dispose()
