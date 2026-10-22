@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from app.modules.corpus.client import ActCard, SourceError, SourceRedaction
+from app.modules.corpus.client import ActCard, SearchHit, SourceError, SourceRedaction
 from app.modules.corpus.sync import CorpusSync
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -54,6 +54,18 @@ class FakeSource:
             toc,
         )
 
+    async def search(self, query: str, limit: int = 20) -> list[SearchHit]:
+        self.calls["search"] += 1
+        return [
+            SearchHit(
+                external_id="64284",
+                external_hash="03bdee8f44a71247d7ba3342484326dbc3fa292d3caae9f88ada4b1ee38c20d9",
+                title="Трудовой кодекс Российской Федерации",
+                passing="Кодекс Российской Федерации от 30.12.2001 № 197-ФЗ",
+                state="Действует с изменениями",
+            )
+        ]
+
     async def card(self, doc_hash: str) -> ActCard:
         self.calls["card"] += 1
         return ActCard(
@@ -91,7 +103,8 @@ def source() -> FakeSource:
 
 @pytest.fixture
 def frozen_today(monkeypatch):
-    monkeypatch.setattr("app.modules.corpus.sync.today_msk", lambda: TODAY)
+    for target in ("app.modules.corpus.sync.today_msk", "app.modules.corpus.router.today_msk"):
+        monkeypatch.setattr(target, lambda: TODAY)
     return TODAY
 
 
