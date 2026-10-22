@@ -6,9 +6,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from app import models  # noqa: F401 — регистрирует таблицы в metadata
 from app.core.config import get_settings
-from app.db.base import Base
+from app.db.registry import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,6 +23,22 @@ if config.config_file_name is not None:
 config.set_main_option("sqlalchemy.url", get_settings().database_url.replace("%", "%%"))
 
 target_metadata = Base.metadata
+
+# у каждого модуля своя схема БД; сравниваем только их (и public)
+SCHEMAS = {t.schema for t in target_metadata.tables.values()}
+
+
+def include_name(name, type_, parent_names) -> bool:
+    if type_ == "schema":
+        return name is None or name in SCHEMAS
+    return True
+
+
+CONFIGURE_OPTS = {
+    "target_metadata": target_metadata,
+    "include_schemas": True,
+    "include_name": include_name,
+}
 
 
 def run_migrations_offline() -> None:
@@ -41,9 +56,9 @@ def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
-        target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        **CONFIGURE_OPTS,
     )
 
     with context.begin_transaction():
@@ -51,7 +66,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(connection=connection, **CONFIGURE_OPTS)
 
     with context.begin_transaction():
         context.run_migrations()
