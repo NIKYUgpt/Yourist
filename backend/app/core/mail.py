@@ -4,7 +4,9 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 from functools import lru_cache
-from typing import Protocol
+from typing import Annotated, Protocol
+
+from fastapi import Depends
 
 from app.core.config import Settings, get_settings
 
@@ -65,3 +67,6 @@ def get_mailer() -> Mailer:
     if settings.mail_backend == "smtp":
         return SmtpMailer(settings)
     return ConsoleMailer(settings.mail_from)
+
+
+MailerDep = Annotated[Mailer, Depends(get_mailer)]

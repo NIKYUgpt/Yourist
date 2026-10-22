@@ -4,7 +4,7 @@ from fastapi import APIRouter, Response, status
 from sqlalchemy import text
 
 from app import __version__
-from app.api.deps import SessionDep
+from app.db.session import SessionDep
 
 logger = logging.getLogger(__name__)
 
