@@ -5,10 +5,9 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.core.security import decode_token
+from app.core.security import ACCESS, decode_token
 from app.db.session import SessionDep
 from app.modules.auth.models import Role, User
-from app.modules.auth.service import ACCESS
 
 # auto_error=False — чтобы на отсутствие токена отвечать 401, а не 403
 bearer = HTTPBearer(auto_error=False)

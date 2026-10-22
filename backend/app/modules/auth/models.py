@@ -1,19 +1,15 @@
-import enum
 import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String, Uuid, func, true
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.roles import Role
 from app.db.base import Base, TimestampMixin
 
 SCHEMA = "auth"
 
-
-class Role(enum.StrEnum):
-    USER = "user"
-    SUPPORT = "support"
-    ADMIN = "admin"
+__all__ = ["SCHEMA", "RefreshToken", "Role", "User"]
 
 
 class User(TimestampMixin, Base):
