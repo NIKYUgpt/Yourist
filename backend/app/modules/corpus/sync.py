@@ -7,7 +7,7 @@ from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Protocol
 
-from sqlalchemy import delete, insert, select, text
+from sqlalchemy import delete, insert, select, text, update
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from app.core.time import utcnow
@@ -117,6 +117,16 @@ class CorpusSync:
             if act is None:
                 raise ValueError(f"акт {act_id} не найден")
             doc_hash = act.external_hash
+            # блокировка у нас — значит, «running» в журнале остался от прерванного запуска
+            await session.execute(
+                update(SyncRun)
+                .where(SyncRun.act_id == act_id, SyncRun.status == SyncStatus.RUNNING)
+                .values(
+                    status=SyncStatus.FAILED,
+                    error="прервана: сервис остановили во время синхронизации",
+                    finished_at=utcnow(),
+                )
+            )
             run = SyncRun(act_id=act_id, trigger=trigger, status=SyncStatus.RUNNING)
             session.add(run)
             await session.commit()
