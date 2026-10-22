@@ -1,4 +1,4 @@
-from app.models import Role
+from app.modules.auth.models import Role
 from tests.conftest import bearer, login, register, register_verified, set_role
 
 
