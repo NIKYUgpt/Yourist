@@ -10,6 +10,7 @@ from app.modules.corpus.models import (
     RedactionArticle,
     RedactionSource,
     RedactionStatus,
+    SyncRun,
     SyncStatus,
 )
 from tests.corpus.conftest import DOC_HASH
@@ -210,3 +211,15 @@ async def test_track_act_is_idempotent(corpus, db):
     second = await corpus.track_act(DOC_HASH)
     assert first.id == second.id
     assert (first.number, first.adopted_on) == ("197-ФЗ", date(2001, 12, 30))
+
+
+async def test_interrupted_run_is_closed_on_next_sync(corpus, db):
+    act = await corpus.track_act(DOC_HASH)
+    db.add(SyncRun(act_id=act.id, trigger="startup", status=SyncStatus.RUNNING))
+    await db.commit()
+
+    await corpus.sync_act(act.id)
+
+    runs = (await db.scalars(select(SyncRun).order_by(SyncRun.id))).all()
+    assert [r.status for r in runs] == [SyncStatus.FAILED, SyncStatus.SUCCESS]
+    assert "прервана" in runs[0].error
