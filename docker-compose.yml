@@ -1,5 +1,15 @@
 name: yourist
 
+# общий образ backend: один код, разные роли (миграции, api, corpus);
+# слои собираются один раз и берутся из кэша
+x-backend: &backend
+  build: ./backend
+  env_file:
+    - path: .env
+      required: false
+  environment: &backend-env
+    DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-yourist}:${POSTGRES_PASSWORD:-yourist}@db:5432/${POSTGRES_DB:-yourist}
+
 services:
   db:
     # PostgreSQL с расширением pgvector — пригодится для поиска по законам
@@ -20,19 +30,40 @@ services:
       timeout: 3s
       retries: 10
 
-  api:
-    build: ./backend
-    restart: unless-stopped
-    env_file:
-      - path: .env
-        required: false
-    environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-yourist}:${POSTGRES_PASSWORD:-yourist}@db:5432/${POSTGRES_DB:-yourist}
+  # применяет миграции и завершается; api и corpus стартуют после него
+  migrate:
+    <<: *backend
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    healthcheck:
+      disable: true
     depends_on:
       db:
         condition: service_healthy
+
+  # основной API: пользователи, дальше — диалоги
+  api:
+    <<: *backend
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     ports:
       - "127.0.0.1:8000:8000"
+
+  # сервис корпуса законов: синхронизация с pravo.gov.ru по расписанию
+  corpus:
+    <<: *backend
+    command: ["sh", "-c", "exec uvicorn app.corpus_main:app --host 0.0.0.0 --port \"$$PORT\" --proxy-headers"]
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      PORT: "8001"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8001:8001"
 
 volumes:
   pgdata:
