@@ -52,6 +52,9 @@ class FakeProvider(Provider):
         self.reply: Callable[[list[Message]], str] = lambda messages: messages[-1]["content"]
         self.chat_calls: list[dict[str, Any]] = []
         self.embed_calls: list[dict[str, Any]] = []
+        self.media_calls: list[dict[str, Any]] = []
+        self.transcript = "Меня зовут Петров Иван Иванович, меня уволили за прогул. Законно ли это?"
+        self.document_text = "ПРИКАЗ № 15 об увольнении Сидоренко Анны Петровны за прогул"
         self.fail: str | None = None
 
     def configured(self) -> bool:
@@ -96,15 +99,37 @@ class FakeProvider(Provider):
         self.embed_calls.append({"model": model, "texts": texts, "kind": kind})
         return [bag_of_words(t) for t in texts]
 
+    async def transcribe(
+        self, model: str, audio: bytes, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        if self.fail:
+            raise ProviderError(self.info.name, self.fail)
+        if Capability.STT not in self.info.capabilities:
+            return await super().transcribe(model, audio)
+        self.media_calls.append({"kind": "stt", "model": model, "size": len(audio)})
+        return ChatResult(self.transcript, self.info.name, model, latency_ms=1)
+
+    async def ocr(
+        self, model: str, image: bytes, mime: str, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        if self.fail:
+            raise ProviderError(self.info.name, self.fail)
+        if Capability.OCR not in self.info.capabilities:
+            return await super().ocr(model, image, mime)
+        self.media_calls.append({"kind": "ocr", "model": model, "mime": mime})
+        return ChatResult(self.document_text, self.info.name, model, latency_ms=1)
+
     async def models(self) -> list[str]:
         return ["fake-small", "fake-large"]
 
 
 def fake_registry() -> Registry:
     chat_only = frozenset({Capability.CHAT})
+    everything = frozenset(Capability)
     providers = [
-        FakeProvider("ollama"),
-        FakeProvider("yandex", Kind.API, "ru"),
+        FakeProvider("ollama", capabilities=everything - {Capability.STT}),
+        FakeProvider("whisper", capabilities=frozenset({Capability.STT})),
+        FakeProvider("yandex", Kind.API, "ru", everything),
         FakeProvider("gigachat", Kind.API, "ru"),
         FakeProvider("deepseek", Kind.API, "foreign", chat_only),
         FakeProvider("openai", Kind.API, "foreign", configured=False),

@@ -1,5 +1,6 @@
 """Локальные модели через Ollama (https://github.com/ollama/ollama/blob/main/docs/api.md)."""
 
+import base64
 from typing import Any
 
 from app.modules.ai.providers.base import (
@@ -18,13 +19,19 @@ from app.modules.ai.providers.base import (
 # параметры запроса верхнего уровня; остальное из профиля уходит в options модели
 _TOP_LEVEL = {"think", "keep_alive", "format"}
 
+OCR_PROMPT = (
+    "Перепиши весь текст с изображения документа дословно, сохраняя абзацы и нумерацию. "
+    "Ничего не добавляй, не сокращай и не комментируй. Если текста нет — ответь пустой строкой."
+)
+
 
 class OllamaProvider(HttpProvider):
     info = ProviderInfo(
         name="ollama",
         title="Ollama (локальные модели)",
         kind=Kind.LOCAL,
-        capabilities=frozenset({Capability.CHAT, Capability.EMBED}),
+        # OCR — моделями со «зрением» (qwen2.5vl и т. п.)
+        capabilities=frozenset({Capability.CHAT, Capability.EMBED, Capability.OCR}),
         location="local",
     )
 
@@ -101,3 +108,37 @@ class OllamaProvider(HttpProvider):
     async def models(self) -> list[str]:
         data = await self.request("GET", "/api/tags")
         return sorted(m["name"] for m in data.get("models", []))
+
+    async def ocr(
+        self, model: str, image: bytes, mime: str, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        """Текст с изображения через модель со «зрением» (например, qwen2.5vl)."""
+        top, model_opts = self._split(options)
+        body: dict[str, Any] = {
+            "model": model,
+            "stream": False,
+            "keep_alive": self.keep_alive,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": OCR_PROMPT,
+                    "images": [base64.b64encode(image).decode()],
+                }
+            ],
+            "options": {"temperature": 0.0, "num_ctx": self.num_ctx, **model_opts},
+            **top,
+        }
+        timer = Timer()
+        data = await self.request("POST", "/api/chat", json=body)
+        try:
+            text = data["message"]["content"]
+        except (KeyError, TypeError) as exc:
+            raise ProviderError(self.info.name, f"неожиданный ответ: {str(data)[:200]}") from exc
+        return ChatResult(
+            text=text.strip(),
+            provider=self.info.name,
+            model=data.get("model", model),
+            latency_ms=timer.ms,
+            usage=Usage(data.get("prompt_eval_count"), data.get("eval_count")),
+            finish_reason=data.get("done_reason"),
+        )

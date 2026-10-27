@@ -9,6 +9,7 @@ from app.modules.search import indexer as indexer_module
 from app.modules.search.indexer import index_status
 from app.modules.search.models import Chunk
 from app.modules.search.retrieval import (
+    expand_query,
     explicit_article_keys,
     lexical_term,
     query_words,
@@ -162,3 +163,11 @@ async def test_unconfigured_provider_is_skipped(db, synced, indexer):
     stats = await indexer.run([Mode.API])
     assert stats.embedded == 0
     assert stats.errors == ["openai/text-search: не заданы ключи провайдера"]
+
+
+def test_everyday_words_are_expanded_with_legal_terms():
+    expanded = expand_query("Я гендиректор и хочу уволиться, а ещё я на больничном")
+    assert "руководитель организации" in expanded
+    assert "временная нетрудоспособность" in expanded
+    assert "по инициативе работника" in expanded
+    assert expand_query("Сколько дней отпуска?") == "Сколько дней отпуска?"

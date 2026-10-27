@@ -20,6 +20,9 @@ class ProviderSettings(BaseSettings):
     ollama_num_ctx: int = 8192
     ollama_keep_alive: str = "30m"
 
+    # где хранить модели Whisper (по умолчанию — кэш Hugging Face)
+    whisper_download_root: str = ""
+
     yandex_api_key: str = ""
     yandex_folder_id: str = ""
     yandex_base_url: str = "https://llm.api.cloud.yandex.net/v1"

@@ -70,6 +70,9 @@ services:
     environment:
       OLLAMA_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434}
       PORT: "8002"
+    # модели Whisper (распознавание голоса) скачиваются при первом запросе и хранятся здесь
+    volumes:
+      - hf-cache:/home/yourist/.cache/huggingface
 
   # сервис корпуса законов: синхронизация с pravo.gov.ru по расписанию
   corpus:
@@ -87,3 +90,4 @@ services:
 
 volumes:
   pgdata:
+  hf-cache:

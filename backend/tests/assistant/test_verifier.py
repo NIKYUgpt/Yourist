@@ -1,4 +1,4 @@
-from app.modules.assistant.verifier import UNKNOWN, parse, revision
+from app.modules.assistant.verifier import UNKNOWN, needs_revision, parse, revision
 
 
 def test_parse_valid_and_fenced_json():
@@ -21,3 +21,13 @@ def test_revision_lists_problems():
     v = parse('{"verdict": "unsupported", "issues": [{"claim": "один месяц", "problem": "три"}]}')
     assert "«один месяц»: три" in revision(v)
     assert "главный вывод не следует" in revision(parse('{"verdict": "unsupported"}'))
+
+
+def test_needs_revision():
+    error = '{"claim": "1 месяц", "problem": "в источнике 3", "severity": "error"}'
+    warning = '{"claim": "28 дней", "problem": "не указано", "severity": "warning"}'
+    assert needs_revision(parse('{"verdict": "unsupported"}'))
+    assert needs_revision(parse(f'{{"verdict": "partially", "issues": [{error}]}}'))
+    assert not needs_revision(parse(f'{{"verdict": "partially", "issues": [{warning}]}}'))
+    assert not needs_revision(parse('{"verdict": "supported"}'))
+    assert not needs_revision(parse("мусор"))

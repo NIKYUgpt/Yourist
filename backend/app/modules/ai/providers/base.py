@@ -24,6 +24,8 @@ class Kind(enum.StrEnum):
 class Capability(enum.StrEnum):
     CHAT = "chat"
     EMBED = "embed"
+    STT = "stt"  # распознавание речи
+    OCR = "ocr"  # распознавание текста на изображении
 
 
 class EmbedKind(enum.StrEnum):
@@ -115,6 +117,18 @@ class Provider:
     ) -> list[list[float]]:
         raise NotSupported(self.info.name, "эмбеддинги не поддерживаются")
 
+    async def transcribe(
+        self, model: str, audio: bytes, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        """Текст из аудио (любой формат, который читает FFmpeg)."""
+        raise NotSupported(self.info.name, "распознавание речи не поддерживается")
+
+    async def ocr(
+        self, model: str, image: bytes, mime: str, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        """Текст с изображения документа (JPEG, PNG)."""
+        raise NotSupported(self.info.name, "распознавание текста на изображениях не поддерживается")
+
     async def models(self) -> list[str]:
         """Модели, доступные у провайдера (для выбора в админке)."""
         return []
@@ -157,7 +171,14 @@ class HttpProvider(Provider):
         return False
 
     async def request(
-        self, method: str, path: str, *, json: Any = None, headers: dict[str, str] | None = None
+        self,
+        method: str,
+        path: str,
+        *,
+        json: Any = None,
+        content: bytes | None = None,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Any:
         url = path if path.startswith("http") else f"{self.base_url}{path}"
         name = self.info.name
@@ -166,7 +187,12 @@ class HttpProvider(Provider):
         while True:
             try:
                 resp = await self.http.request(
-                    method, url, json=json, headers={**await self._headers(), **(headers or {})}
+                    method,
+                    url,
+                    json=json,
+                    content=content,
+                    params=params,
+                    headers={**await self._headers(), **(headers or {})},
                 )
             except httpx.TransportError as exc:
                 if attempt < self.retries:
