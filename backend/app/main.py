@@ -15,6 +15,7 @@ from app.modules.ai.config import get_provider_settings
 from app.modules.ai.registry import build_registry
 from app.modules.ai.router import router as ai_router
 from app.modules.auth.router import router as auth_router
+from app.modules.search.router import router as search_router
 
 
 @asynccontextmanager
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router, prefix="/api/v1")
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(ai_router, prefix="/api/v1")
+    app.include_router(search_router, prefix="/api/v1")
     return app
 
 
