@@ -6,7 +6,7 @@
 4. Детерминированная проверка ссылок; при ошибках — одна попытка исправления
    с перечнем ошибок.
 5. Проверяющая модель сверяет лучший ответ с источниками; если вывод
-   не подтверждается — ещё одна попытка с её замечаниями.
+   не подтверждается или есть серьёзные замечания — ещё одна попытка с ними.
 Из всех попыток остаётся лучшая: меньше ошибок в ссылках, затем лучше вердикт проверки.
 """
 
@@ -24,7 +24,7 @@ from app.modules.ai.service import AIGateway
 from app.modules.assistant import prompts
 from app.modules.assistant.citations import CheckReport, check
 from app.modules.assistant.models import Answer, Question, QuestionSource, QuestionStatus
-from app.modules.assistant.verifier import RANK, UNSUPPORTED, Verification, revision, verify
+from app.modules.assistant.verifier import RANK, Verification, needs_revision, revision, verify
 from app.modules.deid.api import DeidClient
 from app.modules.deid.service import DeidResult, reidentify, summary
 from app.modules.search.retrieval import Hit, search
@@ -184,7 +184,7 @@ class Pipeline:
 
             if self.ai.config.verify:
                 best.verification = await self._verify(deid.text, sources, best.text, on)
-                if best.verification.verdict == UNSUPPORTED:
+                if needs_revision(best.verification):
                     messages = [
                         *base,
                         {"role": "assistant", "content": best.text},
