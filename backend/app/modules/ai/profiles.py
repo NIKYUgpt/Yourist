@@ -23,6 +23,8 @@ class Task(enum.StrEnum):
     VERIFY = "verify"  # проверка ответа второй моделью
     DEID = "deid"  # поиск персональных данных, пропущенных правилами
     EMBED = "embed"  # векторы для поиска по нормам
+    STT = "stt"  # распознавание голосового вопроса
+    OCR = "ocr"  # распознавание текста на фото документа
 
 
 TASK_TITLES = {
@@ -30,11 +32,18 @@ TASK_TITLES = {
     Task.VERIFY: "Проверка ответа",
     Task.DEID: "Деперсонализация",
     Task.EMBED: "Векторный поиск",
+    Task.STT: "Распознавание речи",
+    Task.OCR: "Распознавание документов",
 }
+
+# задачи, в которые попадают исходные данные пользователя (текст, голос, фото документа):
+# их не отправляем зарубежным провайдерам
+RAW_INPUT_TASKS = (Task.DEID, Task.STT, Task.OCR)
 
 
 def required_capability(task: Task) -> Capability:
-    return Capability.EMBED if task == Task.EMBED else Capability.CHAT
+    special = {Task.EMBED: Capability.EMBED, Task.STT: Capability.STT, Task.OCR: Capability.OCR}
+    return special.get(task, Capability.CHAT)
 
 
 class ModelRef(BaseModel):
@@ -55,6 +64,8 @@ class AIConfig(BaseModel):
     tasks: dict[Task, TaskProfile]
     # второй проход деперсонализации моделью (после правил и словаря)
     deid_llm: bool = True
+    # проверка ответа второй моделью (Task.VERIFY)
+    verify: bool = True
 
     def resolve(self, task: Task) -> tuple[Mode, ModelRef]:
         profile = self.tasks[task]
@@ -67,14 +78,18 @@ class AIConfig(BaseModel):
 DEFAULT_CONFIG = AIConfig(
     mode=Mode.LOCAL,
     tasks={
+        # выбор по сравнению 27–28.10.2026 (backend/evaluation/results): YandexGPT-5 Lite —
+        # лучшая точность и скорость среди локальных моделей; в Ollama — с исправленным
+        # шаблоном диалога (deploy/ollama/yandexgpt-5-lite.Modelfile)
         Task.ANSWER: TaskProfile(
-            local=ModelRef(provider="ollama", model="qwen3:8b", options={"think": False}),
-            api=ModelRef(provider="gigachat", model="GigaChat-2-Max"),
+            local=ModelRef(provider="ollama", model="yandexgpt-5-lite:8b"),
+            api=ModelRef(provider="yandex", model="yandexgpt-5.1"),
         ),
-        # проверяющая модель — другого разработчика, чтобы ошибки не совпадали
+        # проверяющая модель — другого разработчика, чтобы ошибки не совпадали: перекрёстная
+        # проверка ловила больше подменённых фактов, чем самопроверка (93% против 79%)
         Task.VERIFY: TaskProfile(
             local=ModelRef(provider="ollama", model="qwen3:8b", options={"think": False}),
-            api=ModelRef(provider="yandex", model="yandexgpt"),
+            api=ModelRef(provider="yandex", model="deepseek-v4-flash"),
         ),
         Task.DEID: TaskProfile(
             local=ModelRef(provider="ollama", model="qwen3:8b", options={"think": False}),
@@ -86,6 +101,19 @@ DEFAULT_CONFIG = AIConfig(
             local=ModelRef(provider="ollama", model="bge-m3", options={"num_gpu": 0}),
             api=ModelRef(provider="yandex", model="text-search"),
         ),
+        Task.STT: TaskProfile(
+            # large-v3-turbo в int8 на процессоре: точный русский без видеокарты
+            local=ModelRef(
+                provider="whisper",
+                model="large-v3-turbo",
+                options={"device": "cpu", "compute_type": "int8"},
+            ),
+            api=ModelRef(provider="yandex", model="general"),
+        ),
+        Task.OCR: TaskProfile(
+            local=ModelRef(provider="ollama", model="qwen2.5vl:7b"),
+            api=ModelRef(provider="yandex", model="page"),
+        ),
     },
 )
 
@@ -94,7 +122,7 @@ def with_defaults(data: dict[str, Any] | None) -> AIConfig:
     """Сохранённая конфигурация, дополненная задачами, которых в ней ещё нет."""
     merged = DEFAULT_CONFIG.model_dump(mode="json")
     if data:
-        for key in ("mode", "deid_llm"):
+        for key in ("mode", "deid_llm", "verify"):
             merged[key] = data.get(key, merged[key])
         merged["tasks"].update(data.get("tasks", {}))
     return AIConfig.model_validate(merged)
@@ -118,10 +146,9 @@ def validate_config(config: AIConfig, providers: dict[str, ProviderInfo]) -> lis
                 errors.append(f"{where}: провайдер {ref.provider!r} не {expected.value}")
             if required_capability(task) not in info.capabilities:
                 errors.append(f"{where}: {ref.provider!r} не умеет {required_capability(task)}")
-            # в задачу деперсонализации попадает исходный текст пользователя —
-            # за пределы РФ его не отправляем
-            if task == Task.DEID and info.location == "foreign":
-                errors.append(f"{where}: для деперсонализации нужен локальный или российский")
+            # в эти задачи попадают исходные данные пользователя — за пределы РФ не отправляем
+            if task in RAW_INPUT_TASKS and info.location == "foreign":
+                errors.append(f"{where}: для исходных данных нужен локальный или российский")
     return errors
 
 

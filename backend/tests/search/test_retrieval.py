@@ -2,13 +2,14 @@ from datetime import date
 
 from sqlalchemy import func, select
 
-from app.modules.ai.profiles import Mode
+from app.modules.ai.profiles import Mode, Task
 from app.modules.ai.service import AIGateway, load_config, save_config
 from app.modules.corpus.models import ArticleVersion
 from app.modules.search import indexer as indexer_module
 from app.modules.search.indexer import index_status
 from app.modules.search.models import Chunk
 from app.modules.search.retrieval import (
+    expand_query,
     explicit_article_keys,
     lexical_term,
     query_words,
@@ -146,3 +147,27 @@ async def test_no_redaction_on_date(db, indexed, gateway):
     result = await search(db, gateway, "трудовой договор", date(2001, 1, 1))
     assert result.hits == []
     assert result.notes == ["нет разобранных редакций, действовавших на 01.01.2001"]
+
+
+async def test_both_modes_can_be_embedded_in_one_run(db, synced, indexer, ai_registry):
+    stats = await indexer.run([Mode.LOCAL, Mode.API])
+    assert stats.space == "ollama/bge-m3"  # активный режим не меняется
+    assert stats.by_space == {"ollama/bge-m3": stats.chunks, "yandex/text-search": stats.chunks}
+    assert (await index_status(db))["spaces"] == stats.by_space
+
+
+async def test_unconfigured_provider_is_skipped(db, synced, indexer):
+    config = await load_config(db)
+    config.tasks[Task.EMBED].api.provider = "openai"  # в подменном реестре без ключей
+    await save_config(db, config, None)
+    stats = await indexer.run([Mode.API])
+    assert stats.embedded == 0
+    assert stats.errors == ["openai/text-search: не заданы ключи провайдера"]
+
+
+def test_everyday_words_are_expanded_with_legal_terms():
+    expanded = expand_query("Я гендиректор и хочу уволиться, а ещё я на больничном")
+    assert "руководитель организации" in expanded
+    assert "временная нетрудоспособность" in expanded
+    assert "по инициативе работника" in expanded
+    assert expand_query("Сколько дней отпуска?") == "Сколько дней отпуска?"

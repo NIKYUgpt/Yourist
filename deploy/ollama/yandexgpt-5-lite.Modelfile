@@ -1,0 +1,29 @@
+# YandexGPT-5 Lite 8B (instruct) для Ollama с корректным шаблоном диалога.
+#
+# Шаблон в GGUF-репозитории yandex/YandexGPT-5-Lite-8B-instruct-GGUF при импорте
+# в Ollama 0.30 теряет системные сообщения и реплики ассистента. Здесь шаблон
+# повторяет официальный (tokenizer_config.json модели): «<s> Пользователь: …\n\n
+# Ассистент: …\n\n … Ассистент:[SEP]». Системной роли у модели нет — системное
+# сообщение подставляется в начало первой реплики пользователя.
+#
+#   ollama pull hf.co/yandex/YandexGPT-5-Lite-8B-instruct-GGUF:Q4_K_M
+#   ollama create yandexgpt-5-lite:8b -f deploy/ollama/yandexgpt-5-lite.Modelfile
+#
+# Лицензия модели — «YandexGPT-5-Lite-8B License» (исследовательское,
+# некоммерческое и ограниченно коммерческое использование).
+
+FROM hf.co/yandex/YandexGPT-5-Lite-8B-instruct-GGUF:Q4_K_M
+
+TEMPLATE """<s>{{- $system := "" }}
+{{- range .Messages }}
+{{- if eq .Role "system" }}{{ $system = .Content }}
+{{- else if eq .Role "user" }} Пользователь: {{ if $system }}{{ $system }}
+
+{{ $system = "" }}{{ end }}{{ .Content }}
+
+{{ else if eq .Role "assistant" }} Ассистент: {{ .Content }}
+
+{{ end }}
+{{- end }} Ассистент:[SEP]"""
+
+PARAMETER stop "</s>"

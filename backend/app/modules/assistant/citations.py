@@ -74,7 +74,8 @@ _ACT_ALIASES = [
     (re.compile(r"^АПК", re.I), "АПК РФ"),
 ]
 _LAW_NUMBER = re.compile(r"(\d+-ФЗ)", re.I)
-_MARKERS = re.compile(r"\[(\d+(?:\s*[,;–-]\s*\d+)*)\]")
+# «[2]», «[1, 3]», «[1–3]», а также «[1, ч. 6]» и «[2, ст. 115 ТК РФ]» — номера в начале скобок
+_MARKERS = re.compile(r"\[(\d+(?:\s*[,;–-]\s*\d+)*)(?:\s*[,;]\s*[^\]\d][^\]]*)?\]")
 _QUOTE = re.compile(r"«([^«»]{20,})»")
 _WORDS = re.compile(r"[а-яёa-z0-9]+")
 

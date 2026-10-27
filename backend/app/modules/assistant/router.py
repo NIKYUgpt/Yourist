@@ -1,13 +1,26 @@
 import uuid
+from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 from sqlalchemy import delete, func, select
 
 from app.db.session import SessionDep
+from app.modules.ai.profiles import Task
+from app.modules.ai.providers.base import Timer
 from app.modules.ai.service import AIDep
-from app.modules.assistant.models import Answer, Question
-from app.modules.assistant.pipeline import AnswerFailed, Pipeline
+from app.modules.assistant.models import Answer, Question, QuestionSource
+from app.modules.assistant.pipeline import AnswerFailed, Outcome, Pipeline
 from app.modules.assistant.schemas import (
     AnswerOut,
     QuestionBrief,
@@ -18,7 +31,8 @@ from app.modules.assistant.schemas import (
 from app.modules.auth.deps import CurrentUser
 from app.modules.auth.models import Role
 from app.modules.corpus.sync import today_msk
-from app.modules.deid.api import DeidClient, DeidUnavailable
+from app.modules.deid.api import DeidClient, DeidUnavailable, MediaError
+from app.modules.deid.service import summary
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 STAFF = (Role.ADMIN, Role.SUPPORT)
@@ -40,6 +54,7 @@ def _answer_out(answer: Answer, restore=lambda text: text) -> AnswerOut:
         citations=report.get("citations", []),
         markers=report.get("markers", []),
         issues=report.get("issues", []),
+        verification=report.get("verification"),
         sources=answer.sources,
         provider=answer.provider,
         model=answer.model,
@@ -57,18 +72,81 @@ async def ask(data: QuestionIn, user: CurrentUser, session: SessionDep, ai: AIDe
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
     except AnswerFailed as exc:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, f"Модель не ответила: {exc}") from exc
+    return _outcome_out(outcome, data.text)
+
+
+def _outcome_out(outcome: Outcome, original: str | None = None) -> QuestionOut:
     q = outcome.question
     # пользователю, задавшему вопрос, — с его данными; в БД и в истории — с метками
     return QuestionOut(
         id=q.id,
         created_at=q.created_at,
         on_date=q.on_date,
-        text=data.text,
+        source=q.source,
+        # для текста — как написал пользователь; для голоса и фото — распознанный текст
+        # (одно лицо в разных падежах восстановится в одной форме)
+        text=original if original is not None else outcome.restore(q.text),
         status=q.status,
         pii=q.pii,
         answer=_answer_out(outcome.answer, outcome.restore),
         trace=q.trace,
     )
+
+
+async def _media_question(pipeline: Pipeline, user_id, recognize, source, on) -> QuestionOut:
+    timer = Timer()
+    try:
+        media = await recognize
+        trace = {
+            "recognize": {"ms": timer.ms, **media.recognized},
+            "deid": {"found": summary(media.deid.entities), "llm": media.deid.llm},
+        }
+        outcome = await pipeline.answer(user_id, media.deid, on or today_msk(), source, trace)
+    except MediaError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except DeidUnavailable as exc:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
+    except AnswerFailed as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, f"Модель не ответила: {exc}") from exc
+    return _outcome_out(outcome)
+
+
+@router.post("/questions/voice", response_model=QuestionOut, status_code=status.HTTP_201_CREATED)
+async def ask_voice(
+    user: CurrentUser,
+    session: SessionDep,
+    ai: AIDep,
+    deid: DeidDep,
+    file: UploadFile = File(..., description="Голосовое сообщение: OGG/Opus, M4A, MP3, WAV"),
+    on: date | None = Form(None, alias="date"),
+):
+    """Голосовой вопрос: распознаётся и обезличивается в сервисе deid, дальше — как текст."""
+    pipeline = Pipeline(session, ai, deid)
+    stt = ai.resolve(Task.STT)[1]
+    audio = await file.read()
+    recognize = deid.from_audio(audio, file.filename or "audio", stt, pipeline.deid_model())
+    return await _media_question(pipeline, user.id, recognize, QuestionSource.VOICE, on)
+
+
+@router.post("/questions/photo", response_model=QuestionOut, status_code=status.HTTP_201_CREATED)
+async def ask_photo(
+    user: CurrentUser,
+    session: SessionDep,
+    ai: AIDep,
+    deid: DeidDep,
+    file: UploadFile = File(..., description="Фото документа: JPEG или PNG"),
+    text: str = Form("", max_length=4000, description="Вопрос к документу; можно не задавать"),
+    on: date | None = Form(None, alias="date"),
+):
+    """Вопрос к фото документа (приказа, договора): текст распознаётся и обезличивается
+    в сервисе deid и добавляется к вопросу."""
+    pipeline = Pipeline(session, ai, deid)
+    ocr = ai.resolve(Task.OCR)[1]
+    image = await file.read()
+    recognize = deid.from_image(
+        image, file.filename or "photo", file.content_type or "", text, ocr, pipeline.deid_model()
+    )
+    return await _media_question(pipeline, user.id, recognize, QuestionSource.PHOTO, on)
 
 
 async def _final_answers(session, ids: list[uuid.UUID]) -> dict[uuid.UUID, Answer]:
@@ -100,6 +178,7 @@ async def history(
             id=q.id,
             created_at=q.created_at,
             on_date=q.on_date,
+            source=q.source,
             text=q.text,
             status=q.status,
             verdict=finals[q.id].verdict if q.id in finals else None,
@@ -125,6 +204,7 @@ async def get_question(question_id: uuid.UUID, user: CurrentUser, session: Sessi
         id=q.id,
         created_at=q.created_at,
         on_date=q.on_date,
+        source=q.source,
         text=q.text,
         status=q.status,
         pii=q.pii,

@@ -1,22 +1,26 @@
 """Построение поискового индекса: нарезка версий статей и векторы фрагментов.
 
 Работает в процессе сервиса корпуса: после каждой синхронизации и периодически —
-чтобы подхватить смену модели эмбеддингов в админке. Векторы считаются только
-для активной модели; при переключении local/api недостающие досчитываются.
+чтобы подхватить смену модели эмбеддингов в админке. Векторы считаются для
+активной модели; по запросу администратора — и для второго режима (local/api),
+чтобы переключение было мгновенным. Автоматически второй режим не считается:
+у API-провайдера это платные запросы.
 """
 
 import asyncio
 import contextlib
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 
 from sqlalchemy import delete, func, insert, select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from app.modules.ai.profiles import Mode, ModelRef, Task, embedding_key
 from app.modules.ai.providers.base import EmbedKind, ProviderError
 from app.modules.ai.registry import Registry
-from app.modules.ai.service import AIGateway, load_config
+from app.modules.ai.service import load_config
 from app.modules.corpus.models import Act, ArticleVersion
 from app.modules.corpus.titles import short_title_for
 from app.modules.search.chunking import CHUNKER_VERSION, chunk_article
@@ -41,7 +45,8 @@ class IndexStats:
     versions: int = 0
     chunks: int = 0
     embedded: int = 0
-    space: str | None = None
+    space: str | None = None  # активное пространство векторов
+    by_space: dict[str, int] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
 
@@ -52,8 +57,11 @@ class Indexer:
         self.registry = registry
         self.embed_batch = embed_batch
 
-    async def run(self) -> IndexStats | None:
-        """Нарезать новые версии и досчитать векторы. None — индекс уже строится."""
+    async def run(self, modes: Iterable[Mode] = ()) -> IndexStats | None:
+        """Нарезать новые версии и досчитать векторы. None — индекс уже строится.
+
+        modes — для каких режимов считать векторы; пусто — только для активного.
+        """
         async with self.engine.connect() as lock_conn:
             locked = await lock_conn.scalar(
                 text("SELECT pg_try_advisory_lock(:ns, 0)"), {"ns": _LOCK_NAMESPACE}
@@ -64,7 +72,7 @@ class Indexer:
             try:
                 stats = IndexStats()
                 await self.build_chunks(stats)
-                await self.embed_missing(stats)
+                await self.embed_missing(stats, modes)
                 if stats.versions or stats.embedded:
                     logger.info("Поисковый индекс обновлён: %s", stats)
                 return stats
@@ -126,10 +134,28 @@ class Indexer:
         stats.versions += 1
         stats.chunks += len(drafts)
 
-    async def embed_missing(self, stats: IndexStats) -> None:
+    async def embed_missing(self, stats: IndexStats, modes: Iterable[Mode] = ()) -> None:
         async with self.sessions() as session:
-            gateway = AIGateway(self.registry, await load_config(session))
-        space = stats.space = gateway.embedding_key
+            config = await load_config(session)
+        active_mode, active = config.resolve(Task.EMBED)
+        stats.space = embedding_key(active)
+        profile = config.tasks[Task.EMBED]
+        targets: dict[str, ModelRef] = {}
+        for mode in [*modes] or [active_mode]:
+            ref = profile.local if mode == Mode.LOCAL else profile.api
+            targets[embedding_key(ref)] = ref
+        for space, ref in targets.items():
+            await self._embed_space(space, ref, stats)
+
+    async def _embed_space(self, space: str, ref: ModelRef, stats: IndexStats) -> None:
+        try:
+            provider = self.registry.get(ref.provider)
+        except ProviderError as exc:
+            stats.errors.append(str(exc))
+            return
+        if not provider.configured():
+            stats.errors.append(f"{space}: не заданы ключи провайдера")
+            return
         while True:
             async with self.sessions() as session:
                 done = select(Embedding.chunk_id).where(Embedding.space == space)
@@ -144,8 +170,11 @@ class Indexer:
                 if not batch:
                     return
                 try:
-                    vectors = await gateway.embed(
-                        [embedding_input(c, t) for _, c, t in batch], EmbedKind.DOCUMENT
+                    vectors = await provider.embed(
+                        ref.model,
+                        [embedding_input(c, t) for _, c, t in batch],
+                        kind=EmbedKind.DOCUMENT,
+                        options=ref.options,
                     )
                 except ProviderError as exc:
                     logger.warning("Векторы не посчитаны (%s): %s", space, exc)
@@ -160,6 +189,7 @@ class Indexer:
                 )
                 await session.commit()
                 stats.embedded += len(batch)
+                stats.by_space[space] = stats.by_space.get(space, 0) + len(batch)
 
 
 async def index_status(session: AsyncSession) -> dict:
@@ -186,6 +216,7 @@ class IndexWorker:
         self.interval_sec = interval_sec
         self._wake = asyncio.Event()
         self._task: asyncio.Task | None = None
+        self._modes: set[Mode] = set()
         self.last: IndexStats | None = None
 
     def start(self) -> None:
@@ -196,13 +227,15 @@ class IndexWorker:
             self._task.cancel()
             await asyncio.gather(self._task, return_exceptions=True)
 
-    def trigger(self) -> None:
+    def trigger(self, modes: Iterable[Mode] = ()) -> None:
+        self._modes.update(modes)
         self._wake.set()
 
     async def _loop(self) -> None:
         while True:
+            modes, self._modes = self._modes, set()
             try:
-                stats = await self.indexer.run()
+                stats = await self.indexer.run(modes)
                 if stats is not None:
                     self.last = stats
             except asyncio.CancelledError:

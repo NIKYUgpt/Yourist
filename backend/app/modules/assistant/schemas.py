@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app.modules.assistant.models import QuestionStatus
+from app.modules.assistant.models import QuestionSource, QuestionStatus
 
 
 class QuestionIn(BaseModel):
@@ -47,6 +47,16 @@ class IssueOut(BaseModel):
     message: str
 
 
+class VerificationOut(BaseModel):
+    verdict: str = Field(description="supported | partially | unsupported | unknown")
+    issues: list[dict[str, str]] = Field(description="Утверждение, проблема, error/warning")
+    missing: str = Field(description="Важное из источников, что ответ упустил")
+    provider: str | None
+    model: str | None
+    latency_ms: int | None
+    error: str | None
+
+
 class AnswerOut(BaseModel):
     text: str
     verdict: str = Field(description="passed | warnings | failed | no_sources")
@@ -54,6 +64,9 @@ class AnswerOut(BaseModel):
     citations: list[CitationOut]
     markers: list[int] = Field(description="Номера источников [n], упомянутые в ответе")
     issues: list[IssueOut]
+    verification: VerificationOut | None = Field(
+        None, description="Сверка ответа с источниками второй моделью"
+    )
     sources: list[SourceOut]
     provider: str | None
     model: str | None
@@ -64,7 +77,8 @@ class QuestionOut(BaseModel):
     id: uuid.UUID
     created_at: datetime
     on_date: date
-    text: str
+    source: QuestionSource = Field(description="text | voice | photo")
+    text: str = Field(description="Вопрос; для голоса и фото — распознанный текст")
     status: QuestionStatus
     pii: dict[str, int] = Field(description="Сколько персональных данных скрыто, по видам")
     answer: AnswerOut | None
@@ -75,6 +89,7 @@ class QuestionBrief(BaseModel):
     id: uuid.UUID
     created_at: datetime
     on_date: date
+    source: QuestionSource
     text: str
     status: QuestionStatus
     verdict: str | None

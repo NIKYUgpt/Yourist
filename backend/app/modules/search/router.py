@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from app.core.principal import require_role
 from app.core.roles import Role
 from app.db.session import SessionDep
+from app.modules.ai.profiles import Mode
 from app.modules.ai.service import AIDep, AIGateway, get_registry, load_config
 from app.modules.auth.deps import CurrentUser
 from app.modules.corpus.sync import today_msk
@@ -51,6 +52,14 @@ async def get_index_status(
 
 
 @index_router.post("", status_code=status.HTTP_202_ACCEPTED, dependencies=[admin_only])
-async def run_index(worker: IndexWorker = Depends(get_worker)) -> dict[str, str]:
-    worker.trigger()
+async def run_index(
+    worker: IndexWorker = Depends(get_worker),
+    modes: list[Mode] = Query(
+        [],
+        alias="mode",
+        description="Для каких режимов считать векторы (local, api); по умолчанию — активный",
+    ),
+) -> dict[str, str]:
+    """Обновить индекс. mode=local&mode=api — заранее посчитать векторы для обоих режимов."""
+    worker.trigger(modes)
     return {"detail": "Обновление индекса запущено"}

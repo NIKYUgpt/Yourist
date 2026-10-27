@@ -33,6 +33,23 @@ class QuestionStatus(enum.StrEnum):
     FAILED = "failed"
 
 
+class QuestionSource(enum.StrEnum):
+    TEXT = "text"
+    VOICE = "voice"  # голосовое сообщение, распознанное в сервисе deid
+    PHOTO = "photo"  # вопрос к фото документа
+
+
+def _enum(cls: type[enum.Enum], name: str) -> Enum:
+    return Enum(
+        cls,
+        name=name,
+        native_enum=False,
+        create_constraint=True,
+        length=16,
+        values_callable=lambda items: [i.value for i in items],
+    )
+
+
 class Question(Base):
     __tablename__ = "questions"
     __table_args__ = {"schema": SCHEMA}
@@ -45,15 +62,11 @@ class Question(Base):
     on_date: Mapped[date] = mapped_column(Date)
     # сколько персональных данных каждого вида нашли — без самих значений
     pii: Mapped[dict[str, int]] = mapped_column(JSONB, default=dict)
-    status: Mapped[QuestionStatus] = mapped_column(
-        Enum(
-            QuestionStatus,
-            name="question_status",
-            native_enum=False,
-            create_constraint=True,
-            length=16,
-            values_callable=lambda items: [i.value for i in items],
-        )
+    status: Mapped[QuestionStatus] = mapped_column(_enum(QuestionStatus, "question_status"))
+    source: Mapped[QuestionSource] = mapped_column(
+        _enum(QuestionSource, "question_source"),
+        default=QuestionSource.TEXT,
+        server_default=QuestionSource.TEXT.value,
     )
     error: Mapped[str | None] = mapped_column(Text)
     # этапы конвейера: время, модели, заметки поиска — для отладки и оценки
