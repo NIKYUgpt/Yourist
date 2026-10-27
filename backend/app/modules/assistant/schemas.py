@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app.modules.assistant.models import QuestionStatus
+from app.modules.assistant.models import QuestionSource, QuestionStatus
 
 
 class QuestionIn(BaseModel):
@@ -77,7 +77,8 @@ class QuestionOut(BaseModel):
     id: uuid.UUID
     created_at: datetime
     on_date: date
-    text: str
+    source: QuestionSource = Field(description="text | voice | photo")
+    text: str = Field(description="Вопрос; для голоса и фото — распознанный текст")
     status: QuestionStatus
     pii: dict[str, int] = Field(description="Сколько персональных данных скрыто, по видам")
     answer: AnswerOut | None
@@ -88,6 +89,7 @@ class QuestionBrief(BaseModel):
     id: uuid.UUID
     created_at: datetime
     on_date: date
+    source: QuestionSource
     text: str
     status: QuestionStatus
     verdict: str | None

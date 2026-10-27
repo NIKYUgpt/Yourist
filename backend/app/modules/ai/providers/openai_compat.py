@@ -7,8 +7,10 @@ Gemini (слой совместимости Google), YandexGPT (AI Studio) и Gi
 """
 
 import asyncio
+import base64
 from typing import Any
 
+from app.modules.ai.audio import SAMPLE_RATE, AudioError, decode_pcm16, split_pcm
 from app.modules.ai.providers.base import (
     Capability,
     ChatResult,
@@ -25,6 +27,8 @@ from app.modules.ai.providers.base import (
 
 CHAT_AND_EMBED = frozenset({Capability.CHAT, Capability.EMBED})
 CHAT_ONLY = frozenset({Capability.CHAT})
+# типы изображений в обозначениях Vision OCR
+OCR_MIME = {"image/jpeg": "JPEG", "image/png": "PNG", "application/pdf": "PDF"}
 
 
 class OpenAICompatProvider(HttpProvider):
@@ -174,9 +178,9 @@ class YandexProvider(OpenAICompatProvider):
 
     info = ProviderInfo(
         name="yandex",
-        title="YandexGPT (Yandex AI Studio)",
+        title="YandexGPT (Yandex AI Studio), SpeechKit, Vision OCR",
         kind=Kind.API,
-        capabilities=CHAT_AND_EMBED,
+        capabilities=CHAT_AND_EMBED | {Capability.STT, Capability.OCR},
         location="ru",
     )
     # /embeddings Яндекса принимает ровно одну строку за запрос (проверено 27.10.2026:
@@ -216,3 +220,68 @@ class YandexProvider(OpenAICompatProvider):
         if model in self.paired_embeddings:
             model = f"{model}-doc" if kind == EmbedKind.DOCUMENT else f"{model}-query"
         return self._uri("emb", model)
+
+    # SpeechKit, синхронное распознавание: до 30 секунд и 1 МБ на запрос
+    stt_url = "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize"
+    stt_chunk_seconds = 25
+    ocr_url = "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText"
+
+    async def transcribe(
+        self, model: str, audio: bytes, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        """SpeechKit v1: запись режется на куски до 25 с по паузам и распознаётся по частям."""
+        if not self.configured():
+            raise ProviderError(self.info.name, "не заданы ключи доступа")
+        try:
+            pcm = await asyncio.to_thread(decode_pcm16, audio)
+        except AudioError as exc:
+            raise ProviderError(self.info.name, str(exc)) from exc
+        params = {
+            "lang": "ru-RU",
+            "format": "lpcm",
+            "sampleRateHertz": str(SAMPLE_RATE),
+            "folderId": self.folder_id,
+            "topic": model or "general",
+            **{k: str(v) for k, v in (options or {}).items()},
+        }
+        timer = Timer()
+        texts = []
+        for part in split_pcm(pcm, self.stt_chunk_seconds):
+            data = await self.request("POST", self.stt_url, content=part, params=params)
+            texts.append(str(data.get("result", "")).strip())
+        return ChatResult(
+            text=" ".join(t for t in texts if t),
+            provider=self.info.name,
+            model=f"speechkit/{params['topic']}",
+            latency_ms=timer.ms,
+        )
+
+    async def ocr(
+        self, model: str, image: bytes, mime: str, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        """Vision OCR: распознавание текста на изображении документа."""
+        if not self.configured():
+            raise ProviderError(self.info.name, "не заданы ключи доступа")
+        body = {
+            "mimeType": OCR_MIME.get(mime, mime),
+            "languageCodes": ["ru", "en"],
+            "model": model or "page",
+            "content": base64.b64encode(image).decode(),
+            **(options or {}),
+        }
+        timer = Timer()
+        data = await self.request(
+            "POST", self.ocr_url, json=body, headers={"x-folder-id": self.folder_id}
+        )
+        try:
+            text = data["result"]["textAnnotation"]["fullText"]
+        except (KeyError, TypeError) as exc:
+            raise ProviderError(
+                self.info.name, f"неожиданный ответ OCR: {str(data)[:200]}"
+            ) from exc
+        return ChatResult(
+            text=text.strip(),
+            provider=self.info.name,
+            model=f"ocr/{body['model']}",
+            latency_ms=timer.ms,
+        )
