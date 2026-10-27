@@ -9,6 +9,11 @@ x-backend: &backend
       required: false
   environment: &backend-env
     DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-yourist}:${POSTGRES_PASSWORD:-yourist}@db:5432/${POSTGRES_DB:-yourist}
+    # Ollama работает на хосте (ей нужна видеокарта), а не в контейнере
+    OLLAMA_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434}
+  # на Linux-сервере host.docker.internal сам не появляется
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
 
 services:
   db:
