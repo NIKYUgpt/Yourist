@@ -34,13 +34,13 @@
    "facts": [
     {
      "name": "можно (до 01.09.2026 запрет — для детей до 1,5 лет)",
-     "pattern": "(^|[^\\w])(да|можно|вправе|допускается|может\\s+быть\\s+установлен)"
+     "pattern": "(^|[^\\w])(да|можно|вправе|допускается|может\\s+быть\\s+установлен)(?!\\w)"
     }
    ],
    "forbidden": [
     {
      "name": "утверждает, что нельзя",
-     "pattern": "^\\W*(нет|нельзя)(?!\\w)|испытани\\w*\\s+не\\s+устанавлива"
+     "pattern": "^\\W*(нет|нельзя)(?!\\w)|не\\s+(может|вправе)\\s+устан|нельзя|противоречит"
     }
    ]
   },
@@ -528,8 +528,8 @@
   "ollama/yandexgpt-5-lite:8b": {
    "answered": 25,
    "errors": 0,
-   "correct": 0.96,
-   "fact_share": 0.96,
+   "correct": 0.92,
+   "fact_share": 0.92,
    "cites_expected": 0.96,
    "check_passed": 0.92,
    "check_failed": 0.0,
@@ -1795,16 +1795,18 @@
    "verdict": "passed",
    "issues": [],
    "score": {
-    "facts_found": [
+    "facts_found": [],
+    "facts_missed": [
      "можно (до 01.09.2026 запрет — для детей до 1,5 лет)"
     ],
-    "facts_missed": [],
-    "contradictions": [],
+    "contradictions": [
+     "утверждает, что нельзя"
+    ],
     "cites_expected": true,
     "refused": false,
     "empty": false,
-    "fact_share": 1.0,
-    "correct": true
+    "fact_share": 0.0,
+    "correct": false
    }
   },
   {

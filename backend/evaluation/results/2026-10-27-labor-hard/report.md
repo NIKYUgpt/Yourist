@@ -18,7 +18,7 @@
 |---|---|---|---|---|---|---|---|---|
 | `ollama/qwen3:8b` | локально | 88% | 90% | 96% | 100% / 0% | 0% | 5.5 | 3163 / 191 |
 | `ollama/qwen2.5:7b` | локально | 68% | 70% | 80% | 92% / 0% | 0% | 4.7 | 3155 / 197 |
-| `ollama/yandexgpt-5-lite:8b` | локально | 96% | 96% | 96% | 92% / 0% | 0% | 2.7 | 2058 / 97 |
+| `ollama/yandexgpt-5-lite:8b` | локально | 92% | 92% | 96% | 92% / 0% | 0% | 2.7 | 2058 / 97 |
 
 ## По вопросам
 
@@ -27,7 +27,7 @@
 | Вопрос | `qwen3:8b` | `qwen2.5:7b` | `yandexgpt-5-lite:8b` |
 |---|---|---|---|
 | probation-mother-now | ✓ | ✓ | ✓ |
-| probation-mother-before | ✗ | ✓ | ✓ |
+| probation-mother-before | ✗ | ✓ | ✗ |
 | probation-pregnant | ✓ | ✓ | ✓ |
 | probation-short-contract | ✓ | ✓ | ✓ |
 | teen-vacation | ✓ | ✓ | ✓ |
