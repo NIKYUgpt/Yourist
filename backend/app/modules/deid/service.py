@@ -82,7 +82,10 @@ async def deidentify(text: str, model: tuple[Provider, ModelRef] | None = None) 
         extra, llm_info = await llm.find(masked, *model)
         # метки, поставленные на первом проходе, модель не трогает
         taken = [(m.start(), m.end()) for m in _PLACEHOLDER.finditer(masked)]
-        masked = masker.apply(masked, _select(extra, taken))
+        applied = _select(extra, taken)
+        masked = masker.apply(masked, applied)
+        if "error" not in llm_info:
+            llm_info["found"] = len(applied)
     return DeidResult(text=masked, entities=masker.entities, mapping=masker.mapping, llm=llm_info)
 
 
