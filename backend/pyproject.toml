@@ -17,7 +17,8 @@ dependencies = [
     "email-validator>=2.3,<3",
     "pyjwt>=2.15,<3",
     "argon2-cffi>=25.1",
-    "httpx>=0.28,<1",
+    "httpx[socks]>=0.28,<1",
+    "certifi",
     "lxml>=6.1,<7",
 ]
 
