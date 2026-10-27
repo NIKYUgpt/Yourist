@@ -23,6 +23,9 @@ class CorpusSettings(BaseSettings):
 
     sync_enabled: bool = True
     sync_interval_hours: float = 24.0
+    # поисковый индекс: после синхронизации и по таймеру (подхватывает смену модели)
+    index_enabled: bool = True
+    index_interval_minutes: float = 10.0
     # акты, которые отслеживаются с первого запуска
     default_acts: list[str] = [TK_RF_HASH]
 

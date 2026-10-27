@@ -57,6 +57,8 @@ async def _prepare() -> None:
         for schema in sorted(schemas):
             await conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))
             await conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+        # pgvector: тип vector для поискового индекса (в миграциях — то же самое)
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
     await engine.dispose()
 
