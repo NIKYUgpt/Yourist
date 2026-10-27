@@ -40,6 +40,7 @@ def _answer_out(answer: Answer, restore=lambda text: text) -> AnswerOut:
         citations=report.get("citations", []),
         markers=report.get("markers", []),
         issues=report.get("issues", []),
+        verification=report.get("verification"),
         sources=answer.sources,
         provider=answer.provider,
         model=answer.model,

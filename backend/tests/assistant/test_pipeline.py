@@ -38,10 +38,25 @@ def is_deid(messages) -> bool:
     return "модуль деперсонализации" in messages[0]["content"]
 
 
+def is_verify(messages) -> bool:
+    return "проверяющий юрист" in messages[0]["content"]
+
+
+SUPPORTED = '{"verdict": "supported", "issues": [], "missing": ""}'
+
+
+def service_reply(messages) -> str | None:
+    if is_deid(messages):
+        return '{"entities": []}'
+    if is_verify(messages):
+        return SUPPORTED
+    return None
+
+
 @pytest.fixture
 def ollama(ai_registry):
     provider = ai_registry.get("ollama")
-    provider.reply = lambda m: '{"entities": []}' if is_deid(m) else good_answer(m)
+    provider.reply = lambda m: service_reply(m) or good_answer(m)
     return provider
 
 
@@ -52,7 +67,11 @@ async def user(client, mailer):
 
 
 def answer_calls(provider):
-    return [c for c in provider.chat_calls if not is_deid(c["messages"])]
+    return [
+        c
+        for c in provider.chat_calls
+        if not is_deid(c["messages"]) and not is_verify(c["messages"])
+    ]
 
 
 async def test_full_flow(client, db, indexed, ollama, user):
@@ -93,8 +112,8 @@ async def test_wrong_citation_is_corrected(client, db, indexed, ollama, user):
     replies = iter(["Это регулируется ст. 999 ТК РФ [1].", None])
 
     def reply(messages):
-        if is_deid(messages):
-            return '{"entities": []}'
+        if service_reply(messages):
+            return service_reply(messages)
         first = next(replies)
         return first if first else good_answer(messages)
 
@@ -113,7 +132,7 @@ async def test_wrong_citation_is_corrected(client, db, indexed, ollama, user):
 
 
 async def test_unfixable_answer_is_returned_with_errors(client, indexed, ollama, user):
-    ollama.reply = lambda m: '{"entities": []}' if is_deid(m) else "См. ст. 999 ТК РФ."
+    ollama.reply = lambda m: service_reply(m) or "См. ст. 999 ТК РФ."
     body = (await client.post(API, json={"text": QUESTION}, headers=user)).json()
     assert body["answer"]["verdict"] == "failed"
     assert body["answer"]["issues"][0]["code"] == "not_found"
@@ -190,3 +209,62 @@ async def test_history_and_access(client, db, mailer, indexed, ollama, user):
 
 async def test_requires_login(client):
     assert (await client.post(API, json={"text": QUESTION})).status_code == 401
+
+
+async def test_verifier_result_is_returned(client, indexed, ollama, user):
+    body = (await client.post(API, json={"text": QUESTION}, headers=user)).json()
+    verification = body["answer"]["verification"]
+    assert verification["verdict"] == "supported" and verification["provider"] == "ollama"
+    # проверяющей модели показали те же источники и ответ, но не исходный текст
+    [call] = [c for c in ollama.chat_calls if is_verify(c["messages"])]
+    prompt = call["messages"][1]["content"]
+    assert "Ответ помощника:" in prompt and "[ФИО_1]" in prompt and "Петров" not in prompt
+    assert call["json_mode"] is True
+
+
+async def test_unsupported_answer_is_revised(client, db, indexed, ollama, user):
+    verdicts = iter(
+        [
+            '{"verdict": "unsupported", "issues": [{"claim": "можно уволить", '
+            '"problem": "в источнике — более четырёх часов подряд", "severity": "error"}]}',
+            SUPPORTED,
+        ]
+    )
+
+    def reply(messages):
+        if is_deid(messages):
+            return '{"entities": []}'
+        if is_verify(messages):
+            return next(verdicts)
+        return good_answer(messages)
+
+    ollama.reply = reply
+    body = (await client.post(API, json={"text": QUESTION}, headers=user)).json()
+    assert body["answer"]["attempt"] == 2
+    assert body["answer"]["verification"]["verdict"] == "supported"
+    revision = answer_calls(ollama)[1]["messages"][-1]["content"]
+    assert "Проверяющий сверил ответ" in revision and "четырёх часов подряд" in revision
+    rows = list(await db.scalars(select(Answer).order_by(Answer.attempt)))
+    assert [(a.attempt, a.is_final, a.report["verification"]["verdict"]) for a in rows] == [
+        (1, False, "unsupported"),
+        (2, True, "supported"),
+    ]
+
+
+async def test_verification_can_be_disabled(client, db, indexed, ollama, user):
+    config = await load_config(db)
+    config.verify = False
+    await save_config(db, config, None)
+    body = (await client.post(API, json={"text": QUESTION}, headers=user)).json()
+    assert body["answer"]["verification"] is None
+    assert not any(is_verify(c["messages"]) for c in ollama.chat_calls)
+
+
+async def test_unreadable_verification_does_not_block_answer(client, indexed, ollama, user):
+    ollama.reply = lambda m: (
+        '{"entities": []}' if is_deid(m) else "не знаю" if is_verify(m) else good_answer(m)
+    )
+    body = (await client.post(API, json={"text": QUESTION}, headers=user)).json()
+    assert body["answer"]["verdict"] == "passed"
+    assert body["answer"]["verification"]["verdict"] == "unknown"
+    assert body["answer"]["attempt"] == 1

@@ -4,7 +4,10 @@
 2. Поиск норм, действующих на дату вопроса.
 3. Ответ модели со ссылками на нумерованные источники.
 4. Детерминированная проверка ссылок; при ошибках — одна попытка исправления
-   с перечнем ошибок, из двух попыток остаётся лучшая.
+   с перечнем ошибок.
+5. Проверяющая модель сверяет лучший ответ с источниками; если вывод
+   не подтверждается — ещё одна попытка с её замечаниями.
+Из всех попыток остаётся лучшая: меньше ошибок в ссылках, затем лучше вердикт проверки.
 """
 
 import re
@@ -21,10 +24,12 @@ from app.modules.ai.service import AIGateway
 from app.modules.assistant import prompts
 from app.modules.assistant.citations import CheckReport, check
 from app.modules.assistant.models import Answer, Question, QuestionStatus
+from app.modules.assistant.verifier import RANK, UNSUPPORTED, Verification, revision, verify
 from app.modules.deid.api import DeidClient
 from app.modules.deid.service import DeidResult, reidentify, summary
 from app.modules.search.retrieval import Hit, search
 
+# попыток на исправление ссылок; плюс одна — по замечаниям проверяющей модели
 MAX_ATTEMPTS = 2
 SOURCES_K = 8
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
@@ -41,6 +46,7 @@ class Attempt:
     result: ChatResult
     text: str
     report: CheckReport
+    verification: Verification | None = None
 
 
 @dataclass
@@ -76,11 +82,26 @@ def _report_dump(report: CheckReport) -> dict[str, Any]:
     return data
 
 
-def _better(a: Attempt, b: Attempt) -> Attempt:
-    """Меньше ошибок, затем меньше предупреждений; при равенстве — более поздняя попытка."""
+def _verification_brief(v: Verification | None) -> dict[str, Any] | None:
+    if v is None:
+        return None
+    return {
+        "verdict": v.verdict,
+        "provider": v.provider,
+        "model": v.model,
+        "latency_ms": v.latency_ms,
+        "issues": len(v.issues),
+        "error": v.error,
+    }
 
-    def cost(x: Attempt) -> tuple[int, int]:
-        return len(x.report.errors), len(x.report.issues)
+
+def _better(a: Attempt, b: Attempt) -> Attempt:
+    """Меньше ошибок в ссылках, лучше вердикт проверки, меньше предупреждений;
+    при равенстве — более поздняя попытка."""
+
+    def cost(x: Attempt) -> tuple[int, int, int]:
+        rank = RANK[x.verification.verdict] if x.verification else 1
+        return len(x.report.errors), rank, len(x.report.issues)
 
     return a if cost(a) < cost(b) else b
 
@@ -130,21 +151,36 @@ class Pipeline:
             )
             return await self._save(question, [answer], deid)
 
-        messages = prompts.build_messages(deid.text, sources, on)
+        base = prompts.build_messages(deid.text, sources, on)
+        messages = base
         attempts: list[Attempt] = []
         try:
             for _ in range(MAX_ATTEMPTS):
-                result = await self.ai.chat(Task.ANSWER, messages, temperature=0.1, max_tokens=1500)
-                answer_text = _THINK.sub("", result.text).strip()
-                report = await check(self.session, answer_text, sources, on)
-                attempts.append(Attempt(result, answer_text, report))
-                if report.verdict != "failed":
+                attempt = await self._answer(messages, sources, on)
+                attempts.append(attempt)
+                if attempt.report.verdict != "failed":
                     break
                 messages = [
                     *messages,
-                    {"role": "assistant", "content": answer_text},
-                    {"role": "user", "content": prompts.correction(report)},
+                    {"role": "assistant", "content": attempt.text},
+                    {"role": "user", "content": prompts.correction(attempt.report)},
                 ]
+            best = attempts[0]
+            for attempt in attempts[1:]:
+                best = _better(best, attempt)
+
+            if self.ai.config.verify:
+                best.verification = await self._verify(deid.text, sources, best.text, on)
+                if best.verification.verdict == UNSUPPORTED:
+                    messages = [
+                        *base,
+                        {"role": "assistant", "content": best.text},
+                        {"role": "user", "content": revision(best.verification)},
+                    ]
+                    revised = await self._answer(messages, sources, on)
+                    revised.verification = await self._verify(deid.text, sources, revised.text, on)
+                    attempts.append(revised)
+                    best = _better(best, revised)
         except ProviderError as exc:
             if not attempts:
                 question.status = QuestionStatus.FAILED
@@ -153,10 +189,10 @@ class Pipeline:
                 self.session.add(question)
                 await self.session.commit()
                 raise AnswerFailed(question, str(exc)) from exc
+            best = attempts[0]
+            for attempt in attempts[1:]:
+                best = _better(best, attempt)
 
-        best = attempts[0]
-        for attempt in attempts[1:]:
-            best = _better(best, attempt)
         trace["answer"] = {
             "attempts": [
                 {
@@ -166,6 +202,7 @@ class Pipeline:
                     "prompt_tokens": a.result.usage.prompt_tokens,
                     "completion_tokens": a.result.usage.completion_tokens,
                     "verdict": a.report.verdict,
+                    "verification": _verification_brief(a.verification),
                 }
                 for a in attempts
             ]
@@ -177,7 +214,10 @@ class Pipeline:
                 is_final=a is best,
                 text=a.text,
                 verdict=a.report.verdict,
-                report=_report_dump(a.report),
+                report={
+                    **_report_dump(a.report),
+                    "verification": asdict(a.verification) if a.verification else None,
+                },
                 sources=source_dump,
                 provider=a.result.provider,
                 model=a.result.model,
@@ -188,6 +228,21 @@ class Pipeline:
             for i, a in enumerate(attempts, 1)
         ]
         return await self._save(question, answers, deid)
+
+    async def _answer(
+        self, messages: list[dict[str, str]], sources: list[Hit], on: date
+    ) -> Attempt:
+        result = await self.ai.chat(Task.ANSWER, messages, temperature=0.1, max_tokens=1500)
+        text = _THINK.sub("", result.text).strip()
+        return Attempt(result, text, await check(self.session, text, sources, on))
+
+    async def _verify(
+        self, question: str, sources: list[Hit], answer: str, on: date
+    ) -> Verification:
+        async def chat(messages, **kwargs):
+            return await self.ai.chat(Task.VERIFY, messages, **kwargs)
+
+        return await verify(chat, question, sources, answer, on)
 
     async def _save(self, question: Question, answers: list[Answer], deid: DeidResult) -> Outcome:
         self.session.add(question)
