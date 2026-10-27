@@ -10,6 +10,7 @@ class ActOut(BaseModel):
 
     id: int
     title: str
+    short_title: str | None
     kind: str | None
     number: str | None
     adopted_on: date | None
