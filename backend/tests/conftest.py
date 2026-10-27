@@ -29,7 +29,9 @@ from app.core.mail import ConsoleMailer, get_mailer  # noqa: E402
 from app.db.registry import Base  # noqa: E402
 from app.db.session import get_session  # noqa: E402
 from app.main import app  # noqa: E402
+from app.modules.ai.registry import Registry  # noqa: E402
 from app.modules.auth.models import Role, User  # noqa: E402
+from tests.fakes import fake_registry  # noqa: E402
 
 PASSWORD = "correct-horse-42"
 
@@ -55,6 +57,8 @@ async def _prepare() -> None:
         for schema in sorted(schemas):
             await conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))
             await conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+        # pgvector: тип vector для поискового индекса (в миграциях — то же самое)
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
     await engine.dispose()
 
@@ -86,7 +90,14 @@ def mailer() -> ConsoleMailer:
 
 
 @pytest.fixture
-async def client(engine: AsyncEngine, mailer: ConsoleMailer) -> AsyncIterator[AsyncClient]:
+def ai_registry() -> Registry:
+    return fake_registry()
+
+
+@pytest.fixture
+async def client(
+    engine: AsyncEngine, mailer: ConsoleMailer, ai_registry: Registry
+) -> AsyncIterator[AsyncClient]:
     sessions = async_sessionmaker(engine, expire_on_commit=False)
 
     async def _get_session() -> AsyncIterator[AsyncSession]:
@@ -95,6 +106,8 @@ async def client(engine: AsyncEngine, mailer: ConsoleMailer) -> AsyncIterator[As
 
     app.dependency_overrides[get_session] = _get_session
     app.dependency_overrides[get_mailer] = lambda: mailer
+    # lifespan в тестах не запускается — реестр нейросетей подставляем сами
+    app.state.ai_registry = ai_registry
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
