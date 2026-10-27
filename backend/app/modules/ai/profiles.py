@@ -23,6 +23,8 @@ class Task(enum.StrEnum):
     VERIFY = "verify"  # проверка ответа второй моделью
     DEID = "deid"  # поиск персональных данных, пропущенных правилами
     EMBED = "embed"  # векторы для поиска по нормам
+    STT = "stt"  # распознавание голосового вопроса
+    OCR = "ocr"  # распознавание текста на фото документа
 
 
 TASK_TITLES = {
@@ -30,11 +32,18 @@ TASK_TITLES = {
     Task.VERIFY: "Проверка ответа",
     Task.DEID: "Деперсонализация",
     Task.EMBED: "Векторный поиск",
+    Task.STT: "Распознавание речи",
+    Task.OCR: "Распознавание документов",
 }
+
+# задачи, в которые попадают исходные данные пользователя (текст, голос, фото документа):
+# их не отправляем зарубежным провайдерам
+RAW_INPUT_TASKS = (Task.DEID, Task.STT, Task.OCR)
 
 
 def required_capability(task: Task) -> Capability:
-    return Capability.EMBED if task == Task.EMBED else Capability.CHAT
+    special = {Task.EMBED: Capability.EMBED, Task.STT: Capability.STT, Task.OCR: Capability.OCR}
+    return special.get(task, Capability.CHAT)
 
 
 class ModelRef(BaseModel):
@@ -88,6 +97,19 @@ DEFAULT_CONFIG = AIConfig(
             local=ModelRef(provider="ollama", model="bge-m3", options={"num_gpu": 0}),
             api=ModelRef(provider="yandex", model="text-search"),
         ),
+        Task.STT: TaskProfile(
+            # large-v3-turbo в int8 на процессоре: точный русский без видеокарты
+            local=ModelRef(
+                provider="whisper",
+                model="large-v3-turbo",
+                options={"device": "cpu", "compute_type": "int8"},
+            ),
+            api=ModelRef(provider="yandex", model="general"),
+        ),
+        Task.OCR: TaskProfile(
+            local=ModelRef(provider="ollama", model="qwen2.5vl:7b"),
+            api=ModelRef(provider="yandex", model="page"),
+        ),
     },
 )
 
@@ -120,10 +142,9 @@ def validate_config(config: AIConfig, providers: dict[str, ProviderInfo]) -> lis
                 errors.append(f"{where}: провайдер {ref.provider!r} не {expected.value}")
             if required_capability(task) not in info.capabilities:
                 errors.append(f"{where}: {ref.provider!r} не умеет {required_capability(task)}")
-            # в задачу деперсонализации попадает исходный текст пользователя —
-            # за пределы РФ его не отправляем
-            if task == Task.DEID and info.location == "foreign":
-                errors.append(f"{where}: для деперсонализации нужен локальный или российский")
+            # в эти задачи попадают исходные данные пользователя — за пределы РФ не отправляем
+            if task in RAW_INPUT_TASKS and info.location == "foreign":
+                errors.append(f"{where}: для исходных данных нужен локальный или российский")
     return errors
 
 
