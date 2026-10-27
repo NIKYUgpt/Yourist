@@ -21,6 +21,7 @@ dependencies = [
     "certifi",
     "lxml>=6.1,<7",
     "pgvector>=0.5,<0.6",
+    "pymorphy3>=2.0,<3",
 ]
 
 [project.optional-dependencies]
