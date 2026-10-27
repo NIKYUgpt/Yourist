@@ -18,12 +18,12 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.ai.profiles import Task
+from app.modules.ai.profiles import ModelRef, Task
 from app.modules.ai.providers.base import ChatResult, ProviderError, Timer
 from app.modules.ai.service import AIGateway
 from app.modules.assistant import prompts
 from app.modules.assistant.citations import CheckReport, check
-from app.modules.assistant.models import Answer, Question, QuestionStatus
+from app.modules.assistant.models import Answer, Question, QuestionSource, QuestionStatus
 from app.modules.assistant.verifier import RANK, UNSUPPORTED, Verification, revision, verify
 from app.modules.deid.api import DeidClient
 from app.modules.deid.service import DeidResult, reidentify, summary
@@ -112,17 +112,30 @@ class Pipeline:
         self.ai = ai
         self.deid = deid
 
-    async def ask(self, user_id: uuid.UUID, text: str, on: date) -> Outcome:
-        trace: dict[str, Any] = {}
-        timer = Timer()
-        llm_ref = self.ai.resolve(Task.DEID)[1] if self.ai.config.deid_llm else None
-        deid: DeidResult = await self.deid.deidentify(text, llm_ref)
-        trace["deid"] = {"ms": timer.ms, "found": summary(deid.entities), "llm": deid.llm}
+    def deid_model(self) -> ModelRef | None:
+        """Модель второго прохода деперсонализации, если он включён."""
+        return self.ai.resolve(Task.DEID)[1] if self.ai.config.deid_llm else None
 
+    async def ask(self, user_id: uuid.UUID, text: str, on: date) -> Outcome:
+        timer = Timer()
+        deid: DeidResult = await self.deid.deidentify(text, self.deid_model())
+        trace = {"deid": {"ms": timer.ms, "found": summary(deid.entities), "llm": deid.llm}}
+        return await self.answer(user_id, deid, on, QuestionSource.TEXT, trace)
+
+    async def answer(
+        self,
+        user_id: uuid.UUID,
+        deid: DeidResult,
+        on: date,
+        source: QuestionSource,
+        trace: dict[str, Any],
+    ) -> Outcome:
+        """Ответ на уже обезличенный вопрос (текст, распознанный голос или документ)."""
         question = Question(
             user_id=user_id,
             text=deid.text,
             on_date=on,
+            source=source,
             pii=summary(deid.entities),
             status=QuestionStatus.ANSWERED,
             trace=trace,
