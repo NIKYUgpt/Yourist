@@ -24,6 +24,7 @@ from app.modules.corpus.models import (
     SyncStatus,
 )
 from app.modules.corpus.parser import ParsedDocument, ParseError, parse_redaction
+from app.modules.corpus.titles import short_title_for
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,7 @@ class CorpusSync:
                 session.add(act)
             act.external_hash = card.external_hash
             act.title = card.title
+            act.short_title = short_title_for(card.title)
             act.kind = card.kind
             act.number = card.number
             act.adopted_on = card.adopted_on
@@ -117,6 +119,8 @@ class CorpusSync:
             if act is None:
                 raise ValueError(f"акт {act_id} не найден")
             doc_hash = act.external_hash
+            if act.short_title is None:
+                act.short_title = short_title_for(act.title)
             # блокировка у нас — значит, «running» в журнале остался от прерванного запуска
             await session.execute(
                 update(SyncRun)
