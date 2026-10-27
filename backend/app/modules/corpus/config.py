@@ -16,7 +16,7 @@ class CorpusSettings(BaseSettings):
 
     # недокументированный JSON API, которым пользуется сам сайт
     source_url: str = "http://actual.pravo.gov.ru:8000/api/ebpi"
-    user_agent: str = "Yourist/0.4 (+https://github.com/NIKYUgpt/Yourist)"
+    user_agent: str = "Yourist/0.5 (+https://github.com/NIKYUgpt/Yourist)"
     request_delay_sec: float = 1.0
     request_timeout_sec: float = 120.0
     request_retries: int = 3
