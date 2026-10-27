@@ -55,6 +55,8 @@ class AIConfig(BaseModel):
     tasks: dict[Task, TaskProfile]
     # второй проход деперсонализации моделью (после правил и словаря)
     deid_llm: bool = True
+    # проверка ответа второй моделью (Task.VERIFY)
+    verify: bool = True
 
     def resolve(self, task: Task) -> tuple[Mode, ModelRef]:
         profile = self.tasks[task]
@@ -94,7 +96,7 @@ def with_defaults(data: dict[str, Any] | None) -> AIConfig:
     """Сохранённая конфигурация, дополненная задачами, которых в ней ещё нет."""
     merged = DEFAULT_CONFIG.model_dump(mode="json")
     if data:
-        for key in ("mode", "deid_llm"):
+        for key in ("mode", "deid_llm", "verify"):
             merged[key] = data.get(key, merged[key])
         merged["tasks"].update(data.get("tasks", {}))
     return AIConfig.model_validate(merged)
