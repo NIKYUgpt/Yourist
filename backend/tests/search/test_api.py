@@ -66,3 +66,8 @@ async def test_index_endpoints_admin_only(corpus_api, indexed):
 
     resp = await corpus_api.post("/api/v1/search/index", headers=token("admin"))
     assert resp.status_code == 202
+    resp = await corpus_api.post(
+        "/api/v1/search/index", params=[("mode", "local"), ("mode", "api")], headers=token("admin")
+    )
+    assert resp.status_code == 202
+    assert corpus_app.state.index_worker._modes == {"local", "api"}
