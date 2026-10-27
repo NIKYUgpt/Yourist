@@ -6,6 +6,7 @@ Gemini (слой совместимости Google), YandexGPT (AI Studio) и Gi
 вынесены в подклассы.
 """
 
+import asyncio
 from typing import Any
 
 from app.modules.ai.providers.base import (
@@ -27,8 +28,9 @@ CHAT_ONLY = frozenset({Capability.CHAT})
 
 
 class OpenAICompatProvider(HttpProvider):
-    # сколько текстов отправлять в одном запросе к /embeddings
+    # сколько текстов отправлять в одном запросе к /embeddings и сколько запросов параллельно
     embed_batch = 32
+    embed_concurrency = 1
     max_tokens_field = "max_tokens"
     supports_json_mode = True
 
@@ -98,16 +100,20 @@ class OpenAICompatProvider(HttpProvider):
             return await super().embed(model, texts, kind=kind, options=options)
         if not self.configured():
             raise ProviderError(self.info.name, "не заданы ключи доступа")
-        vectors: list[list[float]] = []
-        for start in range(0, len(texts), self.embed_batch):
-            batch = texts[start : start + self.embed_batch]
+        limit = asyncio.Semaphore(self.embed_concurrency)
+
+        async def one(batch: list[str]) -> list[list[float]]:
             body = merge_options({"model": self.embed_model(model, kind), "input": batch}, options)
-            data = await self.request("POST", "/embeddings", json=body)
+            async with limit:
+                data = await self.request("POST", "/embeddings", json=body)
             items = sorted(data.get("data", []), key=lambda item: item.get("index", 0))
             if len(items) != len(batch):
                 raise ProviderError(self.info.name, "число векторов не совпадает с числом текстов")
-            vectors.extend(item["embedding"] for item in items)
-        return vectors
+            return [item["embedding"] for item in items]
+
+        batches = [texts[i : i + self.embed_batch] for i in range(0, len(texts), self.embed_batch)]
+        results = await asyncio.gather(*(one(b) for b in batches))
+        return [vector for batch in results for vector in batch]
 
     async def models(self) -> list[str]:
         data = await self.request("GET", "/models")
@@ -176,6 +182,8 @@ class YandexProvider(OpenAICompatProvider):
     # /embeddings Яндекса принимает ровно одну строку за запрос (проверено 27.10.2026:
     # на список отвечает 400 «Array input must contain exactly one string»)
     embed_batch = 1
+    # по одной строке — значит, параллельно; повторы при 429 есть в HttpProvider
+    embed_concurrency = 4
     # модели-пары: отдельная модель для документов (-doc) и для запросов (-query)
     paired_embeddings = ("text-search", "text-embeddings-v2")
 
