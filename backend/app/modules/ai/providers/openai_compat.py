@@ -173,7 +173,11 @@ class YandexProvider(OpenAICompatProvider):
         capabilities=CHAT_AND_EMBED,
         location="ru",
     )
-    embed_batch = 16
+    # /embeddings Яндекса принимает ровно одну строку за запрос (проверено 27.10.2026:
+    # на список отвечает 400 «Array input must contain exactly one string»)
+    embed_batch = 1
+    # модели-пары: отдельная модель для документов (-doc) и для запросов (-query)
+    paired_embeddings = ("text-search", "text-embeddings-v2")
 
     def __init__(self, base_url: str, api_key: str, folder_id: str, **kwargs: Any):
         super().__init__(base_url, api_key, **kwargs)
@@ -201,7 +205,6 @@ class YandexProvider(OpenAICompatProvider):
         return self._uri("gpt", model)
 
     def embed_model(self, model: str, kind: EmbedKind) -> str:
-        # «text-search» — пара моделей: для документов и для запросов
-        if model == "text-search":
-            model = "text-search-doc" if kind == EmbedKind.DOCUMENT else "text-search-query"
+        if model in self.paired_embeddings:
+            model = f"{model}-doc" if kind == EmbedKind.DOCUMENT else f"{model}-query"
         return self._uri("emb", model)

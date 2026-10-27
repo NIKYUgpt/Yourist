@@ -149,6 +149,14 @@ async def test_yandex_uses_model_uri_and_disables_logging():
     assert rec.body()["model"] == "emb://b1gfolder/text-search-doc/latest"
     await yandex.embed("text-search", ["запрос"], kind=EmbedKind.QUERY)
     assert rec.body()["model"] == "emb://b1gfolder/text-search-query/latest"
+    await yandex.embed("text-embeddings-v2", ["запрос"], kind=EmbedKind.QUERY)
+    assert rec.body()["model"] == "emb://b1gfolder/text-embeddings-v2-query/latest"
+
+    # Яндекс принимает одну строку за запрос — несколько текстов уходят отдельными запросами
+    before = len(rec.requests)
+    vectors = await yandex.embed("text-search", ["а", "б", "в"])
+    assert [json.loads(r.content)["input"] for r in rec.requests[before:]] == [["а"], ["б"], ["в"]]
+    assert len(vectors) == 3
 
 
 async def test_gigachat_gets_token_once_and_refreshes_on_401():
