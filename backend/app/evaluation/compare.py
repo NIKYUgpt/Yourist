@@ -58,10 +58,27 @@ class Run:
 
 
 def parse_model(spec: str) -> ModelRef:
-    """«ollama/qwen3:8b», «yandex/yandexgpt-5.1»; у Ollama отключаем режим размышлений."""
+    """«ollama/qwen3:8b», «yandex/qwen3.6-35b-a3b?reasoning_effort=none».
+
+    После «?» — параметры запроса (значения разбираются как JSON, иначе строка).
+    У Ollama режим размышлений по умолчанию выключен, как в рабочем конвейере.
+    """
+    spec, _, query = spec.partition("?")
     provider, _, model = spec.partition("/")
-    options = {"think": False} if provider == "ollama" else {}
+    options: dict[str, Any] = {"think": False} if provider == "ollama" else {}
+    for pair in filter(None, query.split("&")):
+        key, _, value = pair.partition("=")
+        try:
+            options[key] = json.loads(value)
+        except json.JSONDecodeError:
+            options[key] = value
     return ModelRef(provider=provider, model=model, options=options)
+
+
+def label(ref: ModelRef) -> str:
+    extra = {k: v for k, v in ref.options.items() if not (k == "think" and v is False)}
+    suffix = "?" + "&".join(f"{k}={v}" for k, v in extra.items()) if extra else ""
+    return f"{ref.provider}/{ref.model}{suffix}"
 
 
 def _gateway(registry: Registry, config, embed_mode: Mode | None) -> AIGateway | None:
@@ -110,7 +127,7 @@ async def answer_once(
     sources: list[Hit],
     on: date,
 ) -> Run:
-    run = Run(question=q.id, model=f"{ref.provider}/{ref.model}")
+    run = Run(question=q.id, model=label(ref))
     messages = prompts.build_messages(q.text, sources, on)
     timer = Timer()
     try:
@@ -282,15 +299,24 @@ async def main(args: argparse.Namespace) -> None:
         "dataset_questions": dataset["questions"],
         "retrieval": retrieval,
         "summary": {
-            f"{ref.provider}/{ref.model}": summarize(
-                questions, [r for r in runs if r.model == f"{ref.provider}/{ref.model}"]
-            )
+            label(ref): summarize(questions, [r for r in runs if r.model == label(ref)])
             for ref in specs
         },
         "runs": [asdict(r) for r in runs],
     }
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    previous = out / "results.json"
+    if args.append and previous.exists():
+        # дописываем модели в готовый прогон: поиск и источники те же
+        old = json.loads(previous.read_text("utf-8"))
+        new_models = set(data["summary"])
+        data["summary"] = {
+            **{m: s for m, s in old["summary"].items() if m not in new_models},
+            **data["summary"],
+        }
+        data["runs"] = [r for r in old["runs"] if r["model"] not in new_models] + data["runs"]
+        data["started_at"], data["retrieval"] = old["started_at"], old["retrieval"]
     (out / "results.json").write_text(json.dumps(data, ensure_ascii=False, indent=1), "utf-8")
     (out / "report.md").write_text(render_report(data), "utf-8")
     print(f"Готово: {out / 'report.md'}")
@@ -303,4 +329,5 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", required=True)
     parser.add_argument("--models", nargs="+", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--append", action="store_true", help="дописать модели в готовый прогон")
     asyncio.run(main(parser.parse_args()))
