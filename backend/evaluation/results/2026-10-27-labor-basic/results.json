@@ -722,6 +722,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": true,
     "empty": false,
@@ -745,6 +746,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -768,6 +770,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -791,6 +794,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -814,6 +818,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -838,6 +843,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -863,6 +869,7 @@
     "facts_missed": [
      "4 часа в день"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -886,6 +893,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -909,6 +917,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -934,6 +943,7 @@
     "facts_missed": [
      "не позднее 15 дней после периода"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -957,6 +967,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -980,6 +991,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1003,6 +1015,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1026,6 +1039,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1049,6 +1063,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": false,
@@ -1073,6 +1088,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1096,6 +1112,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1119,6 +1136,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1142,6 +1160,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1169,6 +1188,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1192,6 +1212,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1215,6 +1236,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1238,6 +1260,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1261,6 +1284,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1284,6 +1308,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1307,6 +1332,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1330,6 +1356,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1353,6 +1380,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1376,6 +1404,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1399,6 +1428,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -1422,6 +1452,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1445,6 +1476,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1468,6 +1500,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1491,6 +1524,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1514,6 +1548,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1538,6 +1573,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1563,6 +1599,7 @@
     "facts_missed": [
      "4 часа в день"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1586,6 +1623,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1609,6 +1647,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1633,6 +1672,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1656,6 +1696,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1679,6 +1720,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1702,6 +1744,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1725,6 +1768,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1748,6 +1792,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1772,6 +1817,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1795,6 +1841,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1818,6 +1865,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1841,6 +1889,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1866,6 +1915,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1889,6 +1939,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1912,6 +1963,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1935,6 +1987,7 @@
     "facts_missed": [
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1958,6 +2011,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -1981,6 +2035,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2004,6 +2059,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2027,6 +2083,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2050,6 +2107,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2073,6 +2131,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2096,6 +2155,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -2119,6 +2179,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2142,6 +2203,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2165,6 +2227,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2188,6 +2251,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2211,6 +2275,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2235,6 +2300,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2259,6 +2325,7 @@
      "120 часов в год"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2282,6 +2349,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2305,6 +2373,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2329,6 +2398,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2352,6 +2422,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2375,6 +2446,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2398,6 +2470,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2421,6 +2494,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2444,6 +2518,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2468,6 +2543,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2491,6 +2567,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2514,6 +2591,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2537,6 +2615,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2562,6 +2641,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2585,6 +2665,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2608,6 +2689,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2631,6 +2713,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2654,6 +2737,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2677,6 +2761,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2700,6 +2785,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2723,6 +2809,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2746,6 +2833,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2769,6 +2857,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2792,6 +2881,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -2815,6 +2905,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2838,6 +2929,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2861,6 +2953,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2884,6 +2977,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2907,6 +3001,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2931,6 +3026,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2956,6 +3052,7 @@
     "facts_missed": [
      "4 часа в день"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -2979,6 +3076,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3002,6 +3100,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3026,6 +3125,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3049,6 +3149,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3072,6 +3173,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3095,6 +3197,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3118,6 +3221,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3141,6 +3245,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3165,6 +3270,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3188,6 +3294,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3211,6 +3318,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3234,6 +3342,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3259,6 +3368,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3282,6 +3392,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3305,6 +3416,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3328,6 +3440,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3351,6 +3464,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3374,6 +3488,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3397,6 +3512,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3420,6 +3536,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3443,6 +3560,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3466,6 +3584,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3489,6 +3608,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -3512,6 +3632,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3535,6 +3656,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3558,6 +3680,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3581,6 +3704,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3604,6 +3728,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3628,6 +3753,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3653,6 +3779,7 @@
     "facts_missed": [
      "4 часа в день"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3676,6 +3803,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3699,6 +3827,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3724,6 +3853,7 @@
     "facts_missed": [
      "не позднее 15 дней после периода"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3747,6 +3877,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3770,6 +3901,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3793,6 +3925,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3816,6 +3949,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3839,6 +3973,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3863,6 +3998,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3886,6 +4022,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3909,6 +4046,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3932,6 +4070,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3957,6 +4096,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -3980,6 +4120,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4003,6 +4144,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4026,6 +4168,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4049,6 +4192,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4072,6 +4216,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4095,6 +4240,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4118,6 +4264,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4141,6 +4288,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4164,6 +4312,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4187,6 +4336,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -4210,6 +4360,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4233,6 +4384,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4256,6 +4408,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4279,6 +4432,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4302,6 +4456,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4326,6 +4481,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4351,6 +4507,7 @@
     "facts_missed": [
      "4 часа в день"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4374,6 +4531,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4397,6 +4555,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4421,6 +4580,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4444,6 +4604,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4467,6 +4628,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4490,6 +4652,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4513,6 +4676,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4536,6 +4700,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4560,6 +4725,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4583,6 +4749,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4606,6 +4773,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4629,6 +4797,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4654,6 +4823,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4677,6 +4847,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4700,6 +4871,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4723,6 +4895,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4746,6 +4919,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4769,6 +4943,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4792,6 +4967,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4815,6 +4991,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4838,6 +5015,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4861,6 +5039,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4884,6 +5063,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -4907,6 +5087,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4930,6 +5111,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4953,6 +5135,7 @@
     "facts_missed": [
      "6 месяцев"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4976,6 +5159,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -4999,6 +5183,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5023,6 +5208,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5047,6 +5233,7 @@
      "120 часов в год"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5070,6 +5257,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5093,6 +5281,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5117,6 +5306,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5140,6 +5330,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5163,6 +5354,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5186,6 +5378,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5209,6 +5402,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5232,6 +5426,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5256,6 +5451,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5279,6 +5475,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5302,6 +5499,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5325,6 +5523,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5350,6 +5549,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5373,6 +5573,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5396,6 +5597,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5419,6 +5621,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5442,6 +5645,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5465,6 +5669,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5488,6 +5693,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5511,6 +5717,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5534,6 +5741,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5559,6 +5767,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5582,6 +5791,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -5605,6 +5815,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5628,6 +5839,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5651,6 +5863,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5674,6 +5887,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5697,6 +5911,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5721,6 +5936,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5745,6 +5961,7 @@
      "120 часов в год"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5768,6 +5985,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5791,6 +6009,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5815,6 +6034,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5838,6 +6058,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5861,6 +6082,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5884,6 +6106,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5907,6 +6130,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5930,6 +6154,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5954,6 +6179,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -5977,6 +6203,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6000,6 +6227,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6023,6 +6251,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6051,6 +6280,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6074,6 +6304,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6097,6 +6328,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6120,6 +6352,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6143,6 +6376,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6166,6 +6400,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6189,6 +6424,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6212,6 +6448,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6235,6 +6472,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6258,6 +6496,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6281,6 +6520,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -6306,6 +6546,7 @@
     "facts_missed": [
      "28 календарных дней"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6331,6 +6572,7 @@
     "facts_missed": [
      "3 месяца"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6356,6 +6598,7 @@
     "facts_missed": [
      "6 месяцев"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6381,6 +6624,7 @@
     "facts_missed": [
      "2 недели"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6406,6 +6650,7 @@
     "facts_missed": [
      "5 лет"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6432,6 +6677,7 @@
      "первые 2 часа — в полуторном",
      "далее — в двойном"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6458,6 +6704,7 @@
      "4 часа в день",
      "120 часов в год"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6483,6 +6730,7 @@
     "facts_missed": [
      "40 часов"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6508,6 +6756,7 @@
     "facts_missed": [
      "не более 24 часов"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6534,6 +6783,7 @@
      "не реже чем каждые полмесяца",
      "не позднее 15 дней после периода"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6559,6 +6809,7 @@
     "facts_missed": [
      "можно приостановить работу, известив письменно"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6584,6 +6835,7 @@
     "facts_missed": [
      "не ниже 1/150 ключевой ставки за день"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6609,6 +6861,7 @@
     "facts_missed": [
      "в день увольнения"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6634,6 +6887,7 @@
     "facts_missed": [
      "средний месячный заработок"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6657,6 +6911,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6683,6 +6938,7 @@
      "не допускается",
      "кроме ликвидации организации"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6708,6 +6964,7 @@
     "facts_missed": [
      "более 4 часов подряд"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6733,6 +6990,7 @@
     "facts_missed": [
      "не позднее 1 месяца со дня обнаружения"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6758,6 +7016,7 @@
     "facts_missed": [
      "2 рабочих дня"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6785,6 +7044,7 @@
      "выговор",
      "увольнение"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6810,6 +7070,7 @@
     "facts_missed": [
      "не менее чем в двойном размере"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6833,6 +7094,7 @@
     "facts_missed": [
      "с 22 до 6 часов"
     ],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6858,6 +7120,7 @@
     "facts_missed": [
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6883,6 +7146,7 @@
     "facts_missed": [
      "1 год со дня срока выплаты"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6908,6 +7172,7 @@
     "facts_missed": [
      "с 16 лет"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6931,6 +7196,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -6956,6 +7222,7 @@
     "facts_missed": [
      "70 дней до и 70 после родов (140)"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -6981,6 +7248,7 @@
     "facts_missed": [
      "до 3 лет"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -7006,6 +7274,7 @@
     "facts_missed": [
      "не позднее чем за 3 дня до начала"
     ],
+    "contradictions": [],
     "cites_expected": false,
     "refused": false,
     "empty": true,
@@ -7029,6 +7298,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -7052,6 +7322,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7075,6 +7346,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7100,6 +7372,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7123,6 +7396,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7146,6 +7420,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7170,6 +7445,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7194,6 +7470,7 @@
      "120 часов в год"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7217,6 +7494,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7240,6 +7518,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7264,6 +7543,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7287,6 +7567,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7310,6 +7591,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7333,6 +7615,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7356,6 +7639,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7379,6 +7663,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7403,6 +7688,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7428,6 +7714,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7451,6 +7738,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": true,
     "empty": false,
@@ -7474,6 +7762,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7501,6 +7790,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7524,6 +7814,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7547,6 +7838,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7573,6 +7865,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7596,6 +7889,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7619,6 +7913,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7642,6 +7937,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7665,6 +7961,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7688,6 +7985,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7711,6 +8009,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7734,6 +8033,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,
@@ -7757,6 +8057,7 @@
      "28 календарных дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7780,6 +8081,7 @@
      "3 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7803,6 +8105,7 @@
      "6 месяцев"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7826,6 +8129,7 @@
      "2 недели"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7849,6 +8153,7 @@
      "5 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7873,6 +8178,7 @@
      "далее — в двойном"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7897,6 +8203,7 @@
      "120 часов в год"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7920,6 +8227,7 @@
      "40 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7943,6 +8251,7 @@
      "не более 24 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7967,6 +8276,7 @@
      "не позднее 15 дней после периода"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -7990,6 +8300,7 @@
      "можно приостановить работу, известив письменно"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8013,6 +8324,7 @@
      "не ниже 1/150 ключевой ставки за день"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8036,6 +8348,7 @@
      "в день увольнения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8059,6 +8372,7 @@
      "средний месячный заработок"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8082,6 +8396,7 @@
      "не менее чем за 2 месяца"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8106,6 +8421,7 @@
      "кроме ликвидации организации"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8129,6 +8445,7 @@
      "более 4 часов подряд"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8152,6 +8469,7 @@
      "не позднее 1 месяца со дня обнаружения"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8175,6 +8493,7 @@
      "2 рабочих дня"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8200,6 +8519,7 @@
      "увольнение"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8223,6 +8543,7 @@
      "не менее чем в двойном размере"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8246,6 +8567,7 @@
      "с 22 до 6 часов"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8269,6 +8591,7 @@
      "1 месяц со дня вручения приказа или трудовой книжки"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8292,6 +8615,7 @@
      "1 год со дня срока выплаты"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8315,6 +8639,7 @@
      "с 16 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8338,6 +8663,7 @@
      "не позднее 3 рабочих дней"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8361,6 +8687,7 @@
      "70 дней до и 70 после родов (140)"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8384,6 +8711,7 @@
      "до 3 лет"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8407,6 +8735,7 @@
      "не позднее чем за 3 дня до начала"
     ],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": true,
     "refused": false,
     "empty": false,
@@ -8430,6 +8759,7 @@
    "score": {
     "facts_found": [],
     "facts_missed": [],
+    "contradictions": [],
     "cites_expected": false,
     "refused": true,
     "empty": false,

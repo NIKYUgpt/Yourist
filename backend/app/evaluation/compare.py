@@ -14,7 +14,7 @@ import json
 import logging
 import re
 import statistics
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -23,8 +23,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.core.config import get_settings
 from app.evaluation.metrics import (
+    AnswerScore,
     Question,
     load_questions,
+    match_facts,
     retrieval_rank,
     score_answer,
 )
@@ -262,8 +264,43 @@ def render_report(data: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def rescore(data: dict[str, Any], dataset: dict[str, Any]) -> dict[str, Any]:
+    """Пересчитать факты по сохранённым ответам после уточнения эталона — без вызова моделей.
+
+    Ссылки и вердикт проверки не меняются: они зависят от ответа, а не от эталона.
+    """
+    questions = load_questions(dataset)
+    by_id = {q.id: q for q in questions}
+    for run in data["runs"]:
+        if run["error"]:
+            continue
+        old = run["score"]
+        score = AnswerScore(
+            cites_expected=old.get("cites_expected", False),
+            refused=old.get("refused", False),
+            empty=old.get("empty", False),
+        )
+        match_facts(by_id[run["question"]], run["text"], score)
+        run["score"] = {**asdict(score), "fact_share": score.fact_share, "correct": score.correct}
+    names = {f.name for f in fields(Run)}
+    runs = [Run(**{k: v for k, v in r.items() if k in names}) for r in data["runs"]]
+    data["dataset_questions"] = dataset["questions"]
+    data["summary"] = {
+        model: summarize(questions, [r for r in runs if r.model == model])
+        for model in data["summary"]
+    }
+    return data
+
+
 async def main(args: argparse.Namespace) -> None:
     dataset = json.loads(Path(args.dataset).read_text("utf-8"))
+    if args.rescore:
+        out = Path(args.out)
+        data = rescore(json.loads((out / "results.json").read_text("utf-8")), dataset)
+        (out / "results.json").write_text(json.dumps(data, ensure_ascii=False, indent=1), "utf-8")
+        (out / "report.md").write_text(render_report(data), "utf-8")
+        print(f"Пересчитано: {out / 'report.md'}")
+        return
     questions = load_questions(dataset)
     on = date.fromisoformat(dataset["on"])
     specs = [parse_model(m) for m in args.models]
@@ -332,7 +369,10 @@ if __name__ == "__main__":
     logging.getLogger("httpx").setLevel(logging.WARNING)
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--dataset", required=True)
-    parser.add_argument("--models", nargs="+", required=True)
+    parser.add_argument("--models", nargs="*", default=[])
     parser.add_argument("--out", required=True)
     parser.add_argument("--append", action="store_true", help="дописать модели в готовый прогон")
+    parser.add_argument(
+        "--rescore", action="store_true", help="пересчитать оценки готового прогона по эталону"
+    )
     asyncio.run(main(parser.parse_args()))
