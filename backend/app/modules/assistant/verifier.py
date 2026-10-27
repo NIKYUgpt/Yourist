@@ -106,6 +106,19 @@ async def verify(
     return verification
 
 
+def needs_revision(v: Verification) -> bool:
+    """Переписывать ли ответ по замечаниям проверяющей модели.
+
+    Небольшие модели неверный факт обычно помечают как partially с замечанием уровня
+    error, а не как unsupported. На оценке (evaluation/results/2026-10-27-labor-basic,
+    verify.md) правило «unsupported или partially с error» у yandexgpt-5-lite:8b ловит
+    86% подменённых фактов при 3% ложных срабатываний; один unsupported — лишь 7%.
+    """
+    if v.verdict == UNSUPPORTED:
+        return True
+    return v.verdict == PARTIALLY and any(i["severity"] == "error" for i in v.issues)
+
+
 def revision(verification: Verification) -> str:
     problems = "\n".join(
         f"- «{i['claim']}»: {i['problem']}"
