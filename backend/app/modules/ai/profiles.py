@@ -78,14 +78,18 @@ class AIConfig(BaseModel):
 DEFAULT_CONFIG = AIConfig(
     mode=Mode.LOCAL,
     tasks={
+        # выбор по сравнению 27–28.10.2026 (backend/evaluation/results): YandexGPT-5 Lite —
+        # лучшая точность и скорость среди локальных моделей; в Ollama — с исправленным
+        # шаблоном диалога (deploy/ollama/yandexgpt-5-lite.Modelfile)
         Task.ANSWER: TaskProfile(
-            local=ModelRef(provider="ollama", model="qwen3:8b", options={"think": False}),
-            api=ModelRef(provider="gigachat", model="GigaChat-2-Max"),
+            local=ModelRef(provider="ollama", model="yandexgpt-5-lite:8b"),
+            api=ModelRef(provider="yandex", model="yandexgpt-5.1"),
         ),
-        # проверяющая модель — другого разработчика, чтобы ошибки не совпадали
+        # проверяющая модель — другого разработчика, чтобы ошибки не совпадали: перекрёстная
+        # проверка ловила больше подменённых фактов, чем самопроверка (93% против 79%)
         Task.VERIFY: TaskProfile(
             local=ModelRef(provider="ollama", model="qwen3:8b", options={"think": False}),
-            api=ModelRef(provider="yandex", model="yandexgpt"),
+            api=ModelRef(provider="yandex", model="deepseek-v4-flash"),
         ),
         Task.DEID: TaskProfile(
             local=ModelRef(provider="ollama", model="qwen3:8b", options={"think": False}),

@@ -45,7 +45,7 @@ async def test_defaults_are_local(client, admin):
         "title": "Ответ на вопрос",
         "mode": "local",
         "provider": "ollama",
-        "model": "qwen3:8b",
+        "model": "yandexgpt-5-lite:8b",
         "configured": True,
     }
     assert body["effective"]["embed"]["model"] == "bge-m3"
@@ -56,7 +56,7 @@ async def test_one_switch_moves_all_tasks_to_api(client, admin):
     assert resp.status_code == 200, resp.text
     effective = resp.json()["effective"]
     assert {t: (e["mode"], e["provider"]) for t, e in effective.items()} == {
-        "answer": ("api", "gigachat"),
+        "answer": ("api", "yandex"),
         "verify": ("api", "yandex"),
         "deid": ("api", "yandex"),
         "embed": ("api", "yandex"),
