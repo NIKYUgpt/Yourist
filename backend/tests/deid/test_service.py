@@ -69,3 +69,12 @@ async def test_llm_garbage_is_ignored():
     provider.reply = lambda messages: "не могу ответить"
     result = await deidentify("Просто вопрос про отпуск.", (provider, LLM))
     assert result.text == "Просто вопрос про отпуск." and result.llm["found"] == 0
+
+
+async def test_llm_hits_inside_placeholders_are_not_counted():
+    provider = FakeProvider("ollama")
+    # модель вернула кусок метки — совпадение внутри [ФИО_1] отбрасывается
+    provider.reply = lambda messages: '{"entities": [{"text": "ФИО_1", "type": "ФИО"}]}'
+    result = await deidentify("Иванов Иван Иванович уволен.", (provider, LLM))
+    assert result.text == "[ФИО_1] уволен."
+    assert result.llm["found"] == 0
