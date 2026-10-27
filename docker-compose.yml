@@ -46,15 +46,30 @@ services:
       db:
         condition: service_healthy
 
-  # основной API: пользователи, дальше — диалоги
+  # основной API: пользователи, вопросы к ассистенту, настройки нейросетей
   api:
     <<: *backend
     restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DEID_URL: http://deid:8002
     depends_on:
       migrate:
         condition: service_completed_successfully
+      deid:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
+
+  # деперсонализация — граница персональных данных: без БД, без публикации порта,
+  # доступна только api по внутренней сети compose
+  deid:
+    <<: *backend
+    command: ["sh", "-c", "exec uvicorn app.deid_main:app --host 0.0.0.0 --port \"$$PORT\""]
+    restart: unless-stopped
+    environment:
+      OLLAMA_URL: ${OLLAMA_DOCKER_URL:-http://host.docker.internal:11434}
+      PORT: "8002"
 
   # сервис корпуса законов: синхронизация с pravo.gov.ru по расписанию
   corpus:
