@@ -26,24 +26,30 @@ class Question:
     articles: list[str]
     facts: list[dict[str, str]]
     off_topic: bool = False
+    on: str | None = None  # своя дата вопроса (проверка учёта редакции)
+    # шаблоны неверного вывода: если найден — ответ неверен, даже если факты совпали
+    forbidden: list[dict[str, str]] = field(default_factory=list)
 
 
 @dataclass
 class AnswerScore:
     facts_found: list[str] = field(default_factory=list)
     facts_missed: list[str] = field(default_factory=list)
+    contradictions: list[str] = field(default_factory=list)
     cites_expected: bool = False
     refused: bool = False
     empty: bool = False
 
     @property
     def fact_share(self) -> float:
+        if self.contradictions:
+            return 0.0
         total = len(self.facts_found) + len(self.facts_missed)
         return len(self.facts_found) / total if total else 1.0
 
     @property
     def correct(self) -> bool:
-        return not self.empty and not self.facts_missed
+        return not self.empty and not self.facts_missed and not self.contradictions
 
 
 def score_answer(q: Question, text: str, report: CheckReport, sources: list[Hit]) -> AnswerScore:
@@ -52,6 +58,9 @@ def score_answer(q: Question, text: str, report: CheckReport, sources: list[Hit]
     for fact in q.facts:
         found = re.search(fact["pattern"], flat, re.IGNORECASE)
         (score.facts_found if found else score.facts_missed).append(fact["name"])
+    for bad in q.forbidden:
+        if re.search(bad["pattern"], flat, re.IGNORECASE):
+            score.contradictions.append(bad["name"])
     cited = {c.key for c in report.citations if c.status != "external"}
     cited |= {sources[n - 1].key for n in report.markers if 1 <= n <= len(sources)}
     score.cites_expected = bool(set(q.articles) & cited)

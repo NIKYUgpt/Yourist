@@ -81,6 +81,10 @@ def label(ref: ModelRef) -> str:
     return f"{ref.provider}/{ref.model}{suffix}"
 
 
+def _on(q: Question, default: date) -> date:
+    return date.fromisoformat(q.on) if q.on else default
+
+
 def _gateway(registry: Registry, config, embed_mode: Mode | None) -> AIGateway | None:
     if embed_mode is None:
         return None  # только полнотекстовый поиск
@@ -105,7 +109,7 @@ async def compare_retrieval(
         for q in questions:
             if q.off_topic:
                 continue
-            found = await search(session, gateway, q.text, on, k=SOURCES_K)
+            found = await search(session, gateway, q.text, _on(q, on), k=SOURCES_K)
             ranks[q.id] = retrieval_rank(q, found.hits)
             notes.update(found.notes)
         hit = [r for r in ranks.values() if r is not None]
@@ -128,6 +132,7 @@ async def answer_once(
     on: date,
 ) -> Run:
     run = Run(question=q.id, model=label(ref))
+    on = _on(q, on)
     messages = prompts.build_messages(q.text, sources, on)
     timer = Timer()
     try:
@@ -272,7 +277,7 @@ async def main(args: argparse.Namespace) -> None:
             logger.info("Поиск: %s", {k: v["recall"] for k, v in retrieval.items()})
             gateway = _gateway(registry, DEFAULT_CONFIG, Mode.LOCAL)
             sources = {
-                q.id: (await search(session, gateway, q.text, on, k=SOURCES_K)).hits
+                q.id: (await search(session, gateway, q.text, _on(q, on), k=SOURCES_K)).hits
                 for q in questions
             }
             for ref in specs:
