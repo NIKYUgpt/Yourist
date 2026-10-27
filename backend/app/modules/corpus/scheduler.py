@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections.abc import Callable
 
 from sqlalchemy import select
 
@@ -13,9 +14,16 @@ logger = logging.getLogger(__name__)
 class SyncScheduler:
     """Периодическая синхронизация отслеживаемых актов и ручной запуск в фоне."""
 
-    def __init__(self, sync: CorpusSync, settings: CorpusSettings):
+    def __init__(
+        self,
+        sync: CorpusSync,
+        settings: CorpusSettings,
+        after_sync: Callable[[], None] | None = None,
+    ):
         self.sync = sync
         self.settings = settings
+        # например, сигнал обновить поисковый индекс
+        self.after_sync = after_sync or (lambda: None)
         self._loop: asyncio.Task | None = None
         self._tasks: set[asyncio.Task] = set()
 
@@ -55,6 +63,7 @@ class SyncScheduler:
             await self.sync.sync_act(act_id, trigger=reason)
         except Exception:
             logger.exception("Синхронизация акта %s завершилась ошибкой", act_id)
+        self.after_sync()
 
     async def _run_forever(self) -> None:
         reason = "startup"
@@ -63,6 +72,7 @@ class SyncScheduler:
                 await self.ensure_default_acts()
                 runs = await self.sync.sync_all(trigger=reason)
                 logger.info("Синхронизация корпуса (%s): %s", reason, [r.stats for r in runs])
+                self.after_sync()
             except asyncio.CancelledError:
                 raise
             except Exception:
