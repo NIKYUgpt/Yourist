@@ -45,7 +45,7 @@ async def test_defaults_are_local(client, admin):
         "title": "Ответ на вопрос",
         "mode": "local",
         "provider": "ollama",
-        "model": "qwen3:8b",
+        "model": "yandexgpt-5-lite:8b",
         "configured": True,
     }
     assert body["effective"]["embed"]["model"] == "bge-m3"
@@ -56,10 +56,12 @@ async def test_one_switch_moves_all_tasks_to_api(client, admin):
     assert resp.status_code == 200, resp.text
     effective = resp.json()["effective"]
     assert {t: (e["mode"], e["provider"]) for t, e in effective.items()} == {
-        "answer": ("api", "gigachat"),
+        "answer": ("api", "yandex"),
         "verify": ("api", "yandex"),
         "deid": ("api", "yandex"),
         "embed": ("api", "yandex"),
+        "stt": ("api", "yandex"),
+        "ocr": ("api", "yandex"),
     }
     # настройка сохранилась в БД
     assert (await client.get(f"{API}/config", headers=admin)).json()["config"]["mode"] == "api"
@@ -82,7 +84,9 @@ async def test_task_can_override_mode(client, admin):
         ({"answer__local": {"provider": "yandex", "model": "x"}}, "answer.local"),
         ({"answer__api": {"provider": "ollama", "model": "x"}}, "answer.api"),
         ({"embed__api": {"provider": "deepseek", "model": "x"}}, "не умеет embed"),
-        ({"deid__api": {"provider": "deepseek", "model": "x"}}, "деперсонализации"),
+        ({"deid__api": {"provider": "deepseek", "model": "x"}}, "deid.api: для исходных данных"),
+        ({"stt__api": {"provider": "deepseek", "model": "x"}}, "не умеет stt"),
+        ({"ocr__local": {"provider": "whisper", "model": "x"}}, "не умеет ocr"),
         ({"answer__api": {"provider": "nope", "model": "x"}}, "неизвестный провайдер"),
     ],
 )
@@ -101,7 +105,7 @@ async def test_providers_show_configuration_without_secrets(client, admin):
         "name": "yandex",
         "title": "yandex",
         "kind": "api",
-        "capabilities": ["chat", "embed"],
+        "capabilities": ["chat", "embed", "ocr", "stt"],
         "location": "ru",
         "configured": True,
     }

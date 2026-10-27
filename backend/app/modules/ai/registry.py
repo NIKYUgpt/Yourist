@@ -16,6 +16,7 @@ from app.modules.ai.providers.openai_compat import (
     QwenProvider,
     YandexProvider,
 )
+from app.modules.ai.providers.whisper import WhisperProvider
 
 
 class Registry:
@@ -56,6 +57,7 @@ def build_registry(
             keep_alive=settings.ollama_keep_alive,
             **http("ollama"),
         ),
+        WhisperProvider(settings.whisper_download_root),
         YandexProvider(
             settings.yandex_base_url,
             settings.yandex_api_key,

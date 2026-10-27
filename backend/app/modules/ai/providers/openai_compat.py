@@ -6,8 +6,11 @@ Gemini (слой совместимости Google), YandexGPT (AI Studio) и Gi
 вынесены в подклассы.
 """
 
+import asyncio
+import base64
 from typing import Any
 
+from app.modules.ai.audio import SAMPLE_RATE, AudioError, decode_pcm16, split_pcm
 from app.modules.ai.providers.base import (
     Capability,
     ChatResult,
@@ -24,11 +27,14 @@ from app.modules.ai.providers.base import (
 
 CHAT_AND_EMBED = frozenset({Capability.CHAT, Capability.EMBED})
 CHAT_ONLY = frozenset({Capability.CHAT})
+# типы изображений в обозначениях Vision OCR
+OCR_MIME = {"image/jpeg": "JPEG", "image/png": "PNG", "application/pdf": "PDF"}
 
 
 class OpenAICompatProvider(HttpProvider):
-    # сколько текстов отправлять в одном запросе к /embeddings
+    # сколько текстов отправлять в одном запросе к /embeddings и сколько запросов параллельно
     embed_batch = 32
+    embed_concurrency = 1
     max_tokens_field = "max_tokens"
     supports_json_mode = True
 
@@ -98,16 +104,20 @@ class OpenAICompatProvider(HttpProvider):
             return await super().embed(model, texts, kind=kind, options=options)
         if not self.configured():
             raise ProviderError(self.info.name, "не заданы ключи доступа")
-        vectors: list[list[float]] = []
-        for start in range(0, len(texts), self.embed_batch):
-            batch = texts[start : start + self.embed_batch]
+        limit = asyncio.Semaphore(self.embed_concurrency)
+
+        async def one(batch: list[str]) -> list[list[float]]:
             body = merge_options({"model": self.embed_model(model, kind), "input": batch}, options)
-            data = await self.request("POST", "/embeddings", json=body)
+            async with limit:
+                data = await self.request("POST", "/embeddings", json=body)
             items = sorted(data.get("data", []), key=lambda item: item.get("index", 0))
             if len(items) != len(batch):
                 raise ProviderError(self.info.name, "число векторов не совпадает с числом текстов")
-            vectors.extend(item["embedding"] for item in items)
-        return vectors
+            return [item["embedding"] for item in items]
+
+        batches = [texts[i : i + self.embed_batch] for i in range(0, len(texts), self.embed_batch)]
+        results = await asyncio.gather(*(one(b) for b in batches))
+        return [vector for batch in results for vector in batch]
 
     async def models(self) -> list[str]:
         data = await self.request("GET", "/models")
@@ -168,14 +178,16 @@ class YandexProvider(OpenAICompatProvider):
 
     info = ProviderInfo(
         name="yandex",
-        title="YandexGPT (Yandex AI Studio)",
+        title="YandexGPT (Yandex AI Studio), SpeechKit, Vision OCR",
         kind=Kind.API,
-        capabilities=CHAT_AND_EMBED,
+        capabilities=CHAT_AND_EMBED | {Capability.STT, Capability.OCR},
         location="ru",
     )
     # /embeddings Яндекса принимает ровно одну строку за запрос (проверено 27.10.2026:
     # на список отвечает 400 «Array input must contain exactly one string»)
     embed_batch = 1
+    # по одной строке — значит, параллельно; повторы при 429 есть в HttpProvider
+    embed_concurrency = 4
     # модели-пары: отдельная модель для документов (-doc) и для запросов (-query)
     paired_embeddings = ("text-search", "text-embeddings-v2")
 
@@ -208,3 +220,68 @@ class YandexProvider(OpenAICompatProvider):
         if model in self.paired_embeddings:
             model = f"{model}-doc" if kind == EmbedKind.DOCUMENT else f"{model}-query"
         return self._uri("emb", model)
+
+    # SpeechKit, синхронное распознавание: до 30 секунд и 1 МБ на запрос
+    stt_url = "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize"
+    stt_chunk_seconds = 25
+    ocr_url = "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText"
+
+    async def transcribe(
+        self, model: str, audio: bytes, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        """SpeechKit v1: запись режется на куски до 25 с по паузам и распознаётся по частям."""
+        if not self.configured():
+            raise ProviderError(self.info.name, "не заданы ключи доступа")
+        try:
+            pcm = await asyncio.to_thread(decode_pcm16, audio)
+        except AudioError as exc:
+            raise ProviderError(self.info.name, str(exc)) from exc
+        params = {
+            "lang": "ru-RU",
+            "format": "lpcm",
+            "sampleRateHertz": str(SAMPLE_RATE),
+            "folderId": self.folder_id,
+            "topic": model or "general",
+            **{k: str(v) for k, v in (options or {}).items()},
+        }
+        timer = Timer()
+        texts = []
+        for part in split_pcm(pcm, self.stt_chunk_seconds):
+            data = await self.request("POST", self.stt_url, content=part, params=params)
+            texts.append(str(data.get("result", "")).strip())
+        return ChatResult(
+            text=" ".join(t for t in texts if t),
+            provider=self.info.name,
+            model=f"speechkit/{params['topic']}",
+            latency_ms=timer.ms,
+        )
+
+    async def ocr(
+        self, model: str, image: bytes, mime: str, *, options: dict[str, Any] | None = None
+    ) -> ChatResult:
+        """Vision OCR: распознавание текста на изображении документа."""
+        if not self.configured():
+            raise ProviderError(self.info.name, "не заданы ключи доступа")
+        body = {
+            "mimeType": OCR_MIME.get(mime, mime),
+            "languageCodes": ["ru", "en"],
+            "model": model or "page",
+            "content": base64.b64encode(image).decode(),
+            **(options or {}),
+        }
+        timer = Timer()
+        data = await self.request(
+            "POST", self.ocr_url, json=body, headers={"x-folder-id": self.folder_id}
+        )
+        try:
+            text = data["result"]["textAnnotation"]["fullText"]
+        except (KeyError, TypeError) as exc:
+            raise ProviderError(
+                self.info.name, f"неожиданный ответ OCR: {str(data)[:200]}"
+            ) from exc
+        return ChatResult(
+            text=text.strip(),
+            provider=self.info.name,
+            model=f"ocr/{body['model']}",
+            latency_ms=timer.ms,
+        )

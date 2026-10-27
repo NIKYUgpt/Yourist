@@ -101,4 +101,42 @@ def find(text: str) -> list[Entity]:
         threshold = SENTENCE_START_SCORE if _sentence_start(text, tok.start) else SINGLE_WORD_SCORE
         if tok.person >= threshold:
             found.append(Entity(tok.start, tok.end, PERSON, DICTIONARY))
+    return found + _lowercase_with_patronymic(text)
+
+
+_ANY_WORD = re.compile(r"[а-яё]+(?:-[а-яё]+)?")
+PATRONYMIC_SCORE = 0.5
+
+
+def _lowercase_with_patronymic(text: str) -> list[Entity]:
+    """ФИО строчными буквами — так их выдаёт распознавание речи («смирнова анна юрьевна»).
+
+    Отчество — надёжный признак, регистр словарю не важен; к нему присоединяем
+    соседние слова, которые словарь считает именем или фамилией.
+    """
+    words = list(_ANY_WORD.finditer(text))
+
+    def adjacent(a: re.Match, b: re.Match) -> bool:
+        return text[a.end() : b.start()].strip() == ""
+
+    def person_score(word: str) -> float:
+        parses = morph().parse(word)
+        return sum(p.score for p in parses if any(t in p.tag for t in _PERSON_TAGS))
+
+    found = []
+    for i, m in enumerate(words):
+        parses = morph().parse(m.group(0))
+        if sum(p.score for p in parses if "Patr" in p.tag) < PATRONYMIC_SCORE:
+            continue
+        start, end = i, i
+        while start > 0 and i - start < 2 and adjacent(words[start - 1], words[start]):
+            if person_score(words[start - 1].group(0)) < 0.3:
+                break
+            start -= 1
+        if end + 1 < len(words) and adjacent(words[end], words[end + 1]):
+            nxt = morph().parse(words[end + 1].group(0))
+            if sum(p.score for p in nxt if "Surn" in p.tag) >= 0.3:
+                end += 1
+        if start < i or end > i:  # одно отчество без имени — ещё не ФИО
+            found.append(Entity(words[start].start(), words[end].end(), PERSON, DICTIONARY))
     return found

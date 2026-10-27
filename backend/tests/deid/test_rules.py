@@ -73,3 +73,20 @@ def test_no_false_positives(text):
 )
 def test_person_names(text, person):
     assert ("ФИО", person) in found(text)
+
+
+@pytest.mark.parametrize(
+    ("text", "person"),
+    [
+        # так текст выдаёт распознавание речи — без заглавных букв и знаков
+        ("здравствуйте меня зовут смирнова анна юрьевна я работаю", "смирнова анна юрьевна"),
+        ("начальник иван петрович кузнецов уволил меня", "иван петрович кузнецов"),
+    ],
+)
+def test_lowercase_names_with_patronymic(text, person):
+    assert ("ФИО", person) in found(text)
+
+
+def test_lowercase_without_patronymic_is_left_to_llm():
+    # без отчества строчные слова не трогаем: «вера», «надежда», «роза» — обычные слова
+    assert found("вера и надежда остались, а роза завяла") == []

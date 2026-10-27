@@ -16,7 +16,11 @@ COPY alembic.ini .
 COPY migrations ./migrations
 COPY app ./app
 
-RUN useradd --create-home --uid 1000 yourist
+# кэш моделей Hugging Face (Whisper) — том в compose; каталог создаём заранее,
+# иначе Docker создаст его от root и пользователь приложения не сможет писать
+RUN useradd --create-home --uid 1000 yourist \
+    && mkdir -p /home/yourist/.cache/huggingface \
+    && chown -R yourist:yourist /home/yourist/.cache
 USER yourist
 
 EXPOSE 8000
