@@ -53,6 +53,8 @@ class TaskProfile(BaseModel):
 class AIConfig(BaseModel):
     mode: Mode = Mode.LOCAL
     tasks: dict[Task, TaskProfile]
+    # второй проход деперсонализации моделью (после правил и словаря)
+    deid_llm: bool = True
 
     def resolve(self, task: Task) -> tuple[Mode, ModelRef]:
         profile = self.tasks[task]
@@ -79,7 +81,9 @@ DEFAULT_CONFIG = AIConfig(
             api=ModelRef(provider="yandex", model="yandexgpt"),
         ),
         Task.EMBED: TaskProfile(
-            local=ModelRef(provider="ollama", model="bge-m3"),
+            # векторы считаем на процессоре (запрос ~0,2 с): иначе на 8 ГБ видеопамяти
+            # модель ответа и модель векторов вытесняют друг друга на каждом вопросе
+            local=ModelRef(provider="ollama", model="bge-m3", options={"num_gpu": 0}),
             api=ModelRef(provider="yandex", model="text-search"),
         ),
     },
@@ -90,7 +94,8 @@ def with_defaults(data: dict[str, Any] | None) -> AIConfig:
     """Сохранённая конфигурация, дополненная задачами, которых в ней ещё нет."""
     merged = DEFAULT_CONFIG.model_dump(mode="json")
     if data:
-        merged["mode"] = data.get("mode", merged["mode"])
+        for key in ("mode", "deid_llm"):
+            merged[key] = data.get(key, merged[key])
         merged["tasks"].update(data.get("tasks", {}))
     return AIConfig.model_validate(merged)
 

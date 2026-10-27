@@ -8,7 +8,12 @@ from app.modules.corpus.models import ArticleVersion
 from app.modules.search import indexer as indexer_module
 from app.modules.search.indexer import index_status
 from app.modules.search.models import Chunk
-from app.modules.search.retrieval import explicit_article_keys, query_words, search
+from app.modules.search.retrieval import (
+    explicit_article_keys,
+    lexical_term,
+    query_words,
+    search,
+)
 from tests.search.conftest import BEFORE_AGENCIES, NOW
 
 
@@ -17,6 +22,13 @@ def test_explicit_article_keys():
     assert explicit_article_keys(q) == ["81", "19.1", "341.1-1"]
     assert explicit_article_keys("Статья 58 про срочный договор") == ["58"]
     assert explicit_article_keys("сколько стоит 81 рубль") == []
+
+
+def test_long_words_match_by_prefix():
+    # «испытательный» и «испытания» — разные основы; по началу слова находятся обе
+    assert lexical_term("испытательный") == "испыта:*"
+    assert lexical_term("отпуск") == "отпуск"
+    assert lexical_term("прогула") == "прогула"
 
 
 def test_query_words_drop_short_and_stop_words():
