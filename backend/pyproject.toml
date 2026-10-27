@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yourist-backend"
-version = "0.4.1"
+version = "0.5.0"
 description = "Yourist — экспертная система для правового анализа на базе ИИ (backend)"
 requires-python = ">=3.12"
 dependencies = [
