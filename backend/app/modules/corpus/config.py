@@ -16,13 +16,16 @@ class CorpusSettings(BaseSettings):
 
     # недокументированный JSON API, которым пользуется сам сайт
     source_url: str = "http://actual.pravo.gov.ru:8000/api/ebpi"
-    user_agent: str = "Yourist/0.2 (+https://github.com/NIKYUgpt/Yourist)"
+    user_agent: str = "Yourist/0.3 (+https://github.com/NIKYUgpt/Yourist)"
     request_delay_sec: float = 1.0
     request_timeout_sec: float = 120.0
     request_retries: int = 3
 
     sync_enabled: bool = True
     sync_interval_hours: float = 24.0
+    # поисковый индекс: после синхронизации и по таймеру (подхватывает смену модели)
+    index_enabled: bool = True
+    index_interval_minutes: float = 10.0
     # акты, которые отслеживаются с первого запуска
     default_acts: list[str] = [TK_RF_HASH]
 
