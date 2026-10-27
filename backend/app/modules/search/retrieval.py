@@ -27,6 +27,10 @@ logger = logging.getLogger(__name__)
 RRF_K = 60
 CANDIDATES = 40
 EXPLICIT_BONUS = 1.0  # явно названная статья всегда выше найденных по смыслу
+# сколько лучших результатов каждого способа попадает в выдачу в любом случае
+VECTOR_HEADS = 2
+LEXICAL_HEADS = 0  # лучший полнотекстовый результат часто случаен — без гарантии
+PREFIX_CHARS = 6
 
 _WORD = re.compile(r"[а-яёa-z0-9]+", re.IGNORECASE)
 # «ст. 81», «статья 19.1», «статьи 341.1-1», «ст.ст. 81»
@@ -164,8 +168,15 @@ _SCOPE = """
 """
 
 
+def lexical_term(word: str) -> str:
+    """Длинное слово — по началу: «испытательный» и «испытания» дают разные основы,
+    а «испыта:*» находит обе. В слове только буквы и цифры — синтаксис tsquery не сломать.
+    """
+    return f"{word[:PREFIX_CHARS]}:*" if len(word) > PREFIX_CHARS + 1 else word
+
+
 def _match(i: int) -> str:
-    return f"c.tsv @@ plainto_tsquery('russian', :w{i})"
+    return f"c.tsv @@ to_tsquery('russian', :w{i})"
 
 
 async def _lexical(session: AsyncSession, words: list[str], rids: list[int], n: int) -> list[int]:
@@ -176,7 +187,7 @@ async def _lexical(session: AsyncSession, words: list[str], rids: list[int], n: 
     """
     if not words:
         return []
-    params: dict[str, Any] = {f"w{i}": w for i, w in enumerate(words)}
+    params: dict[str, Any] = {f"w{i}": lexical_term(w) for i, w in enumerate(words)}
     params["rids"] = rids
     counts = ", ".join(f"count(*) FILTER (WHERE {_match(i)})" for i in range(len(words)))
     df_sql = text(f"SELECT count(*), {counts} {_SCOPE}").bindparams(
@@ -259,8 +270,10 @@ async def search(
         for cid in explicit_ids:
             scores[cid] = scores.get(cid, 0.0) + EXPLICIT_BONUS
 
-    add(await _lexical(session, query_words(query), rids, CANDIDATES), "lexical")
+    lexical_ids = await _lexical(session, query_words(query), rids, CANDIDATES)
+    add(lexical_ids, "lexical")
     result.timings_ms["lexical"] = timer.ms
+    vector_ids: list[int] = []
 
     if ai is not None:
         result.space = space = ai.embedding_key
@@ -287,14 +300,24 @@ async def search(
                     "qv": _vector_literal(qvec),
                     "n": CANDIDATES,
                 }
-                ids = await session.execute(_VECTOR_SQL, params)
-                add(list(ids.scalars()), "vector")
+                vector_ids = list((await session.execute(_VECTOR_SQL, params)).scalars())
+                add(vector_ids, "vector")
             result.timings_ms["vector"] = timer.ms
 
     if not scores:
         return result
 
-    ordered = sorted(scores, key=lambda cid: (-scores[cid], cid))
+    by_score = sorted(scores, key=lambda cid: (-scores[cid], cid))
+    # RRF поднимает то, что нашли оба способа; но лучший результат одного способа
+    # (например, векторного, когда слова вопроса и нормы разные) терять нельзя
+    heads = vector_ids[:VECTOR_HEADS] + lexical_ids[:LEXICAL_HEADS]
+    ordered = list(
+        dict.fromkeys(
+            [c for c in by_score if c in explicit_ids]
+            + [c for c in heads if c not in explicit_ids]
+            + by_score
+        )
+    )
     rows = await session.execute(
         select(
             Chunk,

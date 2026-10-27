@@ -81,7 +81,9 @@ DEFAULT_CONFIG = AIConfig(
             api=ModelRef(provider="yandex", model="yandexgpt"),
         ),
         Task.EMBED: TaskProfile(
-            local=ModelRef(provider="ollama", model="bge-m3"),
+            # векторы считаем на процессоре (запрос ~0,2 с): иначе на 8 ГБ видеопамяти
+            # модель ответа и модель векторов вытесняют друг друга на каждом вопросе
+            local=ModelRef(provider="ollama", model="bge-m3", options={"num_gpu": 0}),
             api=ModelRef(provider="yandex", model="text-search"),
         ),
     },

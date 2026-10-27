@@ -31,6 +31,7 @@ from app.db.session import get_session  # noqa: E402
 from app.main import app  # noqa: E402
 from app.modules.ai.registry import Registry  # noqa: E402
 from app.modules.auth.models import Role, User  # noqa: E402
+from app.modules.deid.api import DeidClient, DeidSettings  # noqa: E402
 from tests.fakes import fake_registry  # noqa: E402
 
 PASSWORD = "correct-horse-42"
@@ -108,6 +109,8 @@ async def client(
     app.dependency_overrides[get_mailer] = lambda: mailer
     # lifespan в тестах не запускается — реестр нейросетей подставляем сами
     app.state.ai_registry = ai_registry
+    # деперсонализация в процессе (без отдельного сервиса); сервис проверяется в tests/deid
+    app.state.deid_client = DeidClient(DeidSettings(deid_url=""), ai_registry)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
