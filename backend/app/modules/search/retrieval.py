@@ -31,6 +31,7 @@ EXPLICIT_BONUS = 1.0  # явно названная статья всегда в
 VECTOR_HEADS = 2
 LEXICAL_HEADS = 0  # лучший полнотекстовый результат часто случаен — без гарантии
 PREFIX_CHARS = 6
+EXPAND_FOR_VECTORS = True
 
 _WORD = re.compile(r"[а-яёa-z0-9]+", re.IGNORECASE)
 # «ст. 81», «статья 19.1», «статьи 341.1-1», «ст.ст. 81»
@@ -143,7 +144,52 @@ def explicit_article_keys(query: str) -> list[str]:
     return keys
 
 
-def query_words(query: str, limit: int = 16) -> list[str]:
+# Бытовые слова → термины закона. Пользователь пишет «гендиректор», «больничный»,
+# «декрет», а в кодексе — «руководитель организации», «временная нетрудоспособность»,
+# «отпуск по уходу за ребенком»; без перевода поиск такие нормы пропускает
+# (evaluation/results/2026-10-27-labor-hard: вопрос про увольнение директора).
+_LEGAL_TERMS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(p, re.IGNORECASE), terms)
+    for p, terms in [
+        (
+            r"ген\.?\s*директор|генеральн\w*\s+директор|директор\w*\s+(организаци|компани|фирм)"
+            r"|руководител\w*\s+(компани|фирм)",
+            "руководитель организации",
+        ),
+        (r"больничн", "временная нетрудоспособность"),
+        (r"декрет", "отпуск по беременности и родам отпуск по уходу за ребенком"),
+        (r"зарплат|\bзп\b", "заработная плата"),
+        (r"отпускны", "оплата отпуска"),
+        (r"сокращени|сократ", "сокращение численности или штата работников"),
+        (
+            r"уволит\w*ся|увольня\w*сь|по\s+собственному|уйти\s+раньше|хочу\s+уйти",
+            "расторжение трудового договора по инициативе работника",
+        ),
+        (r"переработк", "сверхурочная работа"),
+        (r"испытательн\w*\s+срок", "испытание при приеме на работу"),
+        (r"за\s+свой\s+сч[её]т", "отпуск без сохранения заработной платы"),
+        (r"арми|призыв", "призыв на военную службу"),
+        (r"пьян", "состояние алкогольного опьянения"),
+        (r"командировк", "служебная командировка"),
+        (
+            r"подрост|несовершеннолетн|младше\s+(16|18)|\b1[4-7]\s*(лет|год)",
+            "работники в возрасте до восемнадцати лет",
+        ),
+        (
+            r"задерж\w*\s+(зарплат|выплат)|компенсаци\w*\s+за\s+задержк",
+            "нарушение сроков выплаты заработной платы денежная компенсация",
+        ),
+    ]
+]
+
+
+def expand_query(query: str) -> str:
+    """Вопрос, дополненный терминами закона для найденных бытовых слов."""
+    extra = [terms for pattern, terms in _LEGAL_TERMS if pattern.search(query)]
+    return " ".join([query, *dict.fromkeys(extra)])
+
+
+def query_words(query: str, limit: int = 24) -> list[str]:
     words: list[str] = []
     for word in _WORD.findall(query.lower()):
         if len(word) >= 3 and word not in _STOPWORDS and word not in words:
@@ -270,7 +316,8 @@ async def search(
         for cid in explicit_ids:
             scores[cid] = scores.get(cid, 0.0) + EXPLICIT_BONUS
 
-    lexical_ids = await _lexical(session, query_words(query), rids, CANDIDATES)
+    expanded = expand_query(query)
+    lexical_ids = await _lexical(session, query_words(expanded), rids, CANDIDATES)
     add(lexical_ids, "lexical")
     result.timings_ms["lexical"] = timer.ms
     vector_ids: list[int] = []
@@ -279,7 +326,7 @@ async def search(
         result.space = space = ai.embedding_key
         timer = Timer()
         try:
-            [qvec] = await ai.embed([query], EmbedKind.QUERY)
+            [qvec] = await ai.embed([expanded if EXPAND_FOR_VECTORS else query], EmbedKind.QUERY)
         except ProviderError as exc:
             logger.warning("Векторный поиск недоступен: %s", exc)
             result.notes.append(f"векторный поиск недоступен: {exc}")
