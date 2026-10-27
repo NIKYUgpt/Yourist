@@ -14,6 +14,8 @@ from app.core.time import utcnow
 JWT_ALGORITHM = "HS256"
 # значение claim "typ" у access-токена; другие токены (из писем) как access не принимаются
 ACCESS = "access"
+# короткоживущий токен для вызовов между нашими сервисами (api → deid)
+SERVICE = "service"
 
 # Argon2id с параметрами по умолчанию из argon2-cffi
 _hasher = PasswordHasher()
