@@ -96,7 +96,11 @@ def _gateway(registry: Registry, config, embed_mode: Mode | None) -> AIGateway |
 
 
 async def compare_retrieval(
-    session: AsyncSession, registry: Registry, questions: list[Question], on: date
+    session: AsyncSession,
+    registry: Registry,
+    questions: list[Question],
+    on: date,
+    local_only: bool = False,
 ) -> dict[str, Any]:
     config = await load_config(session)
     methods = {
@@ -104,6 +108,8 @@ async def compare_retrieval(
         "гибридный, локальные векторы": Mode.LOCAL,
         "гибридный, векторы API": Mode.API,
     }
+    if local_only:
+        del methods["гибридный, векторы API"]  # векторы запросов у API платные
     out: dict[str, Any] = {}
     for name, mode in methods.items():
         gateway = _gateway(registry, config, mode)
@@ -310,7 +316,9 @@ async def main(args: argparse.Namespace) -> None:
     runs: list[Run] = []
     try:
         async with async_sessionmaker(engine, expire_on_commit=False)() as session:
-            retrieval = await compare_retrieval(session, registry, questions, on)
+            retrieval = await compare_retrieval(
+                session, registry, questions, on, local_only=args.local_only
+            )
             logger.info("Поиск: %s", {k: v["recall"] for k, v in retrieval.items()})
             gateway = _gateway(registry, DEFAULT_CONFIG, Mode.LOCAL)
             sources = {
@@ -374,5 +382,8 @@ if __name__ == "__main__":
     parser.add_argument("--append", action="store_true", help="дописать модели в готовый прогон")
     parser.add_argument(
         "--rescore", action="store_true", help="пересчитать оценки готового прогона по эталону"
+    )
+    parser.add_argument(
+        "--local-only", action="store_true", help="поиск без векторов API (они платные)"
     )
     asyncio.run(main(parser.parse_args()))

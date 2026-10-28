@@ -25,6 +25,7 @@ class Task(enum.StrEnum):
     EMBED = "embed"  # векторы для поиска по нормам
     STT = "stt"  # распознавание голосового вопроса
     OCR = "ocr"  # распознавание текста на фото документа
+    ANALYZE = "analyze"  # разбор сложного вопроса на отдельные правовые проблемы
 
 
 TASK_TITLES = {
@@ -34,6 +35,7 @@ TASK_TITLES = {
     Task.EMBED: "Векторный поиск",
     Task.STT: "Распознавание речи",
     Task.OCR: "Распознавание документов",
+    Task.ANALYZE: "Разбор вопроса",
 }
 
 # задачи, в которые попадают исходные данные пользователя (текст, голос, фото документа):
@@ -66,6 +68,8 @@ class AIConfig(BaseModel):
     deid_llm: bool = True
     # проверка ответа второй моделью (Task.VERIFY)
     verify: bool = True
+    # разбор длинных вопросов из нескольких проблем (Task.ANALYZE)
+    analyze: bool = True
 
     def resolve(self, task: Task) -> tuple[Mode, ModelRef]:
         profile = self.tasks[task]
@@ -114,6 +118,12 @@ DEFAULT_CONFIG = AIConfig(
             local=ModelRef(provider="ollama", model="qwen2.5vl:7b"),
             api=ModelRef(provider="yandex", model="page"),
         ),
+        # та же модель, что и у деперсонализации: на 8 ГБ видеопамяти разбор идёт сразу
+        # после неё без перезагрузки модели; JSON qwen3 отдаёт надёжно
+        Task.ANALYZE: TaskProfile(
+            local=ModelRef(provider="ollama", model="qwen3:8b", options={"think": False}),
+            api=ModelRef(provider="yandex", model="yandexgpt-5.1"),
+        ),
     },
 )
 
@@ -122,7 +132,7 @@ def with_defaults(data: dict[str, Any] | None) -> AIConfig:
     """Сохранённая конфигурация, дополненная задачами, которых в ней ещё нет."""
     merged = DEFAULT_CONFIG.model_dump(mode="json")
     if data:
-        for key in ("mode", "deid_llm", "verify"):
+        for key in ("mode", "deid_llm", "verify", "analyze"):
             merged[key] = data.get(key, merged[key])
         merged["tasks"].update(data.get("tasks", {}))
     return AIConfig.model_validate(merged)

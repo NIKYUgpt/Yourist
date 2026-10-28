@@ -1,7 +1,8 @@
 """Конвейер ответа на вопрос.
 
 1. Деперсонализация (отдельный сервис). Если он недоступен — вопрос дальше не идёт.
-2. Поиск норм, действующих на дату вопроса.
+2. Поиск норм, действующих на дату вопроса. Длинный вопрос из нескольких проблем
+   модель сначала разбирает на проблемы, и нормы ищутся по каждой (analysis.py).
 3. Ответ модели со ссылками на нумерованные источники.
 4. Детерминированная проверка ссылок; при ошибках — одна попытка исправления
    с перечнем ошибок.
@@ -22,16 +23,20 @@ from app.modules.ai.profiles import ModelRef, Task
 from app.modules.ai.providers.base import ChatResult, ProviderError, Timer
 from app.modules.ai.service import AIGateway
 from app.modules.assistant import prompts
+from app.modules.assistant.analysis import Analysis, analyze, is_compound, sentences
 from app.modules.assistant.citations import CheckReport, check
 from app.modules.assistant.models import Answer, Question, QuestionSource, QuestionStatus
 from app.modules.assistant.verifier import RANK, Verification, needs_revision, revision, verify
 from app.modules.deid.api import DeidClient
 from app.modules.deid.service import DeidResult, reidentify, summary
-from app.modules.search.retrieval import Hit, search
+from app.modules.search.retrieval import Hit, search, search_issues
 
 # попыток на исправление ссылок; плюс одна — по замечаниям проверяющей модели
 MAX_ATTEMPTS = 2
 SOURCES_K = 8
+MAX_TOKENS = 1500
+# ответ по нескольким проблемам длиннее
+MAX_TOKENS_COMPOUND = 2000
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 
@@ -142,8 +147,23 @@ class Pipeline:
         )
         # в сессию — только в конце: запросы поиска не должны сбрасывать вопрос в БД раньше
 
+        analysis = await self._analyze(deid.text, trace)
         timer = Timer()
-        found = await search(self.session, self.ai, deid.text, on, k=SOURCES_K)
+        issues: list[tuple[str, list[int]]] = []
+        if analysis is not None and analysis.compound:
+            # ищем и по каждому предложению вопроса: если модель упустила проблему,
+            # её нормы всё равно попадут в источники (evaluation/results/
+            # 2026-10-28-labor-compound: статья проблемы в источниках 79% → 84%)
+            queries = [i.query for i in analysis.issues] + sentences(deid.text)
+            found, linked = await search_issues(self.session, self.ai, deid.text, queries, on)
+            linked = linked[: len(analysis.issues)]
+            issues = [
+                (i.issue, numbers) for i, numbers in zip(analysis.issues, linked, strict=True)
+            ]
+            for item, numbers in zip(trace["analysis"]["issues"], linked, strict=True):
+                item["sources"] = numbers
+        else:
+            found = await search(self.session, self.ai, deid.text, on, k=SOURCES_K)
         trace["search"] = {
             "ms": timer.ms,
             "space": found.space,
@@ -152,6 +172,7 @@ class Pipeline:
             "hits": [[h.key, h.refs[:2], h.score] for h in found.hits],
         }
         sources = found.hits
+        max_tokens = MAX_TOKENS_COMPOUND if issues else MAX_TOKENS
 
         if not sources:
             answer = Answer(
@@ -164,12 +185,12 @@ class Pipeline:
             )
             return await self._save(question, [answer], deid)
 
-        base = prompts.build_messages(deid.text, sources, on)
+        base = prompts.build_messages(deid.text, sources, on, issues)
         messages = base
         attempts: list[Attempt] = []
         try:
             for _ in range(MAX_ATTEMPTS):
-                attempt = await self._answer(messages, sources, on)
+                attempt = await self._answer(messages, sources, on, max_tokens)
                 attempts.append(attempt)
                 if attempt.report.verdict != "failed":
                     break
@@ -190,7 +211,7 @@ class Pipeline:
                         {"role": "assistant", "content": best.text},
                         {"role": "user", "content": revision(best.verification)},
                     ]
-                    revised = await self._answer(messages, sources, on)
+                    revised = await self._answer(messages, sources, on, max_tokens)
                     revised.verification = await self._verify(deid.text, sources, revised.text, on)
                     attempts.append(revised)
                     best = _better(best, revised)
@@ -242,10 +263,35 @@ class Pipeline:
         ]
         return await self._save(question, answers, deid)
 
+    async def _analyze(self, question: str, trace: dict[str, Any]) -> Analysis | None:
+        """Разбор длинного вопроса на проблемы; None — разбор не нужен или выключен.
+
+        Сбой разбора не останавливает ответ: вопрос идёт обычным поиском.
+        """
+        if not self.ai.config.analyze or not is_compound(question):
+            return None
+
+        async def chat(messages, **kwargs):
+            return await self.ai.chat(Task.ANALYZE, messages, **kwargs)
+
+        analysis = await analyze(chat, question)
+        trace["analysis"] = {
+            "provider": analysis.provider,
+            "model": analysis.model,
+            "latency_ms": analysis.latency_ms,
+            "issues": [asdict(i) for i in analysis.issues],
+            "error": analysis.error,
+        }
+        return analysis
+
     async def _answer(
-        self, messages: list[dict[str, str]], sources: list[Hit], on: date
+        self,
+        messages: list[dict[str, str]],
+        sources: list[Hit],
+        on: date,
+        max_tokens: int = MAX_TOKENS,
     ) -> Attempt:
-        result = await self.ai.chat(Task.ANSWER, messages, temperature=0.1, max_tokens=1500)
+        result = await self.ai.chat(Task.ANSWER, messages, temperature=0.1, max_tokens=max_tokens)
         text = _THINK.sub("", result.text).strip()
         return Attempt(result, text, await check(self.session, text, sources, on))
 
