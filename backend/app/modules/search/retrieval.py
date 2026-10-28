@@ -179,6 +179,13 @@ _LEGAL_TERMS: list[tuple[re.Pattern[str], str]] = [
             r"задерж\w*\s+(зарплат|выплат)|компенсаци\w*\s+за\s+задержк",
             "нарушение сроков выплаты заработной платы денежная компенсация",
         ),
+        # «куда обращаться», «можно ли оспорить» — без этого сроки обращения в суд
+        # (ст. 392) в выдачу не попадали (два составных вопроса, 28.10.2026)
+        (
+            r"оспор|обжал|куда\s+(обращ|идти|жалова|пожалова)|к\s+кому\s+(обращ|идти)"
+            r"|\bв\s+суд\b|подать\s+(иск|в\s+суд)",
+            "сроки обращения в суд за разрешением индивидуального трудового спора",
+        ),
     ]
 ]
 
@@ -286,7 +293,10 @@ async def search(
     *,
     k: int = 8,
     per_article: int = 2,
+    explicit: bool = True,
 ) -> SearchResult:
+    """explicit=False — не поднимать названные в запросе статьи: для запросов,
+    составленных моделью, а не пользователем (номер статьи модель может выдумать)."""
     result = SearchResult(query=query, on=on, hits=[], redactions=[])
     result.redactions = await _redactions_on(session, on)
     if not result.redactions:
@@ -303,7 +313,7 @@ async def search(
             ranks.setdefault(cid, {})[source] = rank
 
     timer = Timer()
-    explicit_keys = explicit_article_keys(query)
+    explicit_keys = explicit_article_keys(query) if explicit else []
     explicit_ids: set[int] = set()
     if explicit_keys:
         rows = await session.execute(
@@ -415,3 +425,56 @@ async def search(
         if len(result.hits) >= k:
             break
     return result
+
+
+async def search_issues(
+    session: AsyncSession,
+    ai: AIGateway | None,
+    question: str,
+    queries: list[str],
+    on: date,
+    *,
+    k_whole: int = 4,
+    k_issue: int = 3,
+    cap: int = 12,
+) -> tuple[SearchResult, list[list[int]]]:
+    """Поиск для вопроса из нескольких проблем: часть выдачи — по вопросу целиком,
+    остальное — по каждой проблеме отдельно, без повторов.
+
+    Возвращает общую выдачу и для каждой проблемы — номера её источников (с 1)
+    в этой выдаче. Ограничение cap держит промпт в контексте локальных моделей
+    (8192 токена у qwen3:8b вместе с ответом).
+    """
+    whole = await search(session, ai, question, on, k=k_whole)
+    found = [await search(session, ai, q, on, k=k_issue * 3, explicit=False) for q in queries]
+    hits = list(whole.hits)
+    index = {h.chunk_id: i for i, h in enumerate(hits)}
+    linked: list[list[int]] = [[] for _ in queries]
+    pointers = [0] * len(queries)
+    # по кругу: сначала лучший фрагмент каждой проблемы, затем второй и т. д. —
+    # чтобы при ограничении выдачи ни одна проблема не осталась без норм
+    for _ in range(k_issue):
+        for qi, result in enumerate(found):
+            while pointers[qi] < len(result.hits):
+                hit = result.hits[pointers[qi]]
+                pointers[qi] += 1
+                if hit.chunk_id in index:
+                    if index[hit.chunk_id] not in linked[qi]:
+                        linked[qi].append(index[hit.chunk_id])
+                        break
+                    continue
+                if len(hits) >= cap:
+                    continue  # места нет — ищем среди уже взятых
+                index[hit.chunk_id] = len(hits)
+                hits.append(hit)
+                linked[qi].append(index[hit.chunk_id])
+                break
+
+    merged = SearchResult(
+        query=question, on=on, hits=hits, redactions=whole.redactions, space=whole.space
+    )
+    for result in [whole, *found]:
+        merged.notes.extend(n for n in result.notes if n not in merged.notes)
+        for name, ms in result.timings_ms.items():
+            merged.timings_ms[name] = merged.timings_ms.get(name, 0) + ms
+    return merged, [[n + 1 for n in sorted(numbers)] for numbers in linked]
