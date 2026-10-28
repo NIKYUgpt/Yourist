@@ -62,6 +62,7 @@ async def test_one_switch_moves_all_tasks_to_api(client, admin):
         "embed": ("api", "yandex"),
         "stt": ("api", "yandex"),
         "ocr": ("api", "yandex"),
+        "analyze": ("api", "yandex"),
     }
     # настройка сохранилась в БД
     assert (await client.get(f"{API}/config", headers=admin)).json()["config"]["mode"] == "api"

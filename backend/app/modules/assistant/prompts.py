@@ -48,13 +48,37 @@ DOCUMENT_STEPS = (
 )
 
 
-def build_messages(question: str, sources: list[Hit], on: date) -> list[dict[str, str]]:
+def issues_block(issues: list[tuple[str, list[int]]]) -> str:
+    """Проблемы из разбора вопроса — перечень того, что ответ не должен упустить.
+
+    Сам вопрос модель видит целиком: перечень дополняет его, а не заменяет.
+    """
+    lines = []
+    for n, (issue, numbers) in enumerate(issues, 1):
+        where = ", ".join(f"[{x}]" for x in numbers) if numbers else "не найдены"
+        lines.append(f"{n}. {issue} (источники: {where})")
+    return (
+        "\n\nВ вопросе несколько проблем. Ответь на каждую, ничего не пропуская:\n"
+        + "\n".join(lines)
+        + "\n\nСтруктура ответа: сначала общий вывод и что сделать в первую очередь — "
+        "с учётом сроков из источников; затем коротко по каждой проблеме по порядку."
+    )
+
+
+def build_messages(
+    question: str,
+    sources: list[Hit],
+    on: date,
+    issues: list[tuple[str, list[int]]] | None = None,
+) -> list[dict[str, str]]:
     blocks = [f"[{n}] {source_title(hit)}\n{hit.text}" for n, hit in enumerate(sources, 1)]
     user = (
         f"Источники (редакция на {on:%d.%m.%Y}):\n\n"
         + "\n\n".join(blocks)
         + f"\n\nВопрос: {question}"
     )
+    if issues:
+        user += issues_block(issues)
     if "Текст документа (распознан с фото)" in question:
         user += DOCUMENT_STEPS
     return [
