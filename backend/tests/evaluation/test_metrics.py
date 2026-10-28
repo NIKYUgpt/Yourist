@@ -3,7 +3,16 @@ import re
 from pathlib import Path
 
 from app.evaluation.compare import parse_model
-from app.evaluation.metrics import Question, load_questions, retrieval_rank, score_answer
+from app.evaluation.metrics import (
+    CompoundQuestion,
+    IssueGold,
+    Question,
+    load_questions,
+    retrieval_rank,
+    score_answer,
+    score_issues,
+)
+from app.modules.assistant.analysis import is_compound
 from app.modules.assistant.citations import CheckReport, Citation
 
 DATASET = Path(__file__).parents[2] / "evaluation" / "labor_basic.json"
@@ -64,3 +73,44 @@ def test_parse_model():
         {"think": False},
     )
     assert parse_model("yandex/yandexgpt-5.1").options == {}
+
+
+COMPOUND = Path(__file__).parents[2] / "evaluation" / "labor_compound.json"
+
+
+def test_compound_dataset_is_valid():
+    data = json.loads(COMPOUND.read_text("utf-8"))
+    questions = [CompoundQuestion.from_dict(q) for q in data["questions"]]
+    assert len({q.id for q in questions}) == len(questions)
+    for q in questions:
+        # разбор включается правилом на каждом вопросе набора
+        assert is_compound(q.text), q.id
+        assert len(q.issues) >= 3, q.id
+        for issue in q.issues:
+            assert issue.articles and issue.facts, (q.id, issue.name)
+            for fact in issue.facts:
+                re.compile(fact["pattern"])
+        for bad in q.forbidden:
+            re.compile(bad["pattern"])
+
+
+def test_score_issues():
+    q = CompoundQuestion(
+        id="x",
+        text="?",
+        issues=[
+            IssueGold("Срок", ["180"], [{"name": "два месяца", "pattern": r"дв(а|ух)\s+месяц"}]),
+            IssueGold("Суд", ["392"], [{"name": "год", "pattern": r"одного\s+года"}]),
+        ],
+        forbidden=[{"name": "«нельзя оспорить»", "pattern": r"нельзя\s+оспорить"}],
+    )
+    scores, bad = score_issues(
+        q, "Предупредить должны за два месяца [1].", [FakeHit("180")], {"180"}
+    )
+    assert [(s.in_sources, s.cited, s.answered) for s in scores] == [
+        (True, True, True),
+        (False, False, False),
+    ]
+    assert scores[1].facts_missed == ["год"] and bad == []
+    _, bad = score_issues(q, "Это нельзя оспорить.", [], set())
+    assert bad == ["«нельзя оспорить»"]
