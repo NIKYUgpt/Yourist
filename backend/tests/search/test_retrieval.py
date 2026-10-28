@@ -14,6 +14,7 @@ from app.modules.search.retrieval import (
     lexical_term,
     query_words,
     search,
+    search_issues,
 )
 from tests.search.conftest import BEFORE_AGENCIES, NOW
 
@@ -171,3 +172,39 @@ def test_everyday_words_are_expanded_with_legal_terms():
     assert "временная нетрудоспособность" in expanded
     assert "по инициативе работника" in expanded
     assert expand_query("Сколько дней отпуска?") == "Сколько дней отпуска?"
+    # «куда обращаться», «оспорить» → сроки обращения в суд (ст. 392)
+    assert "сроки обращения в суд" in expand_query("Можно ли это оспорить и куда обращаться?")
+    assert "сроки обращения в суд" in expand_query("Хочу подать в суд на работодателя")
+
+
+async def test_model_queries_do_not_pull_named_articles(db, indexed, gateway):
+    # номер статьи в запросе, составленном моделью, может быть выдуман
+    result = await search(db, gateway, "ст. 58 прогул", NOW, k=4, explicit=False)
+    assert not any(h.explicit for h in result.hits)
+    assert result.hits[0].key == "81"
+
+
+async def test_search_issues_covers_each_issue(db, indexed, gateway):
+    question = (
+        "Меня уволили за прогул, хотя я отсутствовал пять часов. Договор у меня срочный, "
+        "его продлевали три раза. Законно ли это?"
+    )
+    queries = ["увольнение за прогул", "срочный трудовой договор срок"]
+    found, linked = await search_issues(db, gateway, question, queries, NOW, k_whole=2, k_issue=2)
+    keys = [h.key for h in found.hits]
+    assert len(keys) == len({h.chunk_id for h in found.hits})  # без повторов
+    assert len(linked) == 2 and all(linked)
+    # номера — позиции источников в общей выдаче, с 1
+    assert {found.hits[n - 1].key for n in linked[0]} == {"81"}
+    assert "58" in {found.hits[n - 1].key for n in linked[1]}
+    assert len(found.hits) <= 2 + 2 * 2
+
+
+async def test_search_issues_respects_cap(db, indexed, gateway):
+    queries = ["прогул", "срочный трудовой договор", "цели трудового законодательства"]
+    found, linked = await search_issues(
+        db, gateway, "трудовой договор", queries, NOW, k_whole=2, k_issue=3, cap=4
+    )
+    assert len(found.hits) == 4
+    # по кругу: каждая проблема получила хотя бы один источник до исчерпания места
+    assert all(linked)

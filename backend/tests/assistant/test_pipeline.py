@@ -42,6 +42,10 @@ def is_verify(messages) -> bool:
     return "проверяющий юрист" in messages[0]["content"]
 
 
+def is_analysis(messages) -> bool:
+    return "Раздели вопрос пользователя" in messages[0]["content"]
+
+
 SUPPORTED = '{"verdict": "supported", "issues": [], "missing": ""}'
 
 
@@ -70,7 +74,7 @@ def answer_calls(provider):
     return [
         c
         for c in provider.chat_calls
-        if not is_deid(c["messages"]) and not is_verify(c["messages"])
+        if not any(f(c["messages"]) for f in (is_deid, is_verify, is_analysis))
     ]
 
 
@@ -268,3 +272,66 @@ async def test_unreadable_verification_does_not_block_answer(client, indexed, ol
     assert body["answer"]["verdict"] == "passed"
     assert body["answer"]["verification"]["verdict"] == "unknown"
     assert body["answer"]["attempt"] == 1
+
+
+COMPOUND = (
+    "Меня, Петрова Сергея Ивановича, уволили за прогул, хотя я отсутствовал пять часов. "
+    "Договор у меня срочный, его продлевали три раза. Законно ли это, можно ли оспорить "
+    "увольнение и что делать в первую очередь?"
+)
+ISSUES = (
+    '{"issues": [{"issue": "Увольнение за прогул", "query": "увольнение за прогул"}, '
+    '{"issue": "Многократно продлённый срочный договор", "query": "срочный трудовой договор"}]}'
+)
+
+
+async def test_compound_question_is_searched_by_issues(client, db, indexed, ollama, user):
+    ollama.reply = lambda m: ISSUES if is_analysis(m) else service_reply(m) or good_answer(m)
+    resp = await client.post(API, json={"text": COMPOUND, "date": "2026-10-01"}, headers=user)
+    assert resp.status_code == 201, resp.text
+    body = resp.json()
+    assert body["answer"]["verdict"] == "passed"
+
+    analysis = body["trace"]["analysis"]
+    assert [i["query"] for i in analysis["issues"]] == [
+        "увольнение за прогул",
+        "срочный трудовой договор",
+    ]
+    assert all(i["sources"] for i in analysis["issues"])
+    assert {"81", "58"} <= {s["key"] for s in body["answer"]["sources"]}
+
+    # модель разбора видела только обезличенный вопрос
+    [call] = [c for c in ollama.chat_calls if is_analysis(c["messages"])]
+    assert call["json_mode"]
+    assert "Петров" not in call["messages"][-1]["content"]
+    assert "[ФИО_1]" in call["messages"][-1]["content"]
+
+    # исходный вопрос не заменяется: отвечающая и проверяющая модели видят его целиком
+    masked = (await db.scalar(select(Question))).text
+    prompt = answer_calls(ollama)[0]["messages"][1]["content"]
+    assert f"Вопрос: {masked}" in prompt
+    assert "В вопросе несколько проблем" in prompt
+    assert "1. Увольнение за прогул (источники: [" in prompt
+    [check] = [c for c in ollama.chat_calls if is_verify(c["messages"])]
+    assert f"Вопрос пользователя: {masked}" in check["messages"][1]["content"]
+
+
+async def test_failed_analysis_falls_back_to_plain_search(client, indexed, ollama, user):
+    ollama.reply = lambda m: "не знаю" if is_analysis(m) else service_reply(m) or good_answer(m)
+    body = (await client.post(API, json={"text": COMPOUND}, headers=user)).json()
+    assert body["answer"]["verdict"] == "passed"
+    assert body["trace"]["analysis"]["error"].startswith("ответ модели разбора не разобран")
+    prompt = answer_calls(ollama)[0]["messages"][1]["content"]
+    assert "В вопросе несколько проблем" not in prompt
+
+
+async def test_short_question_and_disabled_analysis_skip_the_model(
+    client, db, indexed, ollama, user
+):
+    await client.post(API, json={"text": QUESTION}, headers=user)
+    config = await load_config(db)
+    config.analyze = False
+    await save_config(db, config, None)
+    body = (await client.post(API, json={"text": COMPOUND}, headers=user)).json()
+    assert "analysis" not in body["trace"]
+    assert not any(is_analysis(c["messages"]) for c in ollama.chat_calls)
