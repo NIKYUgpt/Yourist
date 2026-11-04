@@ -70,6 +70,7 @@ def build_messages(
     sources: list[Hit],
     on: date,
     issues: list[tuple[str, list[int]]] | None = None,
+    history: list[dict[str, str]] | None = None,
 ) -> list[dict[str, str]]:
     blocks = [f"[{n}] {source_title(hit)}\n{hit.text}" for n, hit in enumerate(sources, 1)]
     user = (
@@ -81,8 +82,17 @@ def build_messages(
         user += issues_block(issues)
     if "Текст документа (распознан с фото)" in question:
         user += DOCUMENT_STEPS
+    system = SYSTEM.format(on=f"{on:%d.%m.%Y}")
+    if history:
+        system += (
+            "\nУчитывай предыдущие реплики, но последнее уточнение пользователя важнее. "
+            "Предыдущие ответы помощника не являются источниками права. "
+            "Номера [n] в старых ответах относятся к прежним источникам; "
+            "в новом ответе используй только источники из последнего сообщения."
+        )
     return [
-        {"role": "system", "content": SYSTEM.format(on=f"{on:%d.%m.%Y}")},
+        {"role": "system", "content": system},
+        *(history or []),
         {"role": "user", "content": user},
     ]
 

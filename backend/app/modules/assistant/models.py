@@ -11,6 +11,7 @@ from typing import Any
 
 from sqlalchemy import (
     BigInteger,
+    CheckConstraint,
     Date,
     DateTime,
     Enum,
@@ -18,6 +19,7 @@ from sqlalchemy import (
     Identity,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -39,6 +41,25 @@ class QuestionSource(enum.StrEnum):
     PHOTO = "photo"  # вопрос к фото документа
 
 
+class Dialog(Base):
+    __tablename__ = "dialogs"
+    __table_args__ = (
+        CheckConstraint("next_turn >= 1", name="dialog_next_turn"),
+        {"schema": SCHEMA},
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("auth.users.id", ondelete="CASCADE"), index=True
+    )
+    deid_session_id: Mapped[uuid.UUID] = mapped_column(unique=True)
+    on_date: Mapped[date] = mapped_column(Date)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    next_turn: Mapped[int] = mapped_column(default=1, server_default="1")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 def _enum(cls: type[enum.Enum], name: str) -> Enum:
     return Enum(
         cls,
@@ -52,12 +73,24 @@ def _enum(cls: type[enum.Enum], name: str) -> Enum:
 
 class Question(Base):
     __tablename__ = "questions"
-    __table_args__ = {"schema": SCHEMA}
+    __table_args__ = (
+        UniqueConstraint("dialog_id", "turn_no", name="uq_question_dialog_turn"),
+        CheckConstraint(
+            "(dialog_id IS NULL AND turn_no IS NULL) OR "
+            "(dialog_id IS NOT NULL AND turn_no IS NOT NULL AND turn_no > 0)",
+            name="question_dialog_turn",
+        ),
+        {"schema": SCHEMA},
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("auth.users.id", ondelete="CASCADE"), index=True
     )
+    dialog_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey(f"{SCHEMA}.dialogs.id", ondelete="CASCADE"), index=True
+    )
+    turn_no: Mapped[int | None]
     text: Mapped[str] = mapped_column(Text)  # после деперсонализации
     on_date: Mapped[date] = mapped_column(Date)
     # сколько персональных данных каждого вида нашли — без самих значений

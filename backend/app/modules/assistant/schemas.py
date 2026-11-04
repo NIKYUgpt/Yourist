@@ -9,6 +9,7 @@ from app.modules.assistant.models import QuestionSource, QuestionStatus
 
 class QuestionIn(BaseModel):
     text: str = Field(min_length=3, max_length=4000)
+    dialog_id: uuid.UUID | None = None
     on: date | None = Field(
         None, alias="date", description="На какую дату отвечать; по умолчанию — сегодня (МСК)"
     )
@@ -75,6 +76,8 @@ class AnswerOut(BaseModel):
 
 class QuestionOut(BaseModel):
     id: uuid.UUID
+    dialog_id: uuid.UUID | None = None
+    turn_no: int | None = None
     created_at: datetime
     on_date: date
     source: QuestionSource = Field(description="text | voice | photo")
@@ -87,6 +90,8 @@ class QuestionOut(BaseModel):
 
 class QuestionBrief(BaseModel):
     id: uuid.UUID
+    dialog_id: uuid.UUID | None = None
+    turn_no: int | None = None
     created_at: datetime
     on_date: date
     source: QuestionSource

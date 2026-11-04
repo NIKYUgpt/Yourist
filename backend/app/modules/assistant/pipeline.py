@@ -20,12 +20,13 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.ai.profiles import ModelRef, Task
-from app.modules.ai.providers.base import ChatResult, ProviderError, Timer
+from app.modules.ai.providers.base import ChatResult, Message, ProviderError, Timer
 from app.modules.ai.service import AIGateway
 from app.modules.assistant import prompts
 from app.modules.assistant.analysis import Analysis, analyze, is_compound, sentences
 from app.modules.assistant.citations import CheckReport, check
-from app.modules.assistant.models import Answer, Question, QuestionSource, QuestionStatus
+from app.modules.assistant.context import contextualize, fallback_query
+from app.modules.assistant.models import Answer, Dialog, Question, QuestionSource, QuestionStatus
 from app.modules.assistant.verifier import RANK, Verification, needs_revision, revision, verify
 from app.modules.deid.api import DeidClient
 from app.modules.deid.service import DeidResult, reidentify, summary
@@ -112,10 +113,25 @@ def _better(a: Attempt, b: Attempt) -> Attempt:
 
 
 class Pipeline:
-    def __init__(self, session: AsyncSession, ai: AIGateway, deid: DeidClient):
+    def __init__(
+        self,
+        session: AsyncSession,
+        ai: AIGateway,
+        deid: DeidClient,
+        *,
+        dialog: Dialog | None = None,
+        history: list[Message] | None = None,
+    ):
         self.session = session
         self.ai = ai
         self.deid = deid
+        self.dialog = dialog
+        self.history = history or []
+
+    def deid_context(self) -> dict:
+        if self.dialog is None:
+            return {}
+        return {"session_id": self.dialog.deid_session_id, "user_id": self.dialog.user_id}
 
     def deid_model(self) -> ModelRef | None:
         """Модель второго прохода деперсонализации, если он включён."""
@@ -123,7 +139,9 @@ class Pipeline:
 
     async def ask(self, user_id: uuid.UUID, text: str, on: date) -> Outcome:
         timer = Timer()
-        deid: DeidResult = await self.deid.deidentify(text, self.deid_model())
+        deid: DeidResult = await self.deid.deidentify(
+            text, self.deid_model(), **self.deid_context()
+        )
         trace = {"deid": {"ms": timer.ms, "found": summary(deid.entities), "llm": deid.llm}}
         return await self.answer(user_id, deid, on, QuestionSource.TEXT, trace)
 
@@ -138,6 +156,8 @@ class Pipeline:
         """Ответ на уже обезличенный вопрос (текст, распознанный голос или документ)."""
         question = Question(
             user_id=user_id,
+            dialog_id=self.dialog.id if self.dialog else None,
+            turn_no=self.dialog.next_turn - 1 if self.dialog else None,
             text=deid.text,
             on_date=on,
             source=source,
@@ -147,7 +167,27 @@ class Pipeline:
         )
         # в сессию — только в конце: запросы поиска не должны сбрасывать вопрос в БД раньше
 
-        analysis = await self._analyze(deid.text, trace)
+        search_text = deid.text
+        if self.history:
+            if self.ai.config.analyze:
+
+                async def chat(messages, **kwargs):
+                    return await self.ai.chat(Task.ANALYZE, messages, **kwargs)
+
+                context = await contextualize(chat, deid.text, self.history)
+                search_text = context.query
+                trace["context"] = asdict(context)
+            else:
+                search_text = fallback_query(deid.text, self.history)
+                trace["context"] = {
+                    "query": search_text,
+                    "fallback": True,
+                    "error": "analysis_disabled",
+                }
+            trace["context"]["history_turns"] = sum(m["role"] == "user" for m in self.history)
+            trace["context"]["history_chars"] = sum(len(m["content"]) for m in self.history)
+
+        analysis = await self._analyze(search_text, trace)
         timer = Timer()
         issues: list[tuple[str, list[int]]] = []
         if analysis is not None and analysis.compound:
@@ -155,6 +195,8 @@ class Pipeline:
             # её нормы всё равно попадут в источники (evaluation/results/
             # 2026-10-28-labor-compound: статья проблемы в источниках 79% → 84%)
             queries = [i.query for i in analysis.issues] + sentences(deid.text)
+            if self.history:
+                queries.append(search_text)
             found, linked = await search_issues(self.session, self.ai, deid.text, queries, on)
             linked = linked[: len(analysis.issues)]
             issues = [
@@ -162,6 +204,8 @@ class Pipeline:
             ]
             for item, numbers in zip(trace["analysis"]["issues"], linked, strict=True):
                 item["sources"] = numbers
+        elif self.history:
+            found, _ = await search_issues(self.session, self.ai, deid.text, [search_text], on)
         else:
             found = await search(self.session, self.ai, deid.text, on, k=SOURCES_K)
         trace["search"] = {
@@ -185,7 +229,7 @@ class Pipeline:
             )
             return await self._save(question, [answer], deid)
 
-        base = prompts.build_messages(deid.text, sources, on, issues)
+        base = prompts.build_messages(deid.text, sources, on, issues, self.history)
         messages = base
         attempts: list[Attempt] = []
         try:
@@ -301,7 +345,7 @@ class Pipeline:
         async def chat(messages, **kwargs):
             return await self.ai.chat(Task.VERIFY, messages, **kwargs)
 
-        return await verify(chat, question, sources, answer, on)
+        return await verify(chat, question, sources, answer, on, self.history)
 
     async def _save(self, question: Question, answers: list[Answer], deid: DeidResult) -> Outcome:
         self.session.add(question)
