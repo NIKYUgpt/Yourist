@@ -30,6 +30,26 @@ def test_split_leakage_and_duplicate_id_rejected():
         Dataset.model_validate(raw)
 
 
+def test_documented_overlap_with_earlier_compound_articles():
+    old = set()
+
+    def walk(value):
+        if isinstance(value, dict):
+            old.update(value.get("articles", []))
+            for child in value.values():
+                walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child)
+
+    for path in DATASET.parent.glob("labor_*.json"):
+        walk(json.loads(path.read_bytes()))
+    dataset = Dataset.model_validate_json(DATASET.read_bytes())
+    new = {a.key for c in dataset.cases if c.split == "evaluation" for a in c.articles}
+    # Erratum к первоначальному description; неизменённые данные не скрывают пересечения.
+    assert old & new == {"137", "154"}
+
+
 def test_recall_counts_articles_not_chunks_and_distinguishes_acts():
     gold = {("tk", "70"), ("tk", "71")}
     result = score(gold, [("other", "70"), ("tk", "70"), ("tk", "70")])
