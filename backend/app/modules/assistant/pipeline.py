@@ -77,6 +77,7 @@ def _source_dump(hit: Hit, n: int) -> dict[str, Any]:
         "refs": hit.refs,
         "text": hit.text,
         "valid_from": hit.valid_from.isoformat(),
+        "rerank_score": hit.rerank_score,
         "title": prompts.source_title(hit),
     }
 

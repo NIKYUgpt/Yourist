@@ -199,7 +199,9 @@ async def run(args) -> None:
                         query = context.query
                     # 24 кандидата сохраняются для следующего этапа. Все методы оцениваются
                     # по первым 8, без explicit-подъёма придуманных моделью номеров статей.
-                    found = await search(session, gateway, query, dataset.on, k=24, explicit=False)
+                    found = await search(
+                        session, gateway, query, dataset.on, k=24, explicit=False, rerank=False
+                    )
                     candidates = [
                         {
                             **asdict(h),

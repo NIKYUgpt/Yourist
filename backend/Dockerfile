@@ -12,6 +12,14 @@ COPY pyproject.toml .
 RUN python -c "import tomllib; print('\n'.join(tomllib.load(open('pyproject.toml', 'rb'))['project']['dependencies']))" > /tmp/requirements.txt \
     && pip install -r /tmp/requirements.txt
 
+# CPU-реранкер необязателен: базовая сборка не устанавливает PyTorch.
+ARG INSTALL_RERANK=false
+RUN if [ "$INSTALL_RERANK" = "true" ]; then \
+      pip install 'torch>=2.6,<3' --index-url https://download.pytorch.org/whl/cpu \
+      && python -c "import tomllib; print('\n'.join(tomllib.load(open('pyproject.toml', 'rb'))['project']['optional-dependencies']['rerank']))" > /tmp/rerank.txt \
+      && pip install -r /tmp/rerank.txt; \
+    fi
+
 COPY alembic.ini .
 COPY migrations ./migrations
 COPY app ./app
