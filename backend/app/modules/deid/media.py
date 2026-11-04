@@ -48,7 +48,12 @@ def with_document(question: str, document: str) -> str:
 
 
 async def from_audio(
-    registry: Registry, audio: bytes, stt: ModelRef, llm: ModelRef | None
+    registry: Registry,
+    audio: bytes,
+    stt: ModelRef,
+    llm: ModelRef | None,
+    *,
+    mapping: dict[str, str] | None = None,
 ) -> tuple[DeidResult, Recognized]:
     if not audio:
         raise MediaRejected("пустой файл")
@@ -57,7 +62,7 @@ async def from_audio(
     result = await registry.get(stt.provider).transcribe(stt.model, audio, options=stt.options)
     if not result.text.strip():
         raise MediaRejected("речь не распознана")
-    deid = await deidentify(result.text, _model(registry, llm))
+    deid = await deidentify(result.text, _model(registry, llm), mapping=mapping)
     return deid, Recognized(result.provider, result.model, result.latency_ms, len(result.text))
 
 
@@ -68,6 +73,8 @@ async def from_image(
     question: str,
     ocr: ModelRef,
     llm: ModelRef | None,
+    *,
+    mapping: dict[str, str] | None = None,
 ) -> tuple[DeidResult, Recognized]:
     if mime not in IMAGE_TYPES:
         raise MediaRejected("нужна фотография в формате JPEG или PNG")
@@ -81,7 +88,9 @@ async def from_image(
         raise MediaRejected("на фото не найден текст")
     truncated = len(document) > MAX_DOCUMENT_CHARS
     deid = await deidentify(
-        with_document(question, document[:MAX_DOCUMENT_CHARS]), _model(registry, llm)
+        with_document(question, document[:MAX_DOCUMENT_CHARS]),
+        _model(registry, llm),
+        mapping=mapping,
     )
     recognized = Recognized(
         result.provider, result.model, result.latency_ms, len(document), truncated
