@@ -64,7 +64,17 @@ async def ask(client, user, dialog_id, text, **extra):
     )
 
 
-async def test_dialog_context_and_stable_private_labels(client, db, indexed, model, user):
+@pytest.mark.parametrize("lost_topic", [False, True])
+async def test_dialog_context_and_stable_private_labels(
+    client, db, indexed, model, user, lost_topic
+):
+    if lost_topic:
+        original_reply = model.reply
+        model.reply = lambda messages: (
+            '{"query": "К чему относится слово если?"}'
+            if is_context(messages)
+            else original_reply(messages)
+        )
     dialog_id = await new_dialog(client, user)
     first = await ask(client, user, dialog_id, QUESTION)
     assert first.status_code == 201, first.text
@@ -75,9 +85,14 @@ async def test_dialog_context_and_stable_private_labels(client, db, indexed, mod
     assert body["on_date"] == "2026-10-01"
     assert body["trace"]["context"]["history_turns"] == 1
     assert not body["trace"]["context"]["fallback"]
+    # Даже корректная по форме переформулировка может потерять тему: сохраняем
+    # дополнительный запрос из слов пользователя, без прежних ответов модели.
+    queries = body["trace"]["context"]["retrieval_queries"]
+    assert len(queries) == 2
     # Для текущего ответа доступны и исходные значения предыдущей реплики.
     assert "Петрова Сергея Ивановича" in body["answer"]["text"]
     questions = list(await db.scalars(select(Question).order_by(Question.turn_no)))
+    assert questions[0].text in queries[-1] and questions[1].text in queries[-1]
     assert "[ТЕЛЕФОН_1]" in questions[0].text
     assert "[ТЕЛЕФОН_2]" in questions[1].text
     assert [q.turn_no for q in questions] == [1, 2]

@@ -168,7 +168,9 @@ class Pipeline:
         # в сессию — только в конце: запросы поиска не должны сбрасывать вопрос в БД раньше
 
         search_text = deid.text
+        context_queries = []
         if self.history:
+            history_query = fallback_query(deid.text, self.history)
             if self.ai.config.analyze:
 
                 async def chat(messages, **kwargs):
@@ -178,7 +180,7 @@ class Pipeline:
                 search_text = context.query
                 trace["context"] = asdict(context)
             else:
-                search_text = fallback_query(deid.text, self.history)
+                search_text = history_query
                 trace["context"] = {
                     "query": search_text,
                     "fallback": True,
@@ -186,6 +188,10 @@ class Pipeline:
                 }
             trace["context"]["history_turns"] = sum(m["role"] == "user" for m in self.history)
             trace["context"]["history_chars"] = sum(len(m["content"]) for m in self.history)
+            # Валидный JSON ещё не означает сохранения темы. Независимый запрос
+            # из слов пользователя страхует поиск от смысловой ошибки rewrite.
+            context_queries = list(dict.fromkeys([search_text, history_query]))
+            trace["context"]["retrieval_queries"] = context_queries
 
         analysis = await self._analyze(search_text, trace)
         timer = Timer()
@@ -196,7 +202,7 @@ class Pipeline:
             # 2026-10-28-labor-compound: статья проблемы в источниках 79% → 84%)
             queries = [i.query for i in analysis.issues] + sentences(deid.text)
             if self.history:
-                queries.append(search_text)
+                queries.extend(context_queries)
             found, linked = await search_issues(self.session, self.ai, deid.text, queries, on)
             linked = linked[: len(analysis.issues)]
             issues = [
@@ -205,7 +211,7 @@ class Pipeline:
             for item, numbers in zip(trace["analysis"]["issues"], linked, strict=True):
                 item["sources"] = numbers
         elif self.history:
-            found, _ = await search_issues(self.session, self.ai, deid.text, [search_text], on)
+            found, _ = await search_issues(self.session, self.ai, deid.text, context_queries, on)
         else:
             found = await search(self.session, self.ai, deid.text, on, k=SOURCES_K)
         trace["search"] = {
