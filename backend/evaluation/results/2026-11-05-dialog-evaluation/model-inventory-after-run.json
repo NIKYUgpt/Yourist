@@ -1,0 +1,17 @@
+{
+  "collected_at": "2026-11-04T22:50:03.315010+00:00",
+  "timing": "after experiment; original results remain unchanged",
+  "reason": "Original collector did not normalize bge-m3 to bge-m3:latest and omitted its digest.",
+  "models": [
+    {
+      "name": "qwen3:8b",
+      "digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+      "size": 5225388164
+    },
+    {
+      "name": "bge-m3:latest",
+      "digest": "7907646426070047a77226ac3e684fbbe8410524f7b4a74d02837e43f2146bab",
+      "size": 1157672605
+    }
+  ]
+}
