@@ -3,7 +3,10 @@ name: yourist
 # общий образ backend: один код, разные роли (миграции, api, corpus);
 # слои собираются один раз и берутся из кэша
 x-backend: &backend
-  build: ./backend
+  build:
+    context: ./backend
+    args:
+      INSTALL_RERANK: ${INSTALL_RERANK:-false}
   env_file:
     - path: .env
       required: false
@@ -53,6 +56,9 @@ services:
     environment:
       <<: *backend-env
       DEID_URL: http://deid:8002
+      RERANK_MODEL_PATH: /models/bge-reranker-v2-m3
+    volumes:
+      - ./models:/models:ro
     depends_on:
       migrate:
         condition: service_completed_successfully

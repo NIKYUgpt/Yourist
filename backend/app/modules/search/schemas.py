@@ -11,6 +11,7 @@ class HitOut(BaseModel):
     text: str
     valid_from: date = Field(description="С какой даты действует редакция, из которой фрагмент")
     score: float
+    rerank_score: float | None = None
     lexical_rank: int | None
     vector_rank: int | None
     explicit: bool = Field(description="Статья прямо названа в запросе")

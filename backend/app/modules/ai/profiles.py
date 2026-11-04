@@ -70,6 +70,8 @@ class AIConfig(BaseModel):
     verify: bool = True
     # разбор длинных вопросов из нескольких проблем (Task.ANALYZE)
     analyze: bool = True
+    # Необязательный локальный CPU-реранкер; требует заранее подготовленных весов.
+    rerank: bool = False
 
     def resolve(self, task: Task) -> tuple[Mode, ModelRef]:
         profile = self.tasks[task]
@@ -132,7 +134,7 @@ def with_defaults(data: dict[str, Any] | None) -> AIConfig:
     """Сохранённая конфигурация, дополненная задачами, которых в ней ещё нет."""
     merged = DEFAULT_CONFIG.model_dump(mode="json")
     if data:
-        for key in ("mode", "deid_llm", "verify", "analyze"):
+        for key in ("mode", "deid_llm", "verify", "analyze", "rerank"):
             merged[key] = data.get(key, merged[key])
         merged["tasks"].update(data.get("tasks", {}))
     return AIConfig.model_validate(merged)

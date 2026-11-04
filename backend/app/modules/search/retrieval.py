@@ -115,6 +115,7 @@ class Hit:
     lexical_rank: int | None = None
     vector_rank: int | None = None
     explicit: bool = False
+    rerank_score: float | None = None
 
 
 @dataclass
@@ -294,6 +295,44 @@ async def search(
     k: int = 8,
     per_article: int = 2,
     explicit: bool = True,
+    rerank: bool | None = None,
+) -> SearchResult:
+    from app.modules.search.reranker import RerankUnavailable, get_reranker, rerank_hits
+
+    enabled = rerank if rerank is not None else bool(ai and ai.config.rerank)
+    # Сначала та же выдача и те же лимиты явных ссылок, затем необязательная перестановка.
+    pool = max(k, get_reranker().settings.rerank_candidates) if enabled else k
+    result = await _search(
+        session,
+        ai,
+        query,
+        on,
+        k=pool,
+        per_article=per_article,
+        explicit=explicit,
+        explicit_limit=max(per_article, k // 2),
+    )
+    if enabled and result.hits:
+        timer = Timer()
+        try:
+            result.hits = await rerank_hits(query, result.hits, k, per_article=per_article)
+        except RerankUnavailable as exc:
+            result.notes.append(f"rerank_fallback:{exc}")
+            result.hits = result.hits[:k]
+        result.timings_ms["rerank"] = timer.ms
+    return result
+
+
+async def _search(
+    session: AsyncSession,
+    ai: AIGateway | None,
+    query: str,
+    on: date,
+    *,
+    k: int = 8,
+    per_article: int = 2,
+    explicit: bool = True,
+    explicit_limit: int | None = None,
 ) -> SearchResult:
     """explicit=False — не поднимать названные в запросе статьи: для запросов,
     составленных моделью, а не пользователем (номер статьи модель может выдумать)."""
@@ -394,7 +433,7 @@ async def search(
     per_key: dict[tuple[int, str], int] = {}
     # явно названной статье — до половины выдачи (самые близкие к вопросу её фрагменты),
     # остальным статьям — не больше per_article фрагментов
-    explicit_limit = max(per_article, k // 2)
+    explicit_limit = explicit_limit or max(per_article, k // 2)
     for cid in ordered:
         if cid not in details:
             continue
@@ -445,8 +484,13 @@ async def search_issues(
     в этой выдаче. Ограничение cap держит промпт в контексте локальных моделей
     (8192 токена у qwen3:8b вместе с ответом).
     """
-    whole = await search(session, ai, question, on, k=k_whole)
-    found = [await search(session, ai, q, on, k=k_issue * 3, explicit=False) for q in queries]
+    # Один cross-encoder проход по общей выдаче, а не по каждому подвопросу.
+    # Номера связанных источников пересчитываются после него.
+    whole = await search(session, ai, question, on, k=k_whole, rerank=False)
+    found = [
+        await search(session, ai, q, on, k=k_issue * 3, explicit=False, rerank=False)
+        for q in queries
+    ]
     hits = list(whole.hits)
     index = {h.chunk_id: i for i, h in enumerate(hits)}
     linked: list[list[int]] = [[] for _ in queries]
@@ -477,4 +521,17 @@ async def search_issues(
         merged.notes.extend(n for n in result.notes if n not in merged.notes)
         for name, ms in result.timings_ms.items():
             merged.timings_ms[name] = merged.timings_ms.get(name, 0) + ms
+    if ai is not None and ai.config.rerank and merged.hits:
+        from app.modules.search.reranker import RerankUnavailable, rerank_hits
+
+        timer = Timer()
+        try:
+            query = "\n".join([question, *queries])[:6000]
+            reranked = await rerank_hits(query, merged.hits, cap, per_article=cap)
+            new_index = {h.chunk_id: i for i, h in enumerate(reranked)}
+            linked = [[new_index[hits[n].chunk_id] for n in numbers] for numbers in linked]
+            merged.hits = reranked
+        except RerankUnavailable as exc:
+            merged.notes.append(f"rerank_fallback:{exc}")
+        merged.timings_ms["rerank"] = timer.ms
     return merged, [[n + 1 for n in sorted(numbers)] for numbers in linked]
