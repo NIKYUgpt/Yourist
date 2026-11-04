@@ -1,0 +1,16 @@
+{
+  "collected_at": "2026-11-04T22:52:08.118663+00:00",
+  "reason": "Post-run content hashes for portability across Git CRLF/LF normalization; original runs unchanged.",
+  "runs": {
+    "development": {
+      "input": "evaluation/results/2026-11-05-dialog-development-v2/results.json",
+      "input_sha256_at_run": "64e4f13dbeab3f196862d0486188203feb0707dd9d3bf2cf3b139c9019ea513c",
+      "input_canonical_sha256": "1b3e6ef62f79cafa678e8aabd4d033ffadd1e8ec86afba8de5fb96c3a6c2ccdd"
+    },
+    "evaluation": {
+      "input": "evaluation/results/2026-11-05-dialog-evaluation/results.json",
+      "input_sha256_at_run": "e59730b0bc2e44f55df95dc8c9cb7065c0fa8d6898400b8f98fc2c2fd09c026b",
+      "input_canonical_sha256": "be1e3258e1526a4013fbe41badf9b1680669ed5f521fc183b57bb24c3cbca4be"
+    }
+  }
+}
