@@ -10,7 +10,7 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 
-from app.evaluation.dialog_retrieval import digest, git, save
+from app.evaluation.dialog_retrieval import digest, git, json_digest, save
 from app.evaluation.retrieval_metrics import paired_bootstrap, score
 from app.modules.search.reranker import MODEL, REVISION, LocalReranker, RerankSettings, order
 
@@ -52,6 +52,7 @@ async def run(args):
         "status": "running",
         "started_at": datetime.now(UTC).isoformat(),
         "input_sha256": digest(raw),
+        "input_canonical_sha256": json_digest(original),
         "input": str(Path(args.input).as_posix()),
         "dataset_sha256": original["dataset_sha256"],
         "split": original["split"],
