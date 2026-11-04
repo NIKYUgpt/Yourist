@@ -5,9 +5,25 @@ import pytest
 from pydantic import ValidationError
 
 from app.evaluation.dialog_dataset import Dataset
+from app.evaluation.dialog_retrieval import json_digest, ollama_name, save
 from app.evaluation.retrieval_metrics import paired_bootstrap, score
 
 DATASET = Path(__file__).parents[2] / "evaluation/dialogs_v1.json"
+
+
+def test_ollama_default_tag_is_normalized_for_digest_capture():
+    assert ollama_name("bge-m3") == "bge-m3:latest"
+    assert ollama_name("qwen3:8b") == "qwen3:8b"
+    assert ollama_name("registry:5000/team/model") == "registry:5000/team/model:latest"
+
+
+def test_artifact_digest_and_line_endings_are_portable(tmp_path):
+    path = tmp_path / "results.json"
+    data = {"a": [1, 2], "б": "в"}
+    save(path, data)
+    assert b"\r" not in path.read_bytes()
+    assert json_digest(data) == json_digest(json.loads(path.read_text(encoding="utf-8")))
+    assert json_digest(data) == json_digest({"б": "в", "a": [1, 2]})
 
 
 def test_frozen_dataset_disjoint_families_and_articles():

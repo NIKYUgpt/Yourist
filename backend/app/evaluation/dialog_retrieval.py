@@ -36,9 +36,23 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def json_digest(data: dict) -> str:
+    """Отпечаток содержимого JSON, независимый от CRLF/LF и отступов."""
+    return digest(
+        json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+    )
+
+
+def ollama_name(name: str) -> str:
+    """Ollama /api/tags добавляет :latest к имени без явно заданного тега."""
+    return name if ":" in name.rsplit("/", 1)[-1] else name + ":latest"
+
+
 def save(path: Path, data: dict) -> None:
     temporary = path.with_suffix(".tmp")
-    temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n"
+    )
     temporary.replace(path)
 
 
@@ -174,8 +188,13 @@ async def run(args) -> None:
                 report["ollama_models"] = [
                     {k: item[k] for k in ("name", "digest", "size")}
                     for item in response.json()["models"]
-                    if item["name"] in {m["model"] for m in report["models"].values()}
+                    if ollama_name(item["name"])
+                    in {ollama_name(m["model"]) for m in report["models"].values()}
                 ]
+                if {ollama_name(m["name"]) for m in report["ollama_models"]} != {
+                    ollama_name(m["model"]) for m in report["models"].values()
+                }:
+                    raise ValueError("model digest missing from Ollama inventory")
             acts, report["corpus"] = await corpus_snapshot(session, dataset.on)
             report["gold_evidence"] = await validate_gold(session, dataset, acts)
             rng = random.Random(args.seed)
