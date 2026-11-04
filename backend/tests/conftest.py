@@ -113,6 +113,7 @@ async def client(
     app.state.deid_client = DeidClient(DeidSettings(deid_url=""), ai_registry)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
+    await app.state.deid_client.aclose()
     app.dependency_overrides.clear()
 
 

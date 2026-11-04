@@ -47,11 +47,23 @@ def _key(kind: str, value: str) -> str:
 
 
 class _Masker:
-    def __init__(self) -> None:
-        self.mapping: dict[str, str] = {}
+    def __init__(self, mapping: dict[str, str] | None = None) -> None:
+        self.mapping: dict[str, str] = dict(mapping or {})
         self.by_key: dict[tuple[str, str], str] = {}
         self.counters: dict[str, int] = {}
         self.entities: list[dict[str, str]] = []
+        for label, value in self.mapping.items():
+            match = _PLACEHOLDER.fullmatch(label)
+            if match:
+                kind, number = match.groups()
+                self.by_key[kind, _key(kind, value)] = label
+                self.counters[kind] = max(self.counters.get(kind, 0), int(number))
+
+    def reserve(self, text: str) -> None:
+        # Введённая пользователем метка не должна присвоиться новому человеку.
+        for match in _PLACEHOLDER.finditer(text):
+            kind, number = match.groups()
+            self.counters[kind] = max(self.counters.get(kind, 0), int(number))
 
     def placeholder(self, kind: str, value: str) -> str:
         key = (kind, _key(kind, value))
@@ -73,9 +85,15 @@ class _Masker:
         return "".join(parts)
 
 
-async def deidentify(text: str, model: tuple[Provider, ModelRef] | None = None) -> DeidResult:
+async def deidentify(
+    text: str,
+    model: tuple[Provider, ModelRef] | None = None,
+    *,
+    mapping: dict[str, str] | None = None,
+) -> DeidResult:
     """model — языковая модель для второго прохода; None — только правила и словарь."""
-    masker = _Masker()
+    masker = _Masker(mapping)
+    masker.reserve(text)
     masked = masker.apply(text, _select([*rules.find(text), *names.find(text)]))
     llm_info = None
     if model is not None:
@@ -86,6 +104,8 @@ async def deidentify(text: str, model: tuple[Provider, ModelRef] | None = None) 
         masked = masker.apply(masked, applied)
         if "error" not in llm_info:
             llm_info["found"] = len(applied)
+    if mapping is not None:
+        mapping.update(masker.mapping)
     return DeidResult(text=masked, entities=masker.entities, mapping=masker.mapping, llm=llm_info)
 
 
