@@ -50,3 +50,5 @@ def test_paired_bootstrap_requires_pairs_and_is_reproducible():
     assert first == paired_bootstrap(rows, "a", "b", "recall", 42)
     with pytest.raises(ValueError, match="paired"):
         paired_bootstrap(rows[:-1], "a", "b", "recall", 42)
+    with pytest.raises(ValueError, match="duplicate"):
+        paired_bootstrap(rows + rows[:1], "a", "b", "recall", 42)

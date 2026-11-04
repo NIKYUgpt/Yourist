@@ -14,10 +14,12 @@ def score(expected: set[tuple[str, str]], found: list[tuple[str, str]]) -> dict[
 
 
 def paired_bootstrap(rows: list[dict], a: str, b: str, metric: str, seed: int) -> dict:
-    """Средняя разница B-A; связанные реплики сначала агрегируются по диалогу."""
+    """Средняя разница B-A; одна оценочная реплика на диалог, парный ресемплинг."""
     grouped = defaultdict(dict)
     for row in rows:
         if row["method"] in (a, b):
+            if row["method"] in grouped[row["case"]]:
+                raise ValueError("duplicate paired observation")
             grouped[row["case"]][row["method"]] = row["score"][metric]
     if not grouped or any(set(pair) != {a, b} for pair in grouped.values()):
         raise ValueError("paired observations required")

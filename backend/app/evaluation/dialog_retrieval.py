@@ -136,7 +136,8 @@ async def run(args) -> None:
         raise ValueError("empty split")
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=False)  # Не затирать результат предыдущего прогона.
-    registry = build_registry(get_provider_settings())
+    # Явный транспорт исключает системный HTTP_PROXY для локального стенда.
+    registry = build_registry(get_provider_settings(), transport=httpx.AsyncHTTPTransport())
     report = {
         "status": "running",
         "started_at": datetime.now(UTC).isoformat(),
@@ -224,10 +225,12 @@ async def run(args) -> None:
                     }
                     report["rows"].append(row)
                     save(out / "results.json", report)
+                    if found.notes:
+                        raise RuntimeError("incomplete hybrid search; see saved notes")
                     print(case.id, method, row["score"], flush=True)
             report["summary"] = summarize(report["rows"], args.seed)
             report["status"] = "complete"
-    except Exception as exc:
+    except BaseException as exc:
         report["status"] = "failed"
         report["error_type"] = type(exc).__name__
         raise
