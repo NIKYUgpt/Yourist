@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app import __version__
 from app.core import health
@@ -16,7 +17,8 @@ from app.modules.ai.registry import build_registry
 from app.modules.ai.router import router as ai_router
 from app.modules.assistant.router import router as assistant_router
 from app.modules.auth.router import router as auth_router
-from app.modules.deid.api import DeidClient, get_deid_settings
+from app.modules.deid.api import DeidClient, DeidUnavailable, get_deid_settings
+from app.modules.deid.sessions import SessionBusy, SessionExpired, SessionLimit
 from app.modules.search.router import router as search_router
 
 
@@ -35,6 +37,19 @@ def create_app() -> FastAPI:
     logging.basicConfig(level=logging.INFO)
 
     app = FastAPI(title="Yourist API", version=__version__, lifespan=lifespan)
+
+    async def deid_error(request, exc):
+        code = (
+            503
+            if isinstance(exc, DeidUnavailable)
+            else 429
+            if isinstance(exc, SessionLimit)
+            else 409
+        )
+        return JSONResponse(status_code=code, content={"detail": str(exc)})
+
+    for exception in (DeidUnavailable, SessionBusy, SessionExpired, SessionLimit):
+        app.add_exception_handler(exception, deid_error)
     if settings.cors_origins:
         app.add_middleware(
             CORSMiddleware,

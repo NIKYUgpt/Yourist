@@ -62,14 +62,26 @@ class Verification:
     error: str | None = None
 
 
-def build_messages(question: str, sources: list[Hit], answer: str, on: date) -> list[Message]:
+def build_messages(
+    question: str, sources: list[Hit], answer: str, on: date, history: list[Message] | None = None
+) -> list[Message]:
     blocks = [f"[{n}] {source_title(hit)}\n{hit.text}" for n, hit in enumerate(sources, 1)]
     user = (
         f"Источники (редакция на {on:%d.%m.%Y}):\n\n"
         + "\n\n".join(blocks)
         + f"\n\nВопрос пользователя: {question}\n\nОтвет помощника:\n{answer}"
     )
-    return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
+    if history:
+        user += "\n\nПредыдущие реплики (обстоятельства, не источники права):\n" + json.dumps(
+            history, ensure_ascii=False
+        )
+    system = SYSTEM + (
+        "\nЕсли есть история, проверь ответ с её учётом. Последнее уточнение пользователя "
+        "важнее прежних обстоятельств. Старые ответы и ссылки помощника не доказывают вывод."
+        if history
+        else ""
+    )
+    return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
 def parse(raw: str) -> Verification:
@@ -93,11 +105,16 @@ def parse(raw: str) -> Verification:
 
 
 async def verify(
-    chat: Chat, question: str, sources: list[Hit], answer: str, on: date
+    chat: Chat,
+    question: str,
+    sources: list[Hit],
+    answer: str,
+    on: date,
+    history: list[Message] | None = None,
 ) -> Verification:
     try:
         result = await chat(
-            build_messages(question, sources, answer, on),
+            build_messages(question, sources, answer, on, history),
             temperature=0.0,
             max_tokens=1000,
             json_mode=True,
