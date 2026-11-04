@@ -41,6 +41,7 @@ async def test_defaults_are_local(client, admin):
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["config"]["mode"] == "local"
+    assert body["config"]["rerank"] is False
     assert body["effective"]["answer"] == {
         "title": "Ответ на вопрос",
         "mode": "local",
@@ -71,12 +72,14 @@ async def test_one_switch_moves_all_tasks_to_api(client, admin):
 async def test_task_can_override_mode(client, admin):
     payload = config_payload()
     payload["mode"] = "api"
+    payload["rerank"] = True  # локальный реранкер включается независимо от режима LLM
     payload["tasks"]["embed"]["mode"] = "local"  # векторы остаются локальными
     resp = await client.put(f"{API}/config", json=payload, headers=admin)
     assert resp.status_code == 200, resp.text
     effective = resp.json()["effective"]
     assert effective["answer"]["mode"] == "api"
     assert (effective["embed"]["mode"], effective["embed"]["provider"]) == ("local", "ollama")
+    assert (await client.get(f"{API}/config", headers=admin)).json()["config"]["rerank"] is True
 
 
 @pytest.mark.parametrize(
