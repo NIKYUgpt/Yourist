@@ -1,0 +1,189 @@
+{
+  "$defs": {
+    "IssueLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "entailed",
+            "contradicted",
+            "conditional",
+            "undetermined"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "exceptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exceptions",
+          "type": "array"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "evidence_alternatives": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/Norm"
+            },
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Evidence Alternatives",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "decision",
+        "conditions",
+        "exceptions",
+        "rationale",
+        "evidence_alternatives"
+      ],
+      "title": "IssueLabel",
+      "type": "object"
+    },
+    "Norm": {
+      "additionalProperties": false,
+      "properties": {
+        "act": {
+          "minLength": 1,
+          "title": "Act",
+          "type": "string"
+        },
+        "article": {
+          "pattern": "^\\d+(?:[.-]\\d+)*$",
+          "title": "Article",
+          "type": "string"
+        },
+        "part": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part"
+        },
+        "point": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Point"
+        },
+        "paragraph": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paragraph"
+        },
+        "redaction": {
+          "minLength": 1,
+          "title": "Redaction",
+          "type": "string"
+        },
+        "content_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Content Sha256",
+          "type": "string"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_url": {
+          "pattern": "^https?://",
+          "title": "Source Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "act",
+        "article",
+        "redaction",
+        "content_sha256",
+        "quote",
+        "source_url"
+      ],
+      "title": "Norm",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "answerability": {
+      "enum": [
+        "answerable",
+        "missing_facts",
+        "missing_authority",
+        "out_of_scope",
+        "contested"
+      ],
+      "title": "Answerability",
+      "type": "string"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/IssueLabel"
+      },
+      "minItems": 1,
+      "title": "Issues",
+      "type": "array"
+    },
+    "missing_facts": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Facts",
+      "type": "array"
+    },
+    "missing_authorities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Authorities",
+      "type": "array"
+    }
+  },
+  "required": [
+    "answerability",
+    "issues",
+    "missing_facts",
+    "missing_authorities"
+  ],
+  "title": "Label",
+  "type": "object"
+}
