@@ -1,0 +1,14 @@
+{
+  "disagreements": [],
+  "reviewed_cases": 0,
+  "answerability": {
+    "n": 0,
+    "agreement": null,
+    "cohen_kappa": null
+  },
+  "decision": {
+    "n": 0,
+    "agreement": null,
+    "cohen_kappa": null
+  }
+}
