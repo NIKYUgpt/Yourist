@@ -44,9 +44,30 @@
             },
             "type": "array"
           },
-          "minItems": 1,
           "title": "Evidence Alternatives",
           "type": "array"
+        },
+        "evidence_status": {
+          "default": "supported",
+          "enum": [
+            "supported",
+            "unavailable"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "evidence_unavailable_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Unavailable Reason"
         }
       },
       "required": [

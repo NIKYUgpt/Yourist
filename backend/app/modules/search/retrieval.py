@@ -296,6 +296,7 @@ async def search(
     per_article: int = 2,
     explicit: bool = True,
     rerank: bool | None = None,
+    expand: bool = True,
 ) -> SearchResult:
     from app.modules.search.reranker import RerankUnavailable, get_reranker, rerank_hits
 
@@ -311,6 +312,7 @@ async def search(
         per_article=per_article,
         explicit=explicit,
         explicit_limit=max(per_article, k // 2),
+        expand=expand,
     )
     if enabled and result.hits:
         timer = Timer()
@@ -333,6 +335,7 @@ async def _search(
     per_article: int = 2,
     explicit: bool = True,
     explicit_limit: int | None = None,
+    expand: bool = True,
 ) -> SearchResult:
     """explicit=False — не поднимать названные в запросе статьи: для запросов,
     составленных моделью, а не пользователем (номер статьи модель может выдумать)."""
@@ -365,7 +368,7 @@ async def _search(
         for cid in explicit_ids:
             scores[cid] = scores.get(cid, 0.0) + EXPLICIT_BONUS
 
-    expanded = expand_query(query)
+    expanded = expand_query(query) if expand else query
     lexical_ids = await _lexical(session, query_words(expanded), rids, CANDIDATES)
     add(lexical_ids, "lexical")
     result.timings_ms["lexical"] = timer.ms
