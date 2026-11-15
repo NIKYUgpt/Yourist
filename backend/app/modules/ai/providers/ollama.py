@@ -70,7 +70,7 @@ class OllamaProvider(HttpProvider):
             },
             **top,
         }
-        if json_mode:
+        if json_mode and "format" not in body:
             body["format"] = "json"
         timer = Timer()
         data = await self.request("POST", "/api/chat", json=body)
@@ -85,6 +85,16 @@ class OllamaProvider(HttpProvider):
             latency_ms=timer.ms,
             usage=Usage(data.get("prompt_eval_count"), data.get("eval_count")),
             finish_reason=data.get("done_reason"),
+            server_timings_ns={
+                k: data[k]
+                for k in (
+                    "total_duration",
+                    "load_duration",
+                    "prompt_eval_duration",
+                    "eval_duration",
+                )
+                if isinstance(data.get(k), int) and data[k] >= 0
+            },
         )
 
     async def embed(

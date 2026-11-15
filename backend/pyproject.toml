@@ -27,6 +27,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+research = [
+    "mcp>=1.28,<2",
+]
 rerank = [
     "torch>=2.6,<3",
     "transformers>=4.51,<5",

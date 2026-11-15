@@ -42,12 +42,21 @@ class IssueLabel(Strict):
     exceptions: list[str]
     rationale: str = Field(min_length=1)
     # Каждый внутренний список — обязательный набор (AND), внешние — варианты (OR).
-    evidence_alternatives: list[list[Norm]] = Field(min_length=1)
+    evidence_alternatives: list[list[Norm]]
+    evidence_status: Literal["supported", "unavailable"] = "supported"
+    evidence_unavailable_reason: str | None = Field(default=None, min_length=1)
 
     @model_validator(mode="after")
     def nonempty_evidence(self) -> Self:
         if any(not group for group in self.evidence_alternatives):
             raise ValueError("empty evidence alternative")
+        if self.evidence_status == "unavailable":
+            if self.decision != "undetermined" or self.evidence_alternatives:
+                raise ValueError("unavailable evidence requires undetermined decision and no norms")
+            if not self.evidence_unavailable_reason or not self.evidence_unavailable_reason.strip():
+                raise ValueError("unavailable evidence requires an explanation")
+        elif not self.evidence_alternatives or self.evidence_unavailable_reason is not None:
+            raise ValueError("supported evidence requires norms and no unavailability explanation")
         return self
 
 
@@ -241,6 +250,9 @@ def merge_reviews(
 ) -> Dataset:
     """Импорт после независимой сдачи. Исходные пакеты сохраняет организатор."""
     expected = fingerprint(dataset.model_dump(mode="json"))
+    original_entries = {
+        entry["case_id"]: entry for entry in annotation_packet(dataset, "")["cases"]
+    }
     cases = {c.id: c.model_dump(mode="json") for c in dataset.cases}
     if any(c["reviews"] or c["adjudication"] for c in cases.values()):
         raise ValueError("import into the original unreviewed dataset only")
@@ -251,6 +263,10 @@ def merge_reviews(
         if len(entries) != len(cases) or {e["case_id"] for e in entries} != set(cases):
             raise ValueError("review case coverage mismatch")
         for entry in entries:
+            original = original_entries[entry["case_id"]]
+            immutable = ("legal_as_of", "question", "facts", "issues", "source")
+            if any(entry.get(field) != original[field] for field in immutable):
+                raise ValueError("review packet changes immutable case fields")
             review = Review(
                 reviewer=packet["reviewer"],
                 qualification=packet["qualification"],

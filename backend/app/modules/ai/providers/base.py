@@ -58,6 +58,8 @@ class ChatResult:
     latency_ms: int
     usage: Usage = field(default_factory=Usage)
     finish_reason: str | None = None
+    # Серверные длительности не равны полной задержке клиента. Единица — наносекунды.
+    server_timings_ns: dict[str, int] = field(default_factory=dict)
 
 
 Message = dict[str, str]  # {"role": "system" | "user" | "assistant", "content": "..."}

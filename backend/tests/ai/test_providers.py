@@ -95,6 +95,9 @@ async def test_ollama_chat_and_embed():
                     "done_reason": "stop",
                     "prompt_eval_count": 20,
                     "eval_count": 2,
+                    "total_duration": 9000000,
+                    "load_duration": 1000000,
+                    "eval_duration": -1,
                 },
             )
         return httpx.Response(200, json={"embeddings": [[0.1, 0.2], [0.3, 0.4]]})
@@ -122,6 +125,10 @@ async def test_ollama_chat_and_embed():
     vectors = await ollama.embed("bge-m3", ["а", "б"])
     assert rec.body() == {"model": "bge-m3", "input": ["а", "б"], "keep_alive": "30m"}
     assert vectors == [[0.1, 0.2], [0.3, 0.4]]
+    assert result.server_timings_ns == {"total_duration": 9000000, "load_duration": 1000000}
+    schema = {"type": "object", "properties": {"answer": {"type": "string"}}}
+    await ollama.chat("qwen3:8b", MESSAGES, json_mode=True, options={"format": schema})
+    assert rec.body()["format"] == schema
 
 
 async def test_yandex_uses_model_uri_and_disables_logging():
