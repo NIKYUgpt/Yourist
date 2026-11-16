@@ -1,0 +1,57 @@
+{
+  "observed_date": "2026-11-16",
+  "repository": "NIKYUgpt/Yourist",
+  "source": "GitHub API via connected plugin",
+  "refs": [
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/develop",
+      "sha": "93396d3f3d76f8116116a99c3689f1ddff014572",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/main",
+      "sha": "bf3574f59961e07be3a7ada9c83c2102e413beb8",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/develop",
+      "sha": "93396d3f3d76f8116116a99c3689f1ddff014572",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/main",
+      "sha": "bf3574f59961e07be3a7ada9c83c2102e413beb8",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/tags/v0.1.0",
+      "sha": "8b1529180d04afdaa6ee3c123145f1161417eeee",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.2.0",
+      "sha": "1e0fd88eaffa7a04ea888c3f04c595e7a65449a3",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.3.0",
+      "sha": "ba6971640aac7f14da90e8a92433d70665ccb0f7",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.4.0",
+      "sha": "b667f29807066b9e13f7f1573c5e1a4993bc9c23",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.4.1",
+      "sha": "e5a717d75bce4c2cbdda3bbf9942b88a8a468dcb",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.5.0",
+      "sha": "20e1c0fdbfa665ad7e7a2b94d77949c2fcae4570",
+      "type": "tag"
+    }
+  ]
+}

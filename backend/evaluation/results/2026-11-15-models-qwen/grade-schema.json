@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "IssueGrade": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "conclusion_correct": {
+          "title": "Conclusion Correct",
+          "type": "boolean"
+        },
+        "conditions_complete": {
+          "title": "Conditions Complete",
+          "type": "boolean"
+        },
+        "exceptions_complete": {
+          "title": "Exceptions Complete",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "conclusion_correct",
+        "conditions_complete",
+        "exceptions_complete"
+      ],
+      "title": "IssueGrade",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "response_id": {
+      "title": "Response Id",
+      "type": "string"
+    },
+    "response_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Response Sha256",
+      "type": "string"
+    },
+    "reviewer": {
+      "minLength": 1,
+      "title": "Reviewer",
+      "type": "string"
+    },
+    "qualification": {
+      "minLength": 1,
+      "title": "Qualification",
+      "type": "string"
+    },
+    "completed_on": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "title": "Completed On",
+      "type": "string"
+    },
+    "answerability_correct": {
+      "title": "Answerability Correct",
+      "type": "boolean"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/IssueGrade"
+      },
+      "minItems": 1,
+      "title": "Issues",
+      "type": "array"
+    },
+    "material_contradiction": {
+      "title": "Material Contradiction",
+      "type": "boolean"
+    },
+    "citations_correct": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Citations Correct"
+    },
+    "rationale": {
+      "minLength": 1,
+      "title": "Rationale",
+      "type": "string"
+    }
+  },
+  "required": [
+    "response_id",
+    "response_sha256",
+    "reviewer",
+    "qualification",
+    "completed_on",
+    "answerability_correct",
+    "issues",
+    "material_contradiction",
+    "citations_correct",
+    "rationale"
+  ],
+  "title": "HumanGrade",
+  "type": "object"
+}
