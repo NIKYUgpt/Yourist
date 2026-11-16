@@ -1,0 +1,107 @@
+{
+  "observed_date": "2026-11-16",
+  "repository": "NIKYUgpt/Yourist",
+  "source": "git ls-remote after atomic push with explicit leases",
+  "refs": [
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/develop",
+      "sha": "93396d3f3d76f8116116a99c3689f1ddff014572",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/feature/dialogs",
+      "sha": "2a68e0a8b42bed511928366e94ad3c0efd23b4e1",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/feature/local-reranker",
+      "sha": "f5d1dccd3408d86e8a805e2dcf6577550a42ebac",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/feature/retrieval-evaluation",
+      "sha": "6d1be1155ed6862ed54baa919ba326247f45edfd",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/main",
+      "sha": "bf3574f59961e07be3a7ada9c83c2102e413beb8",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/archive/2026-11-16-before-russian/reports",
+      "sha": "8bb708116e2616171cec01fbb1ad4fcab6eae1b5",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/develop",
+      "sha": "411a282ab9e9880ed0d8bc62c198bf863966aa56",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/heads/main",
+      "sha": "8cea667f39816e64f238db6e4f94d31ef76f43d1",
+      "type": "commit"
+    },
+    {
+      "ref": "refs/tags/v0.1.0",
+      "sha": "8b1529180d04afdaa6ee3c123145f1161417eeee",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.1.0^{}",
+      "sha": "6caa06e83f8938d29f4f326e0c87fc1f335ef51c",
+      "type": "peeled_commit"
+    },
+    {
+      "ref": "refs/tags/v0.2.0",
+      "sha": "1e0fd88eaffa7a04ea888c3f04c595e7a65449a3",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.2.0^{}",
+      "sha": "da03fd409d19750d39a33fbd0dc0173c2003377e",
+      "type": "peeled_commit"
+    },
+    {
+      "ref": "refs/tags/v0.3.0",
+      "sha": "ba6971640aac7f14da90e8a92433d70665ccb0f7",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.3.0^{}",
+      "sha": "c3134910bca0239aa72d13ef4d54feed1bd5e10e",
+      "type": "peeled_commit"
+    },
+    {
+      "ref": "refs/tags/v0.4.0",
+      "sha": "b667f29807066b9e13f7f1573c5e1a4993bc9c23",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.4.0^{}",
+      "sha": "e8f550da47d700860bb74e7c78414c0f38e6aa39",
+      "type": "peeled_commit"
+    },
+    {
+      "ref": "refs/tags/v0.4.1",
+      "sha": "e5a717d75bce4c2cbdda3bbf9942b88a8a468dcb",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.4.1^{}",
+      "sha": "88b21ee97c0fa20d3ec2ee627115a5fd67ae05c5",
+      "type": "peeled_commit"
+    },
+    {
+      "ref": "refs/tags/v0.5.0",
+      "sha": "20e1c0fdbfa665ad7e7a2b94d77949c2fcae4570",
+      "type": "tag"
+    },
+    {
+      "ref": "refs/tags/v0.5.0^{}",
+      "sha": "bf3574f59961e07be3a7ada9c83c2102e413beb8",
+      "type": "peeled_commit"
+    }
+  ]
+}

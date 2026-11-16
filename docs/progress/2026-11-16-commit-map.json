@@ -1,0 +1,896 @@
+{
+  "verified_pairs": 123,
+  "metadata_and_trees_equal": true,
+  "commits": [
+    {
+      "old_sha": "a87b08c82f810371df9133008048dc5f93cc14df",
+      "new_sha": "8bc907f16ec7c8e8aabe0e4f5ed09bb6acd79d20",
+      "tree": "b3ecfe50e3831fa7ce2d4e05d318724284c452b1",
+      "old_subject": "init",
+      "new_subject": "Создал проект"
+    },
+    {
+      "old_sha": "b6e7960d20694423bff16c406dd2d581fa1c8b3e",
+      "new_sha": "4d59e9e1a2c087282e22670835219f8c2b4f6ccb",
+      "tree": "231434eac55f456b8284d577e664c7e85c907f85",
+      "old_subject": "feat(backend): add fastapi app with settings and healthcheck",
+      "new_subject": "Добавил приложение FastAPI с настройками и проверкой состояния"
+    },
+    {
+      "old_sha": "0a7f65bac8a7f3ab1180e9b4d25ab847fc79ed2c",
+      "new_sha": "70e28733fbf207137e544c6b0f06545269ad036b",
+      "tree": "193d3c577bea976a49f17c4ef1d749de496d242f",
+      "old_subject": "feat(db): add alembic setup with users and refresh tokens tables",
+      "new_subject": "Настроил Alembic и таблицы пользователей и refresh-токенов"
+    },
+    {
+      "old_sha": "293d190f496e18efcf70b47ada483b2d49ddc3e7",
+      "new_sha": "b4c394448ef7cccdf8e78d5a148b8fe413afc918",
+      "tree": "193d3c577bea976a49f17c4ef1d749de496d242f",
+      "old_subject": "feat(backend): merge app skeleton and database setup",
+      "new_subject": "Объединил каркас приложения и настройку базы"
+    },
+    {
+      "old_sha": "7fe69e98e749ff231d9c1715174cb92f604d3ba4",
+      "new_sha": "84c70c2a8eb5211172427041c37e974a3cd852a3",
+      "tree": "7bbea4ce37292c77088a1c4a94c600e27c2a140b",
+      "old_subject": "feat(auth): add password hashing and jwt helpers",
+      "new_subject": "Добавил хеширование паролей и функции для JWT"
+    },
+    {
+      "old_sha": "8a051eff506f36f11dc0ea290a040f2611130830",
+      "new_sha": "2d20a10a940ffcaf09a8c70e64443124e22d73aa",
+      "tree": "bfd74074ae34717926c4bb0cc7ae5d4555f79f75",
+      "old_subject": "feat(auth): add registration with email verification, login and token refresh",
+      "new_subject": "Добавил регистрацию с подтверждением почты, вход и обновление токенов"
+    },
+    {
+      "old_sha": "07dbaebcb0efa9a14089d75d57a3451aee1457b5",
+      "new_sha": "91f92cb353f0e0831f662376a3e7eeabe0858d73",
+      "tree": "deebd4e62d9d2d174978c10f9bdce1cfd45171aa",
+      "old_subject": "feat(users): add profile and user management for admin and support",
+      "new_subject": "Добавил профиль и управление пользователями для администратора и поддержки"
+    },
+    {
+      "old_sha": "486867d69e34d15380b6e822dba688401dc1f016",
+      "new_sha": "9f21ca905f0131c40fc9b67706d520031ec10b09",
+      "tree": "b1ec937a6df5e8f366103ccc8f91b717ef6ff2af",
+      "old_subject": "feat(cli): add create-admin command",
+      "new_subject": "Добавил команду create-admin"
+    },
+    {
+      "old_sha": "4595d48891e6156f1c6c3337ad30813d804ac51e",
+      "new_sha": "8aa42268a87a6b4772b949218c8619296f4df764",
+      "tree": "c1866a816e1c3804b6bb97fd0e17e3677a956fa9",
+      "old_subject": "test(auth): add api tests for auth, tokens and roles",
+      "new_subject": "Добавил тесты API для авторизации, токенов и ролей"
+    },
+    {
+      "old_sha": "7949f65568a751ad1497fa1ca65f02839a46f6f4",
+      "new_sha": "bb768617f9eed43c32703fa6261cfb9718024771",
+      "tree": "c1866a816e1c3804b6bb97fd0e17e3677a956fa9",
+      "old_subject": "feat(auth): merge registration, tokens and roles",
+      "new_subject": "Объединил регистрацию, токены и роли"
+    },
+    {
+      "old_sha": "81b354dd55a3cc9429f4d9bd137bf66408a62f24",
+      "new_sha": "68f648b2db79db639944141132a639accd3e36e6",
+      "tree": "63c027493c9e5a8aa225f384f4c701c5c3792261",
+      "old_subject": "feat(docker): add backend image and compose with postgres",
+      "new_subject": "Добавил образ бэкенда и Docker Compose с PostgreSQL"
+    },
+    {
+      "old_sha": "c61f8a0d0d15456dae815145a70f409860d0d422",
+      "new_sha": "f2a10dffe3a17b2a4ee84993ee671d76bea6648f",
+      "tree": "e84bbb0b07ef60a1fe30b6f074df34530d612afa",
+      "old_subject": "feat(ci): add lint, migrations and tests workflow",
+      "new_subject": "Добавил проверку кода, миграций и тестов в CI"
+    },
+    {
+      "old_sha": "040d84df5b7c9abc35c224d67c6a98e0cfb214bb",
+      "new_sha": "305458b9590d134be4e04328e4af3986946b2870",
+      "tree": "e84bbb0b07ef60a1fe30b6f074df34530d612afa",
+      "old_subject": "feat(ci): merge docker and ci setup",
+      "new_subject": "Объединил настройку Docker и CI"
+    },
+    {
+      "old_sha": "71ed1afc83347c327ef0e4fb5fa7a96f9cb7a6a1",
+      "new_sha": "325e10f29b413ec3b297b5370928be120d547137",
+      "tree": "84bc6e67aa3e78a35ea834177799210c62b8bdc4",
+      "old_subject": "docs: add setup instructions and api overview to readme",
+      "new_subject": "Добавил в README инструкции по запуску и обзор API"
+    },
+    {
+      "old_sha": "6caa06e83f8938d29f4f326e0c87fc1f335ef51c",
+      "new_sha": "cca020f582382fdb94288a9abd8ba855cbacf807",
+      "tree": "84bc6e67aa3e78a35ea834177799210c62b8bdc4",
+      "old_subject": "chore(release): v0.1.0",
+      "new_subject": "Подготовил релиз v0.1.0"
+    },
+    {
+      "old_sha": "7ecc078e62e092cb5e0b29a0182c7b37d9af10e7",
+      "new_sha": "c1af58614f94d0c483aa4c0c22bdb568452d5c90",
+      "tree": "3ddda2b6a725d7e883e480797799b65584d8a941",
+      "old_subject": "refactor(backend): move auth into modules package",
+      "new_subject": "Перенёс авторизацию в пакет modules"
+    },
+    {
+      "old_sha": "0c9ed9e9e5ab7e8b8dff7835d2847a0f37ff9875",
+      "new_sha": "505b66464772a169e92746a0992f131dd9f33114",
+      "tree": "63dd7251fad6a3c2f75872215df6646adf1a1571",
+      "old_subject": "feat(db): move auth tables to separate auth schema",
+      "new_subject": "Перенёс таблицы авторизации в отдельную схему auth"
+    },
+    {
+      "old_sha": "cc84f6adffe820db32ba854b4c1aa55f256cd32b",
+      "new_sha": "54126612d6e4814caafe1b6e6fa3a190a473e029",
+      "tree": "2e4b05f6208604a80ba62d313724ec86f7cc3ca9",
+      "old_subject": "feat(auth): add role claim to access token and db-free principal check",
+      "new_subject": "Добавил роль в access-токен и проверку пользователя без обращения к базе"
+    },
+    {
+      "old_sha": "34ba0c6303c5ac4366dff35b600e7920ffbcebff",
+      "new_sha": "454e0682cb44eb9d8a0feb03ec4fafa060ec5060",
+      "tree": "2e4b05f6208604a80ba62d313724ec86f7cc3ca9",
+      "old_subject": "refactor(backend): merge modules structure",
+      "new_subject": "Объединил изменения структуры модулей"
+    },
+    {
+      "old_sha": "f1bbc49cbc7b21da88e4fc4c1b0f22bb5ae17863",
+      "new_sha": "283d799c61da14d11aa18c5e4c22f469292227fc",
+      "tree": "10707787c56b127adde6233030c57529db103a8c",
+      "old_subject": "feat(corpus): add pravo.gov.ru api client with retries and rate limit",
+      "new_subject": "Добавил клиент API pravo.gov.ru с повторами запросов и ограничением частоты"
+    },
+    {
+      "old_sha": "612b83238ceaa35285238707ad001e29b82ba6cf",
+      "new_sha": "16c4a2c4cc7ec991fab0656879997a4b8371dc6b",
+      "tree": "ca478182b0bfafd24fe11def9c9505ea96becb2b",
+      "old_subject": "feat(corpus): add redaction parser driven by source table of contents",
+      "new_subject": "Добавил парсер редакций по оглавлению источника"
+    },
+    {
+      "old_sha": "d2021c96e5c761ed33dd54a059fa564ff1c03e24",
+      "new_sha": "c334c9a7e1f42380c07ac5f10dcf3fd6a047ccd1",
+      "tree": "07463bea3bd06a10c0bb942e298587675951c189",
+      "old_subject": "feat(corpus): add corpus schema with acts, redactions and deduplicated article versions",
+      "new_subject": "Добавил схему корпуса с актами, редакциями и версиями статей без дубликатов"
+    },
+    {
+      "old_sha": "eb0577317e041cbb4614b013d00409155f160fae",
+      "new_sha": "f493a8f7c8699be3124ee3a7c55f861448f0779e",
+      "tree": "50db91564056a9e9bb2269f8087bade20a97e4b5",
+      "old_subject": "feat(corpus): add sync with version dedup, article history and diff between dates",
+      "new_subject": "Добавил синхронизацию без дубликатов версий, историю статей и сравнение по датам"
+    },
+    {
+      "old_sha": "8bc1bb8faef77afab7d1710e7c4260bae546cb7d",
+      "new_sha": "95a1426ea0fc0f7f4bbbcbe42ddd5d8dbaed13bd",
+      "tree": "0c8fe7f6e215acf7ef82fbd5570a37a46cc002d0",
+      "old_subject": "feat(corpus): add corpus service api with background sync scheduler",
+      "new_subject": "Добавил API сервиса корпуса и фоновый планировщик синхронизации"
+    },
+    {
+      "old_sha": "149a5b8cedf85373dec50def22ea5cb1c343f6d7",
+      "new_sha": "b81644c28405bfde66e32912f2b4ea7ce08b2068",
+      "tree": "573342057ce38b63736eb152d62ac563064f9934",
+      "old_subject": "feat(docker): run corpus as separate service with one-shot migrations",
+      "new_subject": "Выделил корпус в отдельный сервис с однократным запуском миграций"
+    },
+    {
+      "old_sha": "1102706c538aff564175fe90affff6b5de77f1df",
+      "new_sha": "e84182adefd130a609b4ebba5462e85184cd4bbe",
+      "tree": "6cbd4f7bc6dff0fcb14cf938a7c5d2e6b5e945c5",
+      "old_subject": "fix(corpus): close sync runs interrupted by service restart",
+      "new_subject": "Добавил завершение синхронизаций, прерванных перезапуском сервиса"
+    },
+    {
+      "old_sha": "9da72414c97f284220bad9600c2ec180f878c9be",
+      "new_sha": "6572975d0e13e2597991e84944c00deae400b4f8",
+      "tree": "6d4f2a816deb7ccb70043f95867e6904d5129ca3",
+      "old_subject": "feat(ci): validate compose config",
+      "new_subject": "Добавил проверку конфигурации Docker Compose в CI"
+    },
+    {
+      "old_sha": "da11c03b02e0bc3b86e7e6c487ead8129c467e43",
+      "new_sha": "a1775a673b62fceb44dfb07b212e3a0445de0941",
+      "tree": "3b306dea995943bc4304b1c2224059fb105b4bd4",
+      "old_subject": "docs: describe modules architecture and corpus service in readme",
+      "new_subject": "Описал в README архитектуру модулей и сервис корпуса"
+    },
+    {
+      "old_sha": "893d398781e8f9f02bacd2df51abf0205f07461a",
+      "new_sha": "87dc87761baa0892d627bbc28369f1d10d4050e2",
+      "tree": "c7ee4cd93fab77b1934bcee90c29789d32f5d417",
+      "old_subject": "chore: bump version to 0.2.0",
+      "new_subject": "Поднял версию до 0.2.0"
+    },
+    {
+      "old_sha": "c0e9f66a550f20fbae9562701c6af8db1bf41932",
+      "new_sha": "de2df8512b5f989a3ac35dc57c0781de49b18bb3",
+      "tree": "c7ee4cd93fab77b1934bcee90c29789d32f5d417",
+      "old_subject": "feat(corpus): merge legal corpus service",
+      "new_subject": "Объединил изменения сервиса правового корпуса"
+    },
+    {
+      "old_sha": "da03fd409d19750d39a33fbd0dc0173c2003377e",
+      "new_sha": "e965cf1a0946ad3d6967dd712163e774864cb0a3",
+      "tree": "c7ee4cd93fab77b1934bcee90c29789d32f5d417",
+      "old_subject": "chore(release): v0.2.0",
+      "new_subject": "Подготовил релиз v0.2.0"
+    },
+    {
+      "old_sha": "702ad2bd0ca5ded730e7964daf70a25e1959a2fb",
+      "new_sha": "56ceede38ca7fbec96a0ee9021c882e019b0b65d",
+      "tree": "78da74c8930ef9ded6404c9fec5476e14858cdfc",
+      "old_subject": "feat(ai): add clients for ollama, yandexgpt, gigachat and openai-compatible apis",
+      "new_subject": "Добавил клиенты Ollama, YandexGPT, GigaChat и совместимых с OpenAI API"
+    },
+    {
+      "old_sha": "b635366ce9b8eaa45f79f6de74a491f87e2cbf1c",
+      "new_sha": "e7052a982085a248fc0b372c494fb1e5439e159e",
+      "tree": "17ba38f18acaa0c891a05c91be7d0739b11abb6e",
+      "old_subject": "feat(ai): add local/api switch and per-task models in admin",
+      "new_subject": "Добавил в админку переключение локального режима и API, модели для отдельных задач"
+    },
+    {
+      "old_sha": "9e11f7bbf63759ba2c10b01de64bb79000ea2183",
+      "new_sha": "33773ff0de22d78814ddb04b7ccab649fa937186",
+      "tree": "16735446585c2a309cedd890184aa290ede4ff2d",
+      "old_subject": "chore(ai): document provider keys and pass ollama address to containers",
+      "new_subject": "Описал ключи провайдеров и передал адрес Ollama в контейнеры"
+    },
+    {
+      "old_sha": "e86e52a951801cd56a4aec483397d6a049fdd939",
+      "new_sha": "7db766fa4ff2b0822f20236f879ee8898480d48b",
+      "tree": "16735446585c2a309cedd890184aa290ede4ff2d",
+      "old_subject": "feat(ai): merge ai providers and local/api switch",
+      "new_subject": "Объединил провайдеров ИИ и переключение локального режима и API"
+    },
+    {
+      "old_sha": "94b3f60f12949db53dc79d4a165ca60bb3685b9e",
+      "new_sha": "ab4d9f4a07e05a19a17b8a1c31e02cee75168b80",
+      "tree": "48cf6cd5ce3ab735a3759deea0cd35d2c8a3f5a8",
+      "old_subject": "feat(corpus): add short act titles for citations",
+      "new_subject": "Добавил короткие названия актов для ссылок на источники"
+    },
+    {
+      "old_sha": "9d2497b06a9ba7b4c781de74b650a70b1c6f0c38",
+      "new_sha": "d93ffecb8ad405330661138113ac5c10a3844c60",
+      "tree": "a93f0c22f328c3493ee19cb7d3e24fd87ff8553f",
+      "old_subject": "feat(search): split article versions into labelled chunks",
+      "new_subject": "Разбил версии статей на фрагменты с метками"
+    },
+    {
+      "old_sha": "dd81779c879ec32508e4a52a74fa32abc4ff8c42",
+      "new_sha": "c302efc83848af0c7713d3a3963dedf736648638",
+      "tree": "7a7dc77967d1024a606782f6fb48b048127d151e",
+      "old_subject": "feat(search): add pgvector index and date-aware hybrid search",
+      "new_subject": "Добавил индекс pgvector и гибридный поиск с учётом даты"
+    },
+    {
+      "old_sha": "ac4dcfde0f0126945a5566d3559c8a95c6f97f65",
+      "new_sha": "cf13b17bb368e17b2b7c335fff81ea0841ec4b58",
+      "tree": "7a7dc77967d1024a606782f6fb48b048127d151e",
+      "old_subject": "feat(search): merge date-aware hybrid search over corpus",
+      "new_subject": "Объединил изменения гибридного поиска по корпусу с учётом даты"
+    },
+    {
+      "old_sha": "77826f110cb03c5a6743ad63ce597c3fc28b13df",
+      "new_sha": "c5d7902cade07c716eed3748c154fba8bc0bd880",
+      "tree": "7bd9f6ebf1d970302c0ac9cdc35be641dbd77c67",
+      "old_subject": "docs: describe ai providers, local/api switch and norm search in readme",
+      "new_subject": "Описал в README провайдеров ИИ, переключение режимов и поиск норм"
+    },
+    {
+      "old_sha": "5ed2983e41d5cb97a7f3898e25953ca7c1587601",
+      "new_sha": "2a415f6d8e3ab3dd2654b57a61d93a88ad5f22bb",
+      "tree": "df37a8a9145c8b5b2f6acb1a34f73b8bb3e82a70",
+      "old_subject": "chore: bump version to 0.3.0",
+      "new_subject": "Поднял версию до 0.3.0"
+    },
+    {
+      "old_sha": "c3134910bca0239aa72d13ef4d54feed1bd5e10e",
+      "new_sha": "6c9185a100ffbd96617f7674a3719939ccc6e02c",
+      "tree": "df37a8a9145c8b5b2f6acb1a34f73b8bb3e82a70",
+      "old_subject": "chore(release): v0.3.0",
+      "new_subject": "Подготовил релиз v0.3.0"
+    },
+    {
+      "old_sha": "3830d5d976416482f37eaff22a072b3699274604",
+      "new_sha": "29dad6b976a82e7f353a920606a5262b0d7dadc3",
+      "tree": "f7a19337ebab1d00bda92c5671448e7c88b47ece",
+      "old_subject": "feat(deid): mask personal data with rules, checksums, name dictionary and llm pass",
+      "new_subject": "Добавил маскирование персональных данных по правилам, контрольным суммам, словарю имён и результатам LLM"
+    },
+    {
+      "old_sha": "979274b6ec82ea1c2c116544e429c09c1daae0ae",
+      "new_sha": "aabde8b5b9c85882d6f34eb966448614cf7e201e",
+      "tree": "1b5629e6d8c80b7b9c33b1364d477c1230e69647",
+      "old_subject": "feat(deid): run de-identification as internal service behind service token",
+      "new_subject": "Выделил обезличивание во внутренний сервис с доступом по сервисному токену"
+    },
+    {
+      "old_sha": "ed674e2d00caab49c2c91ffafac207ed6b4ef154",
+      "new_sha": "16d4adf5b2791fb20082b1ff067ef7c5ed958a16",
+      "tree": "1b5629e6d8c80b7b9c33b1364d477c1230e69647",
+      "old_subject": "feat(deid): merge de-identification service",
+      "new_subject": "Объединил изменения сервиса обезличивания"
+    },
+    {
+      "old_sha": "5a67eee0d0c070088240feac7fa9472b65f6a685",
+      "new_sha": "3a8ad5df6f2daeac82f33d8f9ea5a64c367a33b7",
+      "tree": "b25d10b6e7b1a7457b2065ee6d90e9f86497cf1f",
+      "old_subject": "chore: merge release v0.3.0 into develop",
+      "new_subject": "Объединил релиз v0.3.0 с develop"
+    },
+    {
+      "old_sha": "7701c454aeaaedf25b19bbf0955d660f1f1f312b",
+      "new_sha": "930ad268aa8fcfd5097c46d57511bf5619938dac",
+      "tree": "d1bee7e72512a70b2321172ccaf84d92e9e24bcb",
+      "old_subject": "feat(search): match long words by prefix and always keep top vector hits",
+      "new_subject": "Добавил поиск длинных слов по префиксу и сохранение лучших векторных результатов"
+    },
+    {
+      "old_sha": "4b5e826f3ce6655e5ddc574c3528bcee775a46e0",
+      "new_sha": "178f92399778f9236572c3c1caefd0a70dc3ad7b",
+      "tree": "7ab03a5df4d88e8f16ab777638d9a04cfacb8477",
+      "old_subject": "perf(ai): compute local embeddings on cpu to keep gpu for the answer model",
+      "new_subject": "Перенёс расчёт локальных эмбеддингов на CPU, освободив GPU для модели ответа"
+    },
+    {
+      "old_sha": "4e58752fcd74658160866250a33bb4990ec501d0",
+      "new_sha": "68fa690eb95d95152914bcfea0b7cd5723efe2be",
+      "tree": "6d2edc69dbd18c36f5dc5cb7ff7cabc61337cd5d",
+      "old_subject": "feat(assistant): check answer citations against corpus on question date",
+      "new_subject": "Добавил проверку ссылок в ответе по корпусу на дату вопроса"
+    },
+    {
+      "old_sha": "293acb974738ff731111b325bef710fe91fa3eca",
+      "new_sha": "858f3c23a68d0c6123253fe207ae7c82a4835715",
+      "tree": "19457ba49b449dcef8e99b7d97505708acc48d43",
+      "old_subject": "feat(assistant): answer questions via de-identification, retrieval and citation check",
+      "new_subject": "Добавил ответы через обезличивание, поиск и проверку ссылок"
+    },
+    {
+      "old_sha": "804507d71e1b65c9f8d6a36f33e2c31d2316a0e3",
+      "new_sha": "017b12c373671b91232159e0059946633b1a7944",
+      "tree": "b7c7779111d4aa95b6d4330b4cacb5460bd18be7",
+      "old_subject": "fix(deid): count only applied llm findings",
+      "new_subject": "Исправил подсчёт результатов LLM: учёл только применённые"
+    },
+    {
+      "old_sha": "b50a29239feb4bca11a72309915145e1fb189417",
+      "new_sha": "14d7257dfc6e411f51b0cf9c2c29f9a755022edb",
+      "tree": "da405dcb3353a14f9d96bd89f660db593d240515",
+      "old_subject": "feat(assistant): merge answer pipeline with citation check",
+      "new_subject": "Объединил обработку ответов с проверкой ссылок"
+    },
+    {
+      "old_sha": "662d6135527e58358f625e7f02d6ae17c49be2ab",
+      "new_sha": "e7aec811783f7b4216375a2e7efcdedd1a3b5653",
+      "tree": "d9c7f1fb2e7d0c49125d74d6b718321089b15bd6",
+      "old_subject": "docs: describe de-identification and answer pipeline in readme",
+      "new_subject": "Описал в README обезличивание и обработку ответов"
+    },
+    {
+      "old_sha": "a79471204acacc9afc87e7ccf23f812af6355869",
+      "new_sha": "7dafafa5c011683a167481b490478625d3f62664",
+      "tree": "3ed4f06dbf46dcd4213b758fd639b1c5bcc22e2e",
+      "old_subject": "chore: bump version to 0.4.0",
+      "new_subject": "Поднял версию до 0.4.0"
+    },
+    {
+      "old_sha": "e8f550da47d700860bb74e7c78414c0f38e6aa39",
+      "new_sha": "c3e97b2e5098375d8ca92da39d00158c7e2e7f6c",
+      "tree": "3ed4f06dbf46dcd4213b758fd639b1c5bcc22e2e",
+      "old_subject": "chore(release): v0.4.0",
+      "new_subject": "Подготовил релиз v0.4.0"
+    },
+    {
+      "old_sha": "87fb337679d080c8864fc1b4240053ebf5a5c0c5",
+      "new_sha": "545b35ea85e4e352342e03de85298d2dfab600c4",
+      "tree": "129546d79fbf93043babdfce24a372c4cd8d3f97",
+      "old_subject": "fix(ai): send one text per yandex embeddings request",
+      "new_subject": "Оставил один текст в каждом запросе эмбеддингов Yandex"
+    },
+    {
+      "old_sha": "ce394477279010bb330b64993a03edc7f2f44173",
+      "new_sha": "f7b27fa4f76bf260c7b0e3643f802220988ff995",
+      "tree": "52b496c79d6f0626eb1b3f219a77c763cca99d05",
+      "old_subject": "docs: note live check of yandexgpt",
+      "new_subject": "Зафиксировал проверку YandexGPT вживую"
+    },
+    {
+      "old_sha": "036b001db47b8b847750dd5227e45af07921328c",
+      "new_sha": "7c3909527552d736bc54345452940931d08a4019",
+      "tree": "78aa1e1a8b99d6007c4e75dd8df7d1ea4f9c3405",
+      "old_subject": "chore: bump version to 0.4.1",
+      "new_subject": "Поднял версию до 0.4.1"
+    },
+    {
+      "old_sha": "88b21ee97c0fa20d3ec2ee627115a5fd67ae05c5",
+      "new_sha": "97db6115bb96432b1e88cbd0c65cf706229aad08",
+      "tree": "78aa1e1a8b99d6007c4e75dd8df7d1ea4f9c3405",
+      "old_subject": "chore(release): v0.4.1",
+      "new_subject": "Подготовил релиз v0.4.1"
+    },
+    {
+      "old_sha": "d356f2c4a8c7474368e36fa2f9acdcc230330267",
+      "new_sha": "51b7a929e84baaefe34b16b26c072fa817ac9c95",
+      "tree": "3ed4f06dbf46dcd4213b758fd639b1c5bcc22e2e",
+      "old_subject": "chore: merge release v0.4.0 into develop",
+      "new_subject": "Объединил релиз v0.4.0 с develop"
+    },
+    {
+      "old_sha": "cca602c7a648caedfd3157b0b13b29e65256094b",
+      "new_sha": "467cb3f82ddb529cd57954f329321a3c3163b914",
+      "tree": "78aa1e1a8b99d6007c4e75dd8df7d1ea4f9c3405",
+      "old_subject": "chore: merge hotfix v0.4.1 into develop",
+      "new_subject": "Объединил исправление v0.4.1 с develop"
+    },
+    {
+      "old_sha": "707ba17197a7299c1600eb77eaead898a9d3a3d0",
+      "new_sha": "31087509b091ac06dbf18365b6a49c12c89a519c",
+      "tree": "e4235abb063b447f64fd3bd470306098270ab84d",
+      "old_subject": "perf(ai): send yandex embeddings requests in parallel",
+      "new_subject": "Распараллелил запросы эмбеддингов Yandex"
+    },
+    {
+      "old_sha": "66c6a12782c16a57cc901deedc4fb9b6b6f81703",
+      "new_sha": "a7639921b98ca6b84af8e473443e2fce520db1f0",
+      "tree": "fa012ca780f547f432b46713c3f186afbb995bf2",
+      "old_subject": "feat(search): precompute vectors for both local and api modes on request",
+      "new_subject": "Добавил предварительный расчёт векторов для локального режима и API по запросу"
+    },
+    {
+      "old_sha": "3eab5745e0e420384427cc64a49a31376516d1ed",
+      "new_sha": "a5c0d20f851f4e8c0b5f4c621d8886a67f0ecebe",
+      "tree": "54c08069beec8a7e2ec2b6a5544eeb855b8e89d5",
+      "old_subject": "fix(assistant): recognise source markers with norm inside brackets",
+      "new_subject": "Исправил распознавание маркеров источников с нормой внутри скобок"
+    },
+    {
+      "old_sha": "b8bbb04d382e73cda716bcb8f8dec921789a8592",
+      "new_sha": "ee11a08dc08e6cecf354e1b8ef5e632e64dc61a8",
+      "tree": "54c08069beec8a7e2ec2b6a5544eeb855b8e89d5",
+      "old_subject": "feat(search): merge vectors for both modes and parallel yandex embeddings",
+      "new_subject": "Объединил векторы для обоих режимов и параллельные запросы эмбеддингов Yandex"
+    },
+    {
+      "old_sha": "6ee1033b42f21b9ccbbf0a51804cabe7a86cd472",
+      "new_sha": "ac1f2da98a1b8a7042812578c216ebaa99613af0",
+      "tree": "e63c7e14c2a7c26d62ec9c2416ad7adf9d4bbb37",
+      "old_subject": "feat(ollama): add yandexgpt-5 lite modelfile with fixed chat template",
+      "new_subject": "Добавил Modelfile для YandexGPT-5 Lite с исправленным шаблоном чата"
+    },
+    {
+      "old_sha": "762942936bd691d09111129efc739ef1ee7eb077",
+      "new_sha": "262660ce82ed52e90e300f48c63bda70a907b211",
+      "tree": "247b1e03fb58d02846d485ead94cd60d43e9fda4",
+      "old_subject": "feat(eval): add model comparison stand and labor law question set",
+      "new_subject": "Добавил стенд сравнения моделей и набор вопросов по трудовому праву"
+    },
+    {
+      "old_sha": "c95f489d37928020e6a8fdef9d18bdaf8bdf96a9",
+      "new_sha": "54fcb4b30db6806529a9876dad016a74a7f99e7c",
+      "tree": "e8082ddf7771a6f31382c666c466b1592224d566",
+      "old_subject": "feat(assistant): add verifier model checking answers against sources",
+      "new_subject": "Добавил модель для проверки ответов по источникам"
+    },
+    {
+      "old_sha": "0c4e506d60b98b47f0c0e9303353bc598d4a6588",
+      "new_sha": "be6c74fd082040288f19aec44b4a94fb9c8307dc",
+      "tree": "d3a16fc0a0d4bbaa6f0bc9ce745aafee82090d3e",
+      "old_subject": "feat(assistant): verify final answer and revise it once when unsupported",
+      "new_subject": "Добавил проверку итогового ответа и одну доработку при отсутствии подтверждения"
+    },
+    {
+      "old_sha": "9220dd58dc97965c69d23c7b9b341cf73f367d68",
+      "new_sha": "172128548b8907c6a3d15bc6b1a6e20b7e0c2931",
+      "tree": "d3a16fc0a0d4bbaa6f0bc9ce745aafee82090d3e",
+      "old_subject": "feat(assistant): merge verifier model",
+      "new_subject": "Объединил изменения модели проверки"
+    },
+    {
+      "old_sha": "44f286a854a6699560e050b7dbddb1dd16caf583",
+      "new_sha": "2b5d1882baba618b78b2308ebc0e1ff6d7de105e",
+      "tree": "79725798b0e5ae013faf10c9cf3174dd418935b0",
+      "old_subject": "chore: merge develop into feature/eval-compare",
+      "new_subject": "Объединил develop с feature/eval-compare"
+    },
+    {
+      "old_sha": "2d17f8851d4a7e1cfef61cf1925fef9d50cc3969",
+      "new_sha": "581b3fadb39bee032a69a7633685831e6c81a2a0",
+      "tree": "6e1efd6393c7924312b7a2596cef63a098ce3940",
+      "old_subject": "feat(eval): evaluate verifier on correct and corrupted answers",
+      "new_subject": "Добавил оценку модели проверки на правильных и искажённых ответах"
+    },
+    {
+      "old_sha": "e342ef922a2f7e5bc75a025d39b0c9dd282aa67d",
+      "new_sha": "c4b08b5228b2633dba38da41f13bfb2b1060c006",
+      "tree": "1eda8a44a0fddf768431be566077af4ce8c1171b",
+      "old_subject": "feat(eval): pass model options in spec and append models to a finished run",
+      "new_subject": "Добавил параметры моделей в спецификацию и добавление моделей в завершённый прогон"
+    },
+    {
+      "old_sha": "2d4f8830c70a72538cf16e3ce820258f99e3c4a7",
+      "new_sha": "008e85439b728a31b26aa3b80d5942389d975206",
+      "tree": "feeb2c1adb67a790f90987f0b964323daa17209c",
+      "old_subject": "docs(eval): add results of model comparison on basic labor questions",
+      "new_subject": "Добавил результаты сравнения моделей на базовых вопросах по трудовому праву"
+    },
+    {
+      "old_sha": "7fca56c1193ab807d3c9006fbc5ca787f51a8230",
+      "new_sha": "443fe8ea84785afa0efec216bce181eda5150e83",
+      "tree": "2d045c2cce0223ab7be6639129bc9f6940a00f0c",
+      "old_subject": "feat(eval): include real model errors in verifier evaluation",
+      "new_subject": "Добавил реальные ошибки моделей в оценку модели проверки"
+    },
+    {
+      "old_sha": "37258010931dfb0fe7ac2c4ec92f7a6b264ba4af",
+      "new_sha": "c177bf3fd8858d99e9f4d89e74afbcbc5008da75",
+      "tree": "2d045c2cce0223ab7be6639129bc9f6940a00f0c",
+      "old_subject": "feat(eval): merge model comparison and verifier evaluation",
+      "new_subject": "Объединил сравнение моделей и оценку модели проверки"
+    },
+    {
+      "old_sha": "4e0f9066b1287298178c7de35c7de22c3e418cd8",
+      "new_sha": "217d4c7412f9f77bc7d97f31e660043c00f2ebf1",
+      "tree": "846d0ebf4cef74a658969947891584c3ba2851ed",
+      "old_subject": "feat(ai): add speech and document recognition: whisper, speechkit, vision ocr, ollama vision",
+      "new_subject": "Добавил распознавание речи и документов через Whisper, SpeechKit, Vision OCR и Ollama Vision"
+    },
+    {
+      "old_sha": "1e610c28957188916a28e5d3e3d991910a419af9",
+      "new_sha": "deec0956eb0f3605499da0293df52b8fd6c4e5fd",
+      "tree": "8de994313233a28c599c90523d30e26688933c51",
+      "old_subject": "feat(deid): recognise voice and document photos inside the pii boundary",
+      "new_subject": "Добавил распознавание голоса и фото документов внутри контура персональных данных"
+    },
+    {
+      "old_sha": "5f734ff73600715f0c9bbf407beb22b36bf10423",
+      "new_sha": "ae6c1c3e79aff6c34bb996747d5730e4215e9480",
+      "tree": "59caff59d45ea11dcdff2b73716b9001702cbc30",
+      "old_subject": "feat(assistant): accept voice questions and questions about document photos",
+      "new_subject": "Добавил голосовые вопросы и вопросы по фото документов"
+    },
+    {
+      "old_sha": "4f3c2f3e384d73b6d4142fde2d86b97e7db72f01",
+      "new_sha": "54f9e355ccad984e759bbbf3ce1e2727460ca50b",
+      "tree": "acc4a11bf273330bd61ac07d3e6b38d09ec2abbc",
+      "old_subject": "feat(eval): add hard labor question set with dated questions and contradiction checks",
+      "new_subject": "Добавил сложные вопросы по трудовому праву с датами и проверками противоречий"
+    },
+    {
+      "old_sha": "2c66f7e242372e501a730374e563c134c89120cf",
+      "new_sha": "590865892fd0c46afabebf744594c7d8d6dfc1a5",
+      "tree": "b05bebdd1a58173f73831aaea55b0a01df4852bf",
+      "old_subject": "chore(docker): keep whisper models in a volume for the deid service",
+      "new_subject": "Сохранил модели Whisper в томе сервиса обезличивания"
+    },
+    {
+      "old_sha": "5b4316e33235351ffb786c1d9c21c298931e6763",
+      "new_sha": "24c27c3940b1b99e8d6a9a39d99dd7c13af16e85",
+      "tree": "a3470339c5b46675a5e2ba54224bd9f6827b68d8",
+      "old_subject": "chore: document whisper models directory in env example",
+      "new_subject": "Описал каталог моделей Whisper в примере env"
+    },
+    {
+      "old_sha": "d1dfc877d345746350d36e27c8ab0ae64d5c0af2",
+      "new_sha": "fab92f09f3e6871566ad0005dcfb4833909f7410",
+      "tree": "ceb66549655aeed045f3519904e566fa0330a749",
+      "old_subject": "feat(assistant): revise answer on unsupported or partially verified with errors",
+      "new_subject": "Добавил доработку ответа без подтверждения или с частичным подтверждением и ошибками"
+    },
+    {
+      "old_sha": "1c18ca750de2cc7e50d12b6f244114a82bcfbd42",
+      "new_sha": "e2467d354736b67b09a68368a77d866a4bcbe462",
+      "tree": "09030aee43eda0cd17133dec12a911fe47e3c84f",
+      "old_subject": "docs(eval): add verifier evaluation on correct, corrupted and real wrong answers",
+      "new_subject": "Добавил оценку модели проверки на правильных, искажённых и реальных ошибочных ответах"
+    },
+    {
+      "old_sha": "9c88f98bf9bbfe0b4368733df20427bc4e2f02fe",
+      "new_sha": "2f1eaddf78dacd59a8206aef8e393feaa2c04acd",
+      "tree": "de5c84ba74e3b5a0d235ffaa56b6ebeb7a809ea1",
+      "old_subject": "fix(deid): find lowercase full names from speech transcripts by patronymic",
+      "new_subject": "Добавил поиск ФИО со строчной буквы в расшифровках речи по отчеству"
+    },
+    {
+      "old_sha": "cdf963f2362a1cc7680991f95d5a48b8f57fd30f",
+      "new_sha": "218767add90f72498952ef7902b1c04ca851428e",
+      "tree": "c6f04b82e14255a91977ee10a77da6517d284723",
+      "old_subject": "feat(search): expand everyday words in questions with legal terms",
+      "new_subject": "Добавил дополнение бытовых слов в вопросах юридическими терминами"
+    },
+    {
+      "old_sha": "88d3425263c3b4bd198399a4bf03c76c9b552f70",
+      "new_sha": "04b25459a25ed6a09d398df4ffe918db8f60ed69",
+      "tree": "52b71391dfb246a9c9283af19f2d28e4a3932448",
+      "old_subject": "docs(eval): add hard question set results on local models",
+      "new_subject": "Добавил результаты локальных моделей на сложных вопросах"
+    },
+    {
+      "old_sha": "c4339a1000cc51e501cb7e19980b3d95c985cdc3",
+      "new_sha": "1d7b521146f8e30c501a48cfe4c3584e868daac6",
+      "tree": "fd91948c948d225c9ce067ff4424c9c7d787fc18",
+      "old_subject": "feat(eval): rescore saved runs after fixing gold patterns",
+      "new_subject": "Добавил пересчёт сохранённых прогонов после исправления эталонных шаблонов"
+    },
+    {
+      "old_sha": "0d28d8d3a2967f55e9939600e3c8ef1f15bbd74d",
+      "new_sha": "45d03a6bbec38b2a6d282f820f8c4127b9f397ab",
+      "tree": "19d5d8f911695a75d1fb6bd9eab989607faf3ded",
+      "old_subject": "docs(eval): compare self and cross verification",
+      "new_subject": "Сравнил самопроверку и перекрёстную проверку"
+    },
+    {
+      "old_sha": "6fa68fc96b93e1097c0a218dcde08c21a29315de",
+      "new_sha": "79fe6e0d8722b44fb53d033099683b43d12c9544",
+      "tree": "5a59d0c777f9b7d7e26fb89d05bb55df2610fee9",
+      "old_subject": "feat(ai): choose default answer and verifier models from comparison results",
+      "new_subject": "Выбрал модели ответа и проверки по умолчанию по результатам сравнения"
+    },
+    {
+      "old_sha": "4bb96837c99d9a78368a31a469462f004fa150fe",
+      "new_sha": "a302f10b7225bc18a93d21fe8e4adf8750bed0ac",
+      "tree": "5300b71752b1be5009122eee4149da175a5ee14c",
+      "old_subject": "docs: describe verifier, voice and photo questions and model comparison in readme",
+      "new_subject": "Описал в README модель проверки, голосовые вопросы, фото документов и сравнение моделей"
+    },
+    {
+      "old_sha": "76bf80c1f0d09079efdcfdd0d6e1fa7158185aef",
+      "new_sha": "f85dcd6046c0ab067ed168f4656d9a89239896e2",
+      "tree": "fa751e199166e1312ab8e74c819821319ff84d14",
+      "old_subject": "fix(assistant): make models check facts of the question and document against norm conditions",
+      "new_subject": "Добавил проверку фактов вопроса и документа по условиям правовых норм"
+    },
+    {
+      "old_sha": "1d6815a88d094210fcc58828f10fbf4f5d0ed7c1",
+      "new_sha": "f2ec64cfaae858fcf03cb2ac6b872a4f30356527",
+      "tree": "a7d792b2887edd3c3098205baac37d147acde167",
+      "old_subject": "docs(eval): add live run case study and verifier re-evaluation",
+      "new_subject": "Добавил разбор живого прогона и повторную оценку модели проверки"
+    },
+    {
+      "old_sha": "cdbd58b54c51ac92e16dc2890ee9e2e2ca00dbba",
+      "new_sha": "fec5b2a998482484f549222cd61d143e096d29d8",
+      "tree": "c37eccd78ae7ecbe5e76302d0e37d024484515b6",
+      "old_subject": "docs(eval): confirm live cases through the api after prompt fixes",
+      "new_subject": "Подтвердил живые случаи через API после исправления промптов"
+    },
+    {
+      "old_sha": "603531cd95c70101acb9371bdb3f3739605767b2",
+      "new_sha": "68978be031e176f6fc1d1ed536208cccad6728f3",
+      "tree": "c37eccd78ae7ecbe5e76302d0e37d024484515b6",
+      "old_subject": "feat(assistant): merge verifier, voice and photo questions",
+      "new_subject": "Объединил модель проверки, голосовые вопросы и фото документов"
+    },
+    {
+      "old_sha": "90df9cbcd0fc6993b2df1da75c717fa0f5c2edc9",
+      "new_sha": "6df8735cea5c90cc5a1d9b25363b0ac162773f0e",
+      "tree": "ce3851d96119736192254b76a527e44f0f97c348",
+      "old_subject": "chore: bump version to 0.5.0",
+      "new_subject": "Поднял версию до 0.5.0"
+    },
+    {
+      "old_sha": "bf3574f59961e07be3a7ada9c83c2102e413beb8",
+      "new_sha": "8cea667f39816e64f238db6e4f94d31ef76f43d1",
+      "tree": "ce3851d96119736192254b76a527e44f0f97c348",
+      "old_subject": "chore(release): v0.5.0",
+      "new_subject": "Подготовил релиз v0.5.0"
+    },
+    {
+      "old_sha": "665405f183a98f6e7caa599c5d258d6ee1fbc885",
+      "new_sha": "983ba26ba9c1d14c6787e2e94768c7333e66ded7",
+      "tree": "ce3851d96119736192254b76a527e44f0f97c348",
+      "old_subject": "chore: merge release v0.5.0 into develop",
+      "new_subject": "Объединил релиз v0.5.0 с develop"
+    },
+    {
+      "old_sha": "41b76107fdc5fa1b1ec96b7abbfabcf5ed6d0e2b",
+      "new_sha": "79b22dc435efd0b38b421af22862c1814b90857f",
+      "tree": "e8fa03469c05c6d22f73e8d019021d1c6a72051c",
+      "old_subject": "docs: add dialogs and compound questions to roadmap",
+      "new_subject": "Добавил диалоги и составные вопросы в план развития"
+    },
+    {
+      "old_sha": "a25840e1b9c3b1d5b343ec189d82fa61cf848ad2",
+      "new_sha": "30b00743e6843a44dca9b9d030867012866cd9f8",
+      "tree": "1d641b57e3a30e2a674e252039214a1219eb9e3e",
+      "old_subject": "docs: add incremental retrieval improvements to roadmap",
+      "new_subject": "Добавил поэтапные улучшения поиска в план развития"
+    },
+    {
+      "old_sha": "d4036123df0294296184c055e17ffe48e6dcc087",
+      "new_sha": "013c38783bf41ffc1efd4a6ece6fd49133af9676",
+      "tree": "91b254037001543e114a2df51f25ddcae264e870",
+      "old_subject": "feat(search): search by several queries for compound questions",
+      "new_subject": "Добавил поиск по нескольким запросам для составных вопросов"
+    },
+    {
+      "old_sha": "86d6bcfd5858ee964d751a4cae5b3761d5c5ca68",
+      "new_sha": "9a7aac81ed523dc4e2c3304ecbd3a9b2543d1cda",
+      "tree": "93b17be1cbf283f537cdccd7382e1930a67bf873",
+      "old_subject": "feat(assistant): split compound questions into issues",
+      "new_subject": "Добавил разбиение составных вопросов на отдельные темы"
+    },
+    {
+      "old_sha": "5a239cf85d0500f3e413a93bc032ea42060ac483",
+      "new_sha": "c2a949352ff0ce96a89fb4d0e4d9ae7ea97fded1",
+      "tree": "eb1f93cd7cb482b3ba92c2f8df519f9285ae32be",
+      "old_subject": "feat(evaluation): compare retrieval variants on compound questions",
+      "new_subject": "Добавил сравнение вариантов поиска на составных вопросах"
+    },
+    {
+      "old_sha": "8d29d3d71dafd38a45c5deade25e18dadb1aa7d9",
+      "new_sha": "463355fecb45de16bc4e834745d7d7f8795a6666",
+      "tree": "8ae68186a993aad5c56b03e3e1e41583defcfbda",
+      "old_subject": "docs: describe compound question handling",
+      "new_subject": "Описал обработку составных вопросов"
+    },
+    {
+      "old_sha": "93396d3f3d76f8116116a99c3689f1ddff014572",
+      "new_sha": "411a282ab9e9880ed0d8bc62c198bf863966aa56",
+      "tree": "8ae68186a993aad5c56b03e3e1e41583defcfbda",
+      "old_subject": "chore: merge feature/compound-questions into develop",
+      "new_subject": "Объединил feature/compound-questions с develop"
+    },
+    {
+      "old_sha": "78924494591df17d2da7112901fac554ed6ac0fc",
+      "new_sha": "84cba54478eeed40aaf0104e0589608ef3846fee",
+      "tree": "bb42014a0e6930125964e6ff3db14e342b7881f4",
+      "old_subject": "feat(deid): keep dialog placeholders in expiring sessions",
+      "new_subject": "Добавил хранение подстановок диалога в сессиях с ограниченным сроком"
+    },
+    {
+      "old_sha": "d02d1d78dd5464388a19c496c2de00a634f76522",
+      "new_sha": "b4763b283a54a705e598d853db9bf5e66594cb95",
+      "tree": "4d5fd29bca722a672b2e78217943dc21b41fcb4d",
+      "old_subject": "feat(assistant): add dialogs with masked history and follow-up search",
+      "new_subject": "Добавил диалоги с обезличенной историей и поиском по уточняющим вопросам"
+    },
+    {
+      "old_sha": "28070686427e7a794c57f8462b5e76c08fb40c18",
+      "new_sha": "bad12daede7b84440a0a90c70d3a6fbef765ce9b",
+      "tree": "90b73fd33ed2ad21985de80acc6e9e5755acac9c",
+      "old_subject": "fix(assistant): keep user context when a rewrite loses the topic",
+      "new_subject": "Сохранил контекст пользователя при потере темы в переформулированном запросе"
+    },
+    {
+      "old_sha": "2a68e0a8b42bed511928366e94ad3c0efd23b4e1",
+      "new_sha": "22f3e60758999fcb5c12fc4b6d042150bd83484a",
+      "tree": "2c9727b1ef42c4bc4f949973b8a847fb2fb32fa4",
+      "old_subject": "docs(dialogs): record smoke tests and evaluation protocol",
+      "new_subject": "Зафиксировал базовые проверки диалогов и протокол оценки"
+    },
+    {
+      "old_sha": "1eed7d657770eaf609dca16f0eaa90eb87400966",
+      "new_sha": "78c40d001dfa25ae1ff5c74dabcdf2f3e9fbfafd",
+      "tree": "52f409a9ce569de5e024a68ec7755a823d59687a",
+      "old_subject": "feat(eval): freeze dialog scenarios and compare context retrieval",
+      "new_subject": "Зафиксировал сценарии диалогов и сравнил поиск с учётом контекста"
+    },
+    {
+      "old_sha": "85f10c4dbbf8d8186a14c21fd07f6fded0427e3e",
+      "new_sha": "29461af91c1440d1d2017dd968bfb9161f665a09",
+      "tree": "f9744567cc5ee1655c366bf68ad0d714b1d501ee",
+      "old_subject": "fix(eval): reject incomplete retrieval and bypass the local proxy",
+      "new_subject": "Добавил отклонение неполных результатов поиска и обход локального прокси"
+    },
+    {
+      "old_sha": "6d1be1155ed6862ed54baa919ba326247f45edfd",
+      "new_sha": "933a3dc155bc615e5f9bc811753ec820e05c6474",
+      "tree": "3f1a60c6929564cdbcefeaa8943d3032ae8038fc",
+      "old_subject": "docs(eval): record frozen dialog retrieval results",
+      "new_subject": "Зафиксировал результаты поиска по закреплённым сценариям диалогов"
+    },
+    {
+      "old_sha": "36584da52f882cab34f566a7177bf70074e2f609",
+      "new_sha": "c79718bb05beff3559b1b605862c86d6cd5fb18a",
+      "tree": "73434496ba99a5556788bdd82778651e8daa2bba",
+      "old_subject": "docs(eval): clarify overlap with earlier compound scenarios",
+      "new_subject": "Уточнил пересечения с прежними сценариями составных вопросов"
+    },
+    {
+      "old_sha": "6d461a64d90225101a8d6906bfc31843bf7d1f58",
+      "new_sha": "53bec785a50d311b8f3c9a4058dabd508cf14fd6",
+      "tree": "10037829f78448dc2a7f6d558bee0a87b7ef390b",
+      "old_subject": "feat(search): add optional local reranking with safe fallback",
+      "new_subject": "Добавил необязательное локальное переранжирование с резервным вариантом при сбое"
+    },
+    {
+      "old_sha": "346f160638923dd40716e88d2ec8bdf27209b972",
+      "new_sha": "4ca9f01bd91feaf941b05690eb292a24078bfb7a",
+      "tree": "218180f3f0047012f1ff51e8408e32ed3774a3a3",
+      "old_subject": "test(ai): check reranker settings through the admin API",
+      "new_subject": "Добавил тесты настроек переранжирования через API админки"
+    },
+    {
+      "old_sha": "6e71429053046f61c2117881192ee2a5ed69b5f5",
+      "new_sha": "89f6ef7cb196551e3be529d009112f3027b79857",
+      "tree": "5709e8d8bfdcdfff39f96005ba0c337d1e857694",
+      "old_subject": "fix(eval): capture model digests and portable artifact hashes",
+      "new_subject": "Исправил сохранение дайджестов моделей и переносимых хешей артефактов"
+    },
+    {
+      "old_sha": "c065e6a5342e7b1f4e53c1dfe6ab7b4f600f9ed2",
+      "new_sha": "3b56fa22498d5ea2a2f8203e4cc1d30667da5354",
+      "tree": "d2aee5290246cf9d1b653f67c5177478cfb792db",
+      "old_subject": "docs(search): record reranker results and research limitations",
+      "new_subject": "Зафиксировал результаты переранжирования и ограничения исследования"
+    },
+    {
+      "old_sha": "194d3f07ec34f5d2a9fbd734ec6f665d4af024c2",
+      "new_sha": "9f74993b22974ea85cb2b4374fe4425d9307ec65",
+      "tree": "de5d85a8012ed8dc7879a761d31b1e53bb0a4b5b",
+      "old_subject": "docs(research): revise evaluation plan after supervisor discussion",
+      "new_subject": "Пересмотрел план оценки после обсуждения с научным руководителем"
+    },
+    {
+      "old_sha": "f17bc770b5272933c74fe6dde314d744400eae8d",
+      "new_sha": "0d5da26833e5d5ca87b2bef4f95a9443147091ca",
+      "tree": "bd91869431014513713bda277748822ac8c71fb3",
+      "old_subject": "docs(research): prepare evaluation and annotation methodology",
+      "new_subject": "Подготовил методику оценки и разметки"
+    },
+    {
+      "old_sha": "b68ddd75575d0c3bc7a568ed5ea25ec56d4d80e4",
+      "new_sha": "118a149093456e1f0998e0ee195d267a6a721c67",
+      "tree": "9e60db4d4d1c52bf572e6e6b72d815a4817a6eb2",
+      "old_subject": "Подготовил случаи и пакеты независимой разметки",
+      "new_subject": "Подготовил случаи и пакеты независимой разметки"
+    },
+    {
+      "old_sha": "135efa354e5b10ef8522c178d1e2531d844698e4",
+      "new_sha": "1ac76183a61de8f9504d24ece6c23443dfafd396",
+      "tree": "ddf6db997cd84cfb9c927c2992883c53ca2c74eb",
+      "old_subject": "Собрал стенд сравнения ответов и чтение корпуса",
+      "new_subject": "Собрал стенд сравнения ответов и чтение корпуса"
+    },
+    {
+      "old_sha": "f5d1dccd3408d86e8a805e2dcf6577550a42ebac",
+      "new_sha": "be69afaf8e6006006a2c4e4979685ae66810edfa",
+      "tree": "50d82a77ec7a5e33a122a35e2bcf86168efad0d0",
+      "old_subject": "Добавил проверку восстановления ФИО",
+      "new_subject": "Добавил проверку восстановления ФИО"
+    },
+    {
+      "old_sha": "8bb708116e2616171cec01fbb1ad4fcab6eae1b5",
+      "new_sha": "3b97b690f64851e86d31c1022dec72d7f6c176f4",
+      "tree": "b9d9b9f2b279eee312ffd4b704d74e0b083e46ba",
+      "old_subject": "Сохранил результаты пилотов и инструкции по разметке",
+      "new_subject": "Сохранил результаты пилотов и инструкции по разметке"
+    }
+  ],
+  "date": "2026-11-16",
+  "repository": "NIKYUgpt/Yourist",
+  "changed_subjects": 119,
+  "original_commits": 122,
+  "reports_commits": 1,
+  "branches": {
+    "before": {
+      "refs/heads/develop": "93396d3f3d76f8116116a99c3689f1ddff014572",
+      "refs/heads/feature/dialogs": "2a68e0a8b42bed511928366e94ad3c0efd23b4e1",
+      "refs/heads/feature/local-reranker": "8bb708116e2616171cec01fbb1ad4fcab6eae1b5",
+      "refs/heads/feature/retrieval-evaluation": "6d1be1155ed6862ed54baa919ba326247f45edfd",
+      "refs/heads/main": "bf3574f59961e07be3a7ada9c83c2102e413beb8"
+    },
+    "after": {
+      "refs/heads/develop": "411a282ab9e9880ed0d8bc62c198bf863966aa56",
+      "refs/heads/feature/dialogs": "22f3e60758999fcb5c12fc4b6d042150bd83484a",
+      "refs/heads/feature/local-reranker": "3b97b690f64851e86d31c1022dec72d7f6c176f4",
+      "refs/heads/feature/retrieval-evaluation": "933a3dc155bc615e5f9bc811753ec820e05c6474",
+      "refs/heads/main": "8cea667f39816e64f238db6e4f94d31ef76f43d1"
+    }
+  },
+  "verification": {
+    "pairs": 123,
+    "branches": 5,
+    "tags_unchanged": true,
+    "results_unchanged": 60,
+    "tracked_worktree_clean": true
+  },
+  "backup_bundle_sha256": "787e4b0fb1e2d3c8155bae0a1c42441b871cc3ea5fe6460f0993190347edea5c"
+}
