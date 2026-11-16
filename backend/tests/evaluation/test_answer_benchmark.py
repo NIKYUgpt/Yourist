@@ -1,11 +1,14 @@
 import asyncio
+import copy
 import json
 from datetime import date
 from pathlib import Path
 
+import httpx
 import pytest
 
 from app.evaluation.answer_benchmark import (
+    VERIFY_SYSTEM,
     Answer,
     MeteredGateway,
     answer_messages,
@@ -21,11 +24,15 @@ from app.evaluation.answer_metrics import (
     nearest_rank,
     paired_family_bootstrap,
     quality_bounds,
+    summarize,
     token_cost,
 )
 from app.evaluation.answer_review import apply_grades
 from app.evaluation.frozen_corpus import Snapshot, oracle_sources
-from app.modules.ai.profiles import DEFAULT_CONFIG
+from app.modules.ai.profiles import DEFAULT_CONFIG, Task
+from app.modules.ai.providers.ollama import OllamaProvider
+from app.modules.ai.registry import Registry
+from app.modules.search.retrieval import SearchResult
 from tests.fakes import fake_registry
 
 DATA = Path(__file__).resolve().parents[2] / "evaluation/answers_v1.json"
@@ -209,3 +216,182 @@ def test_review_cannot_attach_to_changed_answer_or_promote_unreviewed_gold():
     report["rows"][0]["answer"]["answer"] = "изменено"
     with pytest.raises(ValueError, match="another report"):
         apply_grades(report, data, key, [grade.model_dump()])
+
+
+@pytest.mark.parametrize("task,budget", [(Task.ANSWER, 2048), (Task.VERIFY, 1024)])
+async def test_profile_cannot_override_benchmark_controls(task, budget):
+    captured = []
+
+    def respond(request):
+        captured.append(json.loads(request.content))
+        return httpx.Response(
+            200,
+            json={"message": {"content": "{}"}, "done_reason": "stop"},
+        )
+
+    provider = OllamaProvider(
+        "http://127.0.0.1:11434",
+        num_ctx=8192,
+        keep_alive="5m",
+        timeout=1,
+        retries=0,
+        transport=httpx.MockTransport(respond),
+    )
+    config = DEFAULT_CONFIG.model_copy(deep=True)
+    config.tasks[task].local.options.update(temperature=0.9, num_predict=-1)
+    ai = MeteredGateway(Registry({"ollama": provider}), config)
+    try:
+        await ai.chat(
+            task, [{"role": "user", "content": "fixture"}], temperature=0.0, max_tokens=budget
+        )
+    finally:
+        await provider.aclose()
+    assert captured[0]["options"]["temperature"] == 0.0
+    assert captured[0]["options"]["num_predict"] == budget
+    assert ai.attempts[0]["options"]["provider_options"]["num_predict"] == budget
+    assert config.tasks[task].local.options["num_predict"] == -1
+
+
+async def test_wrapped_http_timeout_is_censored_without_hidden_retries():
+    calls = []
+
+    def timeout(request):
+        calls.append(request)
+        raise httpx.ReadTimeout("fixture timeout", request=request)
+
+    provider = OllamaProvider(
+        "http://127.0.0.1:11434",
+        num_ctx=8192,
+        keep_alive="5m",
+        timeout=1,
+        retries=0,
+        transport=httpx.MockTransport(timeout),
+    )
+    ai = MeteredGateway(Registry({"ollama": provider}), DEFAULT_CONFIG.model_copy(deep=True))
+    case = dataset().cases[0]
+    try:
+        row = await evaluate_case(
+            None, ai, case, "B0", Snapshot(legal_as_of=case.legal_as_of, articles=[]), {}
+        )
+    finally:
+        await provider.aclose()
+    assert len(calls) == len(row["attempts"]) == 1
+    assert row["censored"] and row["attempts"][0]["censored"]
+    assert row["error_type"] == "ProviderError"
+
+
+async def test_cancellation_checkpoints_the_inflight_attempt_before_propagating():
+    started = asyncio.Event()
+
+    async def slow(*args, **kwargs):
+        started.set()
+        await asyncio.Event().wait()
+
+    reg = fake_registry()
+    reg.get("ollama").chat = slow
+    ai = MeteredGateway(reg, DEFAULT_CONFIG.model_copy(deep=True))
+    case = dataset().cases[0]
+    saved = []
+    task = asyncio.create_task(
+        evaluate_case(
+            None,
+            ai,
+            case,
+            "B0",
+            Snapshot(legal_as_of=case.legal_as_of, articles=[]),
+            {},
+            checkpoint=lambda row: saved.append(copy.deepcopy(row)),
+        )
+    )
+    await started.wait()
+    assert saved[-1]["attempts"][0]["status"] == "running"
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    row = saved[-1]
+    assert row["status"] == "interrupted" and row["censored"]
+    assert row["solution_pass"] is False and row["elapsed_ms"] > 0
+    assert row["attempts"][0]["censored"] and row["attempts"][0]["elapsed_ms"] > 0
+    assert ai.checkpoint is None
+
+
+async def test_b0_b3_inputs_and_single_revision_are_controlled(monkeypatch):
+    searches = []
+
+    async def fake_search(session, ai, query, on, **kwargs):
+        searches.append((ai is None, query, on, kwargs))
+        return SearchResult(query=query, on=on, hits=[], redactions=[])
+
+    monkeypatch.setattr("app.evaluation.answer_benchmark.search", fake_search)
+    case = dataset().cases[0]
+    reg = fake_registry()
+    reg.get("ollama").reply = lambda messages: json.dumps(
+        {"needs_revision": True, "problems": ["fixture"], "missing_norms": []}
+        if messages[0]["content"] == VERIFY_SYSTEM
+        else answer(case)
+    )
+    ai = MeteredGateway(reg, DEFAULT_CONFIG.model_copy(deep=True))
+    snapshot = Snapshot(legal_as_of=case.legal_as_of, articles=[])
+    rows = {
+        v: await evaluate_case(None, ai, case, v, snapshot, {}) for v in ("B0", "B1", "B2", "B3")
+    }
+    assert all(r["status"] == "ok" and r["solution_pass"] is None for r in rows.values())
+    assert [item[0] for item in searches] == [True, False, False]
+    assert all(item[1:3] == (case.question, case.legal_as_of) for item in searches)
+    assert [item[3]["expand"] for item in searches] == [False, True, True]
+    assert all(item[3]["rerank"] is False for item in searches)
+    assert rows["B2"]["attempts"][0]["messages"] == rows["B3"]["attempts"][0]["messages"]
+    assert [a["stage"] for a in rows["B3"]["attempts"]] == ["answer", "verify", "revision"]
+    for variant, row in rows.items():
+        payload = json.loads(row["attempts"][0]["messages"][-1]["content"])
+        assert set(payload) == {
+            "question",
+            "facts",
+            "date",
+            "issues",
+            "sources",
+            "allow_prior_knowledge",
+        }
+        assert payload["allow_prior_knowledge"] is (variant == "B0")
+        assert row["attempts"][0]["options"]["max_tokens"] == 2048
+    assert rows["B3"]["attempts"][1]["options"]["max_tokens"] == 1024
+    assert rows["B3"]["attempts"][2]["options"]["max_tokens"] == 2048
+
+
+@pytest.mark.parametrize("repeat_ids,match", [([0, 0], "duplicate"), ([0, 2], "unpaired repeat")])
+def test_bootstrap_rejects_equal_length_but_invalid_repeat_pairing(repeat_ids, match):
+    rows = [
+        {"case": case, "family": case, "variant": variant, "repeat": repeat, "solution_pass": True}
+        for case in ("a", "b")
+        for variant, repeats in (("B2", [0, 1]), ("B3", repeat_ids))
+        for repeat in repeats
+    ]
+    with pytest.raises(ValueError, match=match):
+        paired_family_bootstrap(rows, "B2", "B3")
+
+
+def test_token_summary_preserves_unknown_and_counts_failed_returned_generations():
+    row = {
+        "variant": "B3",
+        "status": "failed",
+        "elapsed_ms": 100,
+        "solution_pass": False,
+        "attempts": [
+            {
+                "operation": "chat",
+                "status": "ok",
+                "result": {"usage": {"prompt_tokens": 10, "completion_tokens": 5}},
+            },
+            {"operation": "chat", "status": "error"},
+            {"operation": "embed", "status": "ok", "usage": None},
+        ],
+    }
+    summary = summarize([row])["B3"]
+    assert summary["chat_tokens"]["prompt_tokens"] == {
+        "total": None,
+        "observed": 10,
+        "missing_calls": 1,
+    }
+    assert summary["chat_tokens"]["completion_tokens"]["observed"] == 5
+    assert summary["model_calls"] == 3 and summary["embedding_calls_without_usage"] == 1
+    assert summary["money"] is None

@@ -13,7 +13,7 @@ from fastapi import APIRouter, FastAPI
 from app import __version__
 from app.modules.ai.config import get_provider_settings
 from app.modules.ai.registry import build_registry
-from app.modules.deid.api import get_deid_settings, session_store
+from app.modules.deid.api import get_deid_settings, install_identity_handlers, session_store
 from app.modules.deid.api import router as deid_router
 from app.modules.deid.names import morph
 
@@ -39,6 +39,7 @@ async def health_check() -> dict[str, str]:
 def create_app() -> FastAPI:
     logging.basicConfig(level=logging.INFO)
     app = FastAPI(title="Yourist De-identification", version=__version__, lifespan=lifespan)
+    install_identity_handlers(app)
     app.state.deid_sessions = session_store(get_deid_settings())
     app.include_router(health, prefix="/api/v1")
     app.include_router(deid_router, prefix="/api/v1")

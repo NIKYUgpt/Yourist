@@ -17,7 +17,12 @@ from app.modules.ai.registry import build_registry
 from app.modules.ai.router import router as ai_router
 from app.modules.assistant.router import router as assistant_router
 from app.modules.auth.router import router as auth_router
-from app.modules.deid.api import DeidClient, DeidUnavailable, get_deid_settings
+from app.modules.deid.api import (
+    DeidClient,
+    DeidUnavailable,
+    get_deid_settings,
+    install_identity_handlers,
+)
 from app.modules.deid.sessions import SessionBusy, SessionExpired, SessionLimit
 from app.modules.search.router import router as search_router
 
@@ -37,6 +42,7 @@ def create_app() -> FastAPI:
     logging.basicConfig(level=logging.INFO)
 
     app = FastAPI(title="Yourist API", version=__version__, lifespan=lifespan)
+    install_identity_handlers(app)
 
     async def deid_error(request, exc):
         code = (

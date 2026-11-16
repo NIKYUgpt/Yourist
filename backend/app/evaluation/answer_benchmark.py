@@ -7,6 +7,7 @@ import importlib.metadata
 import json
 import random
 import time
+from collections.abc import Callable
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -108,6 +109,11 @@ class MeteredGateway(AIGateway):
         self.timeout = timeout
         self.attempts: list[dict] = []
         self.stage = "answer"
+        self.checkpoint: Callable[[], None] | None = None
+
+    def save_progress(self) -> None:
+        if self.checkpoint is not None:
+            self.checkpoint()
 
     async def _call(self, task, operation, invoke, messages=None, options=None):
         started = time.perf_counter()
@@ -121,6 +127,7 @@ class MeteredGateway(AIGateway):
             "status": "running",
         }
         self.attempts.append(attempt)
+        self.save_progress()
         try:
             result = await asyncio.wait_for(invoke(), timeout=self.timeout)
             attempt["status"] = "ok"
@@ -141,14 +148,22 @@ class MeteredGateway(AIGateway):
         except BaseException as exc:
             attempt["status"] = "error"
             attempt["error_type"] = type(exc).__name__
-            attempt["censored"] = isinstance(exc, (TimeoutError, asyncio.CancelledError))
+            attempt["censored"] = is_timeout(exc) or isinstance(exc, asyncio.CancelledError)
             raise
         finally:
             attempt["elapsed_ms"] = round((time.perf_counter() - started) * 1000, 3)
+            self.save_progress()
 
     async def chat(self, task, messages, *, schema=None, **kwargs):
         _, ref, provider = self.resolve(task)
         options = {**ref.options, **({"format": schema} if schema else {})}
+        # Ollama puts profile options over the explicit chat arguments. Keep the
+        # benchmark's declared controls authoritative, without changing the profile.
+        if ref.provider == "ollama":
+            options.update(
+                temperature=kwargs.get("temperature", 0.1),
+                num_predict=kwargs.get("max_tokens", 2048),
+            )
         return await self._call(
             task,
             "chat",
@@ -165,6 +180,17 @@ class MeteredGateway(AIGateway):
             texts,
             {"kind": kind.value},
         )
+
+
+def is_timeout(exc: BaseException) -> bool:
+    """ProviderError can wrap an HTTP timeout; do not count it as a completed call."""
+    seen = set()
+    while exc is not None and id(exc) not in seen:
+        seen.add(id(exc))
+        if isinstance(exc, (TimeoutError, httpx.TimeoutException)):
+            return True
+        exc = exc.__cause__ or exc.__context__
+    return False
 
 
 def question_data(case: Case) -> dict:
@@ -245,7 +271,7 @@ def check_citations(
     return rows
 
 
-async def evaluate_case(session, ai, case, variant, snapshot, act_refs):
+async def evaluate_case(session, ai, case, variant, snapshot, act_refs, *, checkpoint=None):
     ai.attempts = []
     started = time.perf_counter()
     row = {
@@ -260,7 +286,9 @@ async def evaluate_case(session, ai, case, variant, snapshot, act_refs):
         "censored": False,
         "tool_trace": [],
     }
+    ai.checkpoint = (lambda: checkpoint(row)) if checkpoint else None
     try:
+        ai.save_progress()
         async with asyncio.timeout(900):
             sources = []
             ai.stage = "retrieval"
@@ -366,17 +394,26 @@ async def evaluate_case(session, ai, case, variant, snapshot, act_refs):
             row["answer"] = answer.model_dump()
             row["citation_checks"] = check_citations(answer, snapshot, sources, variant)
             row["status"] = "ok"
+    except asyncio.CancelledError:
+        row["status"] = "interrupted"
+        row["error_type"] = "CancelledError"
+        row["solution_pass"] = False
+        row["grade_status"] = "operational_failure"
+        row["censored"] = True
+        raise
     except Exception as exc:
         row["status"] = "failed"
         row["error_type"] = type(exc).__name__
         row["error"] = str(exc)[:1000]
         row["solution_pass"] = False
         row["grade_status"] = "operational_failure"
-        row["censored"] = isinstance(exc, TimeoutError) or any(
-            a.get("censored") for a in ai.attempts
-        )
+        row["censored"] = is_timeout(exc) or any(a.get("censored") for a in ai.attempts)
     finally:
         row["elapsed_ms"] = round((time.perf_counter() - started) * 1000, 3)
+        try:
+            ai.save_progress()
+        finally:
+            ai.checkpoint = None
     return row
 
 
@@ -436,6 +473,7 @@ async def run(args) -> None:
         "git_commit": git("rev-parse", "HEAD"),
         "git_dirty": bool(git("status", "--porcelain")),
         "warmup": "no_explicit_warmup_load_times_recorded",
+        "recording": "atomic_checkpoints_before_after_calls_included_in_case_elapsed",
         "packages": {p: importlib.metadata.version(p) for p in ("httpx", "pydantic", "sqlalchemy")},
         "code_sha256": {
             str(p): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -499,12 +537,22 @@ async def run(args) -> None:
             report["schedule"] = [{"case": c.id, "variant": v, "repeat": r} for c, v, r in schedule]
             write_json(args.out / "results.json", report)
             for case, variant, repeat in schedule:
+
+                def checkpoint(row, repeat=repeat):
+                    row["repeat"] = repeat
+                    if not any(saved is row for saved in report["rows"]):
+                        report["rows"].append(row)
+                    write_json(args.out / "results.json", report)
+
                 row = await evaluate_case(
-                    session, ai, case, variant, snapshots[case.legal_as_of], act_refs
+                    session,
+                    ai,
+                    case,
+                    variant,
+                    snapshots[case.legal_as_of],
+                    act_refs,
+                    checkpoint=checkpoint,
                 )
-                row["repeat"] = repeat
-                report["rows"].append(row)
-                write_json(args.out / "results.json", report)
                 print(case.id, variant, repeat, row["status"], row["elapsed_ms"], flush=True)
             report["summary"] = summarize(report["rows"])
             report["primary_contrast_B3_minus_B2"] = (

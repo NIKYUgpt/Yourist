@@ -12,6 +12,7 @@ from app.evaluation.answer_dataset import (
     annotation_packet,
     fingerprint,
     merge_reviews,
+    write_json,
 )
 
 DATA = Path(__file__).resolve().parents[2] / "evaluation/answers_v1.json"
@@ -192,3 +193,17 @@ def test_review_import_rejects_changed_case_with_original_dataset_hash(field, re
     assert packet["dataset_sha256"] == fingerprint(data.model_dump(mode="json"))
     with pytest.raises(ValueError, match="immutable case fields"):
         merge_reviews(data, [packet])
+
+
+def test_json_checkpoint_failure_preserves_previous_report(tmp_path, monkeypatch):
+    target = tmp_path / "results.json"
+    write_json(target, {"status": "previous"})
+
+    def fail_replace(self, other):
+        raise OSError("fixture replacement failure")
+
+    monkeypatch.setattr(Path, "replace", fail_replace)
+    with pytest.raises(OSError, match="replacement failure"):
+        write_json(target, {"status": "new"})
+    assert '"previous"' in target.read_text("utf-8")
+    assert '"new"' in target.with_suffix(".json.tmp").read_text("utf-8")

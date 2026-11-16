@@ -40,7 +40,7 @@ from app.modules.assistant.schemas import (
 from app.modules.auth.deps import CurrentUser
 from app.modules.auth.models import Role
 from app.modules.corpus.sync import today_msk
-from app.modules.deid.api import DeidClient, DeidUnavailable, MediaError
+from app.modules.deid.api import DeidClient, DeidUnavailable, MediaError, parse_person_resolution
 from app.modules.deid.service import summary
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
@@ -158,7 +158,12 @@ async def ask(data: QuestionIn, user: CurrentUser, session: SessionDep, ai: AIDe
     """Задать вопрос. Ответ приходит целиком (локальная модель — до минуты)."""
     pipeline, on = await _pipeline(session, ai, deid, user, data.dialog_id, data.on)
     try:
-        outcome = await pipeline.ask(user.id, data.text, on)
+        resolution = (
+            {"person_resolution": data.person_resolution}
+            if data.person_resolution is not None
+            else {}
+        )
+        outcome = await pipeline.ask(user.id, data.text, on, **resolution)
     except DeidUnavailable as exc:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from exc
     except AnswerFailed as exc:
@@ -213,13 +218,20 @@ async def ask_voice(
     file: UploadFile = File(..., description="Голосовое сообщение: OGG/Opus, M4A, MP3, WAV"),
     on: date | None = Form(None, alias="date"),
     dialog_id: uuid.UUID | None = Form(None),
+    person_resolution: str | None = Form(None),
 ):
     """Голосовой вопрос: распознаётся и обезличивается в сервисе deid, дальше — как текст."""
+    resolution = parse_person_resolution(person_resolution)
     pipeline, on = await _pipeline(session, ai, deid, user, dialog_id, on)
     stt = ai.resolve(Task.STT)[1]
     audio = await file.read()
     recognize = deid.from_audio(
-        audio, file.filename or "audio", stt, pipeline.deid_model(), **pipeline.deid_context()
+        audio,
+        file.filename or "audio",
+        stt,
+        pipeline.deid_model(),
+        **pipeline.deid_context(),
+        **({"person_resolution": resolution} if resolution is not None else {}),
     )
     return await _media_question(pipeline, user.id, recognize, QuestionSource.VOICE, on)
 
@@ -234,9 +246,11 @@ async def ask_photo(
     text: str = Form("", max_length=4000, description="Вопрос к документу; можно не задавать"),
     on: date | None = Form(None, alias="date"),
     dialog_id: uuid.UUID | None = Form(None),
+    person_resolution: str | None = Form(None),
 ):
     """Вопрос к фото документа (приказа, договора): текст распознаётся и обезличивается
     в сервисе deid и добавляется к вопросу."""
+    resolution = parse_person_resolution(person_resolution)
     pipeline, on = await _pipeline(session, ai, deid, user, dialog_id, on)
     ocr = ai.resolve(Task.OCR)[1]
     image = await file.read()
@@ -248,6 +262,7 @@ async def ask_photo(
         ocr,
         pipeline.deid_model(),
         **pipeline.deid_context(),
+        **({"person_resolution": resolution} if resolution is not None else {}),
     )
     return await _media_question(pipeline, user.id, recognize, QuestionSource.PHOTO, on)
 

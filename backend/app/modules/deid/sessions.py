@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 from app.core.time import utcnow
+from app.modules.deid.identity import PersonMapping
 
 
 class SessionExpired(Exception):
@@ -32,7 +33,7 @@ class SessionInfo:
 @dataclass
 class _Entry:
     info: SessionInfo
-    mapping: dict[str, str] = field(default_factory=dict, repr=False)
+    mapping: PersonMapping = field(default_factory=PersonMapping, repr=False)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False)
     closed: bool = False
 
@@ -92,7 +93,9 @@ class SessionStore:
                     raise SessionExpired("Сеанс обезличивания завершён; начните новый диалог")
                 if (
                     len(working) > self.max_entities
-                    or sum(map(len, working.values())) > self.max_chars
+                    or len(working.actors) > self.max_entities
+                    or len(working.aliases) > self.max_entities
+                    or sum(map(len, working.values())) + working.identity_size > self.max_chars
                 ):
                     raise SessionLimit("Достигнут предел данных сеанса; начните новый диалог")
                 entry.mapping = working.copy()

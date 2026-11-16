@@ -171,7 +171,9 @@ def fingerprint(value: dict | list) -> str:
 
 
 def write_json(path: Path, value: dict | list) -> None:
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
 
 
 def annotation_packet(dataset: Dataset, reviewer: str) -> dict:

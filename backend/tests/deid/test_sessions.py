@@ -7,8 +7,10 @@ from httpx import ASGITransport
 
 from app.deid_main import create_app
 from app.modules.deid.api import DeidClient, DeidSettings
+from app.modules.deid.identity import IdentityRequired
 from app.modules.deid.service import deidentify
 from app.modules.deid.sessions import SessionBusy, SessionExpired, SessionLimit, SessionStore
+from tests.deid.identity_helpers import resolution
 from tests.fakes import fake_registry
 
 
@@ -89,6 +91,63 @@ async def test_limits_do_not_evict_or_partially_update():
 async def test_literal_placeholder_cannot_capture_a_new_person():
     result = await deidentify("[ТЕЛЕФОН_1] и номер 89161234567")
     assert result.mapping == {"[ТЕЛЕФОН_2]": "89161234567"}
+
+
+async def test_known_namesakes_remain_ambiguous_between_turns():
+    store = SessionStore()
+    info = store.create(uuid4())
+    async with store.use(info.id, info.user_id) as mapping:
+        mapping.update({"[ФИО_1]": "Иванов Иван Иванович", "[ФИО_2]": "Иванов Иван Иванович"})
+    for number in (3, 4):
+        text = "Копию передали Иванову Ивану Ивановичу."
+        with pytest.raises(IdentityRequired):
+            async with store.use(info.id, info.user_id) as mapping:
+                await deidentify(text, mapping=mapping)
+        async with store.use(info.id, info.user_id) as mapping:
+            result = await deidentify(
+                text,
+                mapping=mapping,
+                person_resolution=resolution(text, ("Иванову Ивану Ивановичу", f"worker-{number}")),
+            )
+        assert result.text == f"Копию передали [ФИО_{number}]."
+    assert store.entries[info.id].mapping["[ФИО_1]"] == "Иванов Иван Иванович"
+    assert store.entries[info.id].mapping["[ФИО_2]"] == "Иванов Иван Иванович"
+    await store.aclose()
+    assert not store.entries
+
+
+@pytest.mark.parametrize("remote", [False, True])
+async def test_namesake_ambiguity_survives_service_boundary(remote):
+    registry = fake_registry()
+    app = create_app()
+    app.state.ai_registry = registry
+    client = DeidClient(
+        DeidSettings(deid_url="http://deid" if remote else ""),
+        registry,
+        transport=ASGITransport(app=app),
+    )
+    try:
+        owner = uuid4()
+        info = await client.create_session(owner)
+        store = app.state.deid_sessions if remote else client.sessions
+        async with store.use(info.id, owner) as mapping:
+            mapping.update({"[ФИО_1]": "Иванов Иван Иванович", "[ФИО_2]": "Иванов Иван Иванович"})
+        text = "Копию передали Иванову Ивану Ивановичу."
+        with pytest.raises(IdentityRequired):
+            await client.deidentify(text, None, session_id=info.id, user_id=owner)
+        result = await client.deidentify(
+            text,
+            None,
+            session_id=info.id,
+            user_id=owner,
+            person_resolution=resolution(text, ("Иванову Ивану Ивановичу", "[ФИО_2]")),
+        )
+        assert result.text == "Копию передали [ФИО_2]."
+        assert result.mapping["[ФИО_1]"] == result.mapping["[ФИО_2]"] == "Иванов Иван Иванович"
+        await client.delete_session(info.id, owner)
+        assert not store.entries
+    finally:
+        await client.aclose()
 
 
 @pytest.mark.parametrize("remote", [False, True])

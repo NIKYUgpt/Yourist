@@ -17,6 +17,9 @@ from uuid import UUID
 import httpx
 import jwt
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,6 +28,7 @@ from app.core.security import SERVICE, create_token, decode_token
 from app.modules.ai.profiles import ModelRef
 from app.modules.ai.providers.base import ProviderError
 from app.modules.ai.registry import Registry
+from app.modules.deid.identity import IdentityBindingError, IdentityRequired, PersonResolution
 from app.modules.deid.media import MediaRejected, from_audio, from_image
 from app.modules.deid.service import DeidResult, deidentify
 from app.modules.deid.sessions import (
@@ -66,6 +70,7 @@ class DeidIn(BaseModel):
     llm: ModelRef | None = Field(None, description="Модель для второго прохода; null — без неё")
     session_id: UUID | None = None
     user_id: UUID | None = None
+    person_resolution: PersonResolution | None = None
 
 
 class SessionIn(BaseModel):
@@ -85,6 +90,38 @@ class MediaOut(DeidOut):
 
 router = APIRouter(tags=["deid"])
 bearer = HTTPBearer(auto_error=False)
+
+
+IDENTITY_ERROR = {
+    "code": "invalid_person_resolution",
+    "message": "Некорректная привязка участников",
+}
+
+
+def parse_person_resolution(value: str | None) -> PersonResolution | None:
+    if value is None:
+        return None
+    try:
+        return PersonResolution.model_validate_json(value)
+    except ValueError:
+        raise HTTPException(422, IDENTITY_ERROR) from None
+
+
+def install_identity_handlers(app) -> None:
+    async def required(request, exc):
+        return JSONResponse(status_code=409, content={"detail": exc.detail})
+
+    async def invalid(request, exc):
+        return JSONResponse(status_code=422, content={"detail": IDENTITY_ERROR})
+
+    async def validation(request, exc):
+        if any("person_resolution" in error["loc"] for error in exc.errors()):
+            return await invalid(request, exc)
+        return await request_validation_exception_handler(request, exc)
+
+    app.add_exception_handler(IdentityRequired, required)
+    app.add_exception_handler(IdentityBindingError, invalid)
+    app.add_exception_handler(RequestValidationError, validation)
 
 
 async def require_service(
@@ -154,7 +191,9 @@ async def deid(
         except ProviderError as exc:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
     async with session_mapping(store, data.session_id, data.user_id) as mapping:
-        result = await deidentify(data.text, model, mapping=mapping)
+        result = await deidentify(
+            data.text, model, mapping=mapping, person_resolution=data.person_resolution
+        )
     return result
 
 
@@ -186,11 +225,20 @@ async def deid_audio(
     llm: str | None = Form(None),
     session_id: UUID | None = Form(None),
     user_id: UUID | None = Form(None),
+    person_resolution: str | None = Form(None),
 ):
     stt_ref, llm_ref = _refs(stt, llm)
+    resolution = parse_person_resolution(person_resolution)
     async with session_mapping(store, session_id, user_id) as mapping:
         result = await _media(
-            from_audio(registry, await file.read(), stt_ref, llm_ref, mapping=mapping)
+            from_audio(
+                registry,
+                await file.read(),
+                stt_ref,
+                llm_ref,
+                mapping=mapping,
+                person_resolution=resolution,
+            )
         )
     return result
 
@@ -205,13 +253,22 @@ async def deid_image(
     text: str = Form("", max_length=MAX_TEXT, description="Вопрос пользователя к документу"),
     session_id: UUID | None = Form(None),
     user_id: UUID | None = Form(None),
+    person_resolution: str | None = Form(None),
 ):
     ocr_ref, llm_ref = _refs(ocr, llm)
+    resolution = parse_person_resolution(person_resolution)
     image = await file.read()
     async with session_mapping(store, session_id, user_id) as mapping:
         result = await _media(
             from_image(
-                registry, image, file.content_type or "", text, ocr_ref, llm_ref, mapping=mapping
+                registry,
+                image,
+                file.content_type or "",
+                text,
+                ocr_ref,
+                llm_ref,
+                mapping=mapping,
+                person_resolution=resolution,
             )
         )
     return result
@@ -290,6 +347,16 @@ class DeidClient:
 
     @staticmethod
     def _session_error(resp: httpx.Response) -> None:
+        if resp.status_code in (409, 422):
+            try:
+                detail = resp.json().get("detail")
+            except (ValueError, AttributeError):
+                detail = None
+            if isinstance(detail, dict):
+                if resp.status_code == 409 and detail.get("code") == "person_identity_required":
+                    raise IdentityRequired(detail)
+                if resp.status_code == 422 and detail.get("code") == "invalid_person_resolution":
+                    raise IdentityBindingError("Некорректная привязка участников")
         if resp.status_code == 409:
             raise SessionExpired("Сеанс обезличивания недоступен; начните новый диалог")
         if resp.status_code == 429:
@@ -302,18 +369,26 @@ class DeidClient:
         *,
         session_id: UUID | None = None,
         user_id: UUID | None = None,
+        person_resolution: PersonResolution | None = None,
     ) -> DeidResult:
+        resolution = (
+            {"person_resolution": person_resolution} if person_resolution is not None else {}
+        )
         if self.http is None:
             model = (self.registry.get(llm.provider), llm) if llm else None
             if session_id is not None:
                 async with self.sessions.use(session_id, user_id) as mapping:
-                    result = await deidentify(text, model, mapping=mapping)
+                    result = await deidentify(text, model, mapping=mapping, **resolution)
                 return result
-            return await deidentify(text, model)
+            return await deidentify(text, model, **resolution)
         token = create_token(API_SERVICE_ID, SERVICE, timedelta(minutes=1))
-        payload = DeidIn(text=text, llm=llm, session_id=session_id, user_id=user_id).model_dump(
-            mode="json"
-        )
+        payload = DeidIn(
+            text=text,
+            llm=llm,
+            session_id=session_id,
+            user_id=user_id,
+            person_resolution=person_resolution,
+        ).model_dump(mode="json")
         try:
             resp = await self.http.post(
                 "/api/v1/deid", json=payload, headers={"Authorization": f"Bearer {token}"}
@@ -334,16 +409,22 @@ class DeidClient:
         *,
         session_id: UUID | None = None,
         user_id: UUID | None = None,
+        person_resolution: PersonResolution | None = None,
     ) -> MediaResult:
+        resolution = (
+            {"person_resolution": person_resolution} if person_resolution is not None else {}
+        )
         if self.http is None:
             if session_id is not None:
                 async with self.sessions.use(session_id, user_id) as mapping:
                     result = await self._local(
-                        from_audio(self.registry, audio, stt, llm, mapping=mapping)
+                        from_audio(self.registry, audio, stt, llm, mapping=mapping, **resolution)
                     )
                 return result
-            return await self._local(from_audio(self.registry, audio, stt, llm))
+            return await self._local(from_audio(self.registry, audio, stt, llm, **resolution))
         data = {"stt": stt.model_dump_json(), **({"llm": llm.model_dump_json()} if llm else {})}
+        if person_resolution is not None:
+            data["person_resolution"] = person_resolution.model_dump_json()
         if session_id is not None:
             data.update(session_id=str(session_id), user_id=str(user_id))
         return await self._post_media("/api/v1/deid/audio", data, (filename, audio, None))
@@ -359,20 +440,45 @@ class DeidClient:
         *,
         session_id: UUID | None = None,
         user_id: UUID | None = None,
+        person_resolution: PersonResolution | None = None,
     ) -> MediaResult:
+        resolution = (
+            {"person_resolution": person_resolution} if person_resolution is not None else {}
+        )
         if self.http is None:
             if session_id is not None:
                 async with self.sessions.use(session_id, user_id) as mapping:
                     result = await self._local(
-                        from_image(self.registry, image, mime, question, ocr, llm, mapping=mapping)
+                        from_image(
+                            self.registry,
+                            image,
+                            mime,
+                            question,
+                            ocr,
+                            llm,
+                            mapping=mapping,
+                            **resolution,
+                        )
                     )
                 return result
-            return await self._local(from_image(self.registry, image, mime, question, ocr, llm))
+            return await self._local(
+                from_image(
+                    self.registry,
+                    image,
+                    mime,
+                    question,
+                    ocr,
+                    llm,
+                    **resolution,
+                )
+            )
         data = {
             "ocr": ocr.model_dump_json(),
             "text": question,
             **({"llm": llm.model_dump_json()} if llm else {}),
         }
+        if person_resolution is not None:
+            data["person_resolution"] = person_resolution.model_dump_json()
         if session_id is not None:
             data.update(session_id=str(session_id), user_id=str(user_id))
         return await self._post_media("/api/v1/deid/image", data, (filename, image, mime))

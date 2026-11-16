@@ -10,6 +10,7 @@ from typing import Any
 from app.modules.ai.profiles import ModelRef
 from app.modules.ai.providers.base import ProviderError
 from app.modules.ai.registry import Registry
+from app.modules.deid.identity import PersonResolution
 from app.modules.deid.service import DeidResult, deidentify
 
 MAX_AUDIO_BYTES = 20 * 1024 * 1024
@@ -54,6 +55,7 @@ async def from_audio(
     llm: ModelRef | None,
     *,
     mapping: dict[str, str] | None = None,
+    person_resolution: PersonResolution | None = None,
 ) -> tuple[DeidResult, Recognized]:
     if not audio:
         raise MediaRejected("пустой файл")
@@ -62,7 +64,9 @@ async def from_audio(
     result = await registry.get(stt.provider).transcribe(stt.model, audio, options=stt.options)
     if not result.text.strip():
         raise MediaRejected("речь не распознана")
-    deid = await deidentify(result.text, _model(registry, llm), mapping=mapping)
+    deid = await deidentify(
+        result.text, _model(registry, llm), mapping=mapping, person_resolution=person_resolution
+    )
     return deid, Recognized(result.provider, result.model, result.latency_ms, len(result.text))
 
 
@@ -75,6 +79,7 @@ async def from_image(
     llm: ModelRef | None,
     *,
     mapping: dict[str, str] | None = None,
+    person_resolution: PersonResolution | None = None,
 ) -> tuple[DeidResult, Recognized]:
     if mime not in IMAGE_TYPES:
         raise MediaRejected("нужна фотография в формате JPEG или PNG")
@@ -91,6 +96,7 @@ async def from_image(
         with_document(question, document[:MAX_DOCUMENT_CHARS]),
         _model(registry, llm),
         mapping=mapping,
+        person_resolution=person_resolution,
     )
     recognized = Recognized(
         result.provider, result.model, result.latency_ms, len(document), truncated

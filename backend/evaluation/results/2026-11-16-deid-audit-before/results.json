@@ -1,0 +1,456 @@
+{
+  "dataset_sha256": "d80567f0e27e12e6ffe5253129456257a67c4581195d274532f1464b49d202ce",
+  "status": "authored_and_inspected_development_not_independent_gold",
+  "packages": {
+    "pymorphy3": "2.0.6",
+    "pymorphy3-dicts-ru": "2.4.417150.4580142"
+  },
+  "code_sha256": {
+    "A:\\work\\Yourist\\backend\\app\\evaluation\\restoration_eval.py": "188ad41ae1546e71752013d8eccd056eaeac81cae9b3652551e0370a6ce3ff80",
+    "app\\modules\\deid\\restoration.py": "6a38eaf323fb0aeaaf6c64451a404849e75c88d1285e7dff3c9511c847e8a2c9",
+    "app\\modules\\deid\\service.py": "4597e94037e87885c01d7438ae3bd2c5eb9c10974d6148763d54d6a302fef11d",
+    "app\\modules\\deid\\names.py": "75cad68c400e6978ed5b0d0ad21ed02fbb0eeaf1abe216ceb2b26cdf7c6eeef7"
+  },
+  "restoration": [
+    {
+      "id": "genitive",
+      "baseline": "Документы для Иванов Иван Иванович готовы.",
+      "corrected": {
+        "text": "Документы для Иванова Ивана Ивановича готовы.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Документы для Иванова Ивана Ивановича готовы.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.0073999399319291115,
+      "corrected_ms": 124.78079996071756
+    },
+    {
+      "id": "dative",
+      "baseline": "Обратитесь к Петров Сергей Петрович.",
+      "corrected": {
+        "text": "Обратитесь к Петрову Сергею Петровичу.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Обратитесь к Петрову Сергею Петровичу.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.003600027412176132,
+      "corrected_ms": 2.020500018261373
+    },
+    {
+      "id": "instrumental",
+      "baseline": "Обязательства перед Иванов Иван Иванович сохраняются.",
+      "corrected": {
+        "text": "Обязательства перед Ивановым Иваном Ивановичем сохраняются.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Обязательства перед Ивановым Иваном Ивановичем сохраняются.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002500019036233425,
+      "corrected_ms": 1.9702999852597713
+    },
+    {
+      "id": "locative",
+      "baseline": "Речь о Петров Сергей Петрович.",
+      "corrected": {
+        "text": "Речь о Петрове Сергее Петровиче.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Речь о Петрове Сергее Петровиче.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002500019036233425,
+      "corrected_ms": 2.1692999871447682
+    },
+    {
+      "id": "female",
+      "baseline": "Копия для Иванова Мария Ивановна.",
+      "corrected": {
+        "text": "Копия для Ивановой Марии Ивановны.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Копия для Ивановой Марии Ивановны.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002400018274784088,
+      "corrected_ms": 2.726100035943091
+    },
+    {
+      "id": "two-people",
+      "baseline": "От Иванов Иван Иванович к Петров Сергей Петрович поступило заявление.",
+      "corrected": {
+        "text": "От Иванова Ивана Ивановича к Петрову Сергею Петровичу поступило заявление.",
+        "changed": 2,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "От Иванова Ивана Ивановича к Петрову Сергею Петровичу поступило заявление.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.00300002284348011,
+      "corrected_ms": 4.774200031533837
+    },
+    {
+      "id": "two-forms-one-person",
+      "baseline": "Для Иванов Иван Иванович подготовлена копия, её передадут к Иванов Иван Иванович.",
+      "corrected": {
+        "text": "Для Иванова Ивана Ивановича подготовлена копия, её передадут к Иванову Ивану Ивановичу.",
+        "changed": 2,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Для Иванова Ивана Ивановича подготовлена копия, её передадут к Иванову Ивану Ивановичу.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.004500034265220165,
+      "corrected_ms": 4.27889998536557
+    },
+    {
+      "id": "first-surface-oblique",
+      "baseline": "Надо обратиться к Иванова Ивана Ивановича.",
+      "corrected": {
+        "text": "Надо обратиться к Иванову Ивану Ивановичу.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Надо обратиться к Иванову Ивану Ивановичу.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002499902620911598,
+      "corrected_ms": 3.7721000844612718
+    },
+    {
+      "id": "legal-text",
+      "baseline": "Для Иванов Иван Иванович: не позднее трёх рабочих дней, ч. 1 ст. 62 ТК РФ; сумма 1000 руб.",
+      "corrected": {
+        "text": "Для Иванова Ивана Ивановича: не позднее трёх рабочих дней, ч. 1 ст. 62 ТК РФ; сумма 1000 руб.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Для Иванова Ивана Ивановича: не позднее трёх рабочих дней, ч. 1 ст. 62 ТК РФ; сумма 1000 руб.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002500019036233425,
+      "corrected_ms": 2.1077999845147133
+    },
+    {
+      "id": "unchanged-nominative",
+      "baseline": "Иванов Иван Иванович вправе подать заявление.",
+      "corrected": {
+        "text": "Иванов Иван Иванович вправе подать заявление.",
+        "changed": 0,
+        "unknown": 1,
+        "fallback": false,
+        "notes": [
+          {
+            "offset": 0,
+            "reason": "unknown_grammar"
+          }
+        ]
+      },
+      "expected": "Иванов Иван Иванович вправе подать заявление.",
+      "baseline_exact": true,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.003100023604929447,
+      "corrected_ms": 0.01079996582120657
+    },
+    {
+      "id": "verb-government-unsupported",
+      "baseline": "Выдайте Иванов Иван Иванович справку.",
+      "corrected": {
+        "text": "Выдайте Иванов Иван Иванович справку.",
+        "changed": 0,
+        "unknown": 1,
+        "fallback": false,
+        "notes": [
+          {
+            "offset": 8,
+            "reason": "unknown_grammar"
+          }
+        ]
+      },
+      "expected": "Выдайте Иванову Ивану Ивановичу справку.",
+      "baseline_exact": false,
+      "corrected_exact": false,
+      "outside_unchanged": true,
+      "baseline_ms": 0.00209989957511425,
+      "corrected_ms": 0.01100008375942707
+    },
+    {
+      "id": "ambiguous-preposition-unsupported",
+      "baseline": "Поговорите с Петров Сергей Петрович.",
+      "corrected": {
+        "text": "Поговорите с Петров Сергей Петрович.",
+        "changed": 0,
+        "unknown": 1,
+        "fallback": false,
+        "notes": [
+          {
+            "offset": 13,
+            "reason": "unknown_grammar"
+          }
+        ]
+      },
+      "expected": "Поговорите с Петровым Сергеем Петровичем.",
+      "baseline_exact": false,
+      "corrected_exact": false,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002300017513334751,
+      "corrected_ms": 0.010699965059757233
+    },
+    {
+      "id": "initials-unsupported",
+      "baseline": "Копия для Иванов И. И.",
+      "corrected": {
+        "text": "Копия для Иванов И. И.",
+        "changed": 0,
+        "unknown": 1,
+        "fallback": false,
+        "notes": [
+          {
+            "offset": 10,
+            "reason": "unknown_grammar"
+          }
+        ]
+      },
+      "expected": "Копия для Иванова И. И.",
+      "baseline_exact": false,
+      "corrected_exact": false,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002100015990436077,
+      "corrected_ms": 0.05039991810917854
+    },
+    {
+      "id": "unknown-label",
+      "baseline": "Для [ФИО_99] и Иванов Иван Иванович.",
+      "corrected": {
+        "text": "Для [ФИО_99] и Иванов Иван Иванович.",
+        "changed": 0,
+        "unknown": 1,
+        "fallback": false,
+        "notes": [
+          {
+            "offset": 15,
+            "reason": "unknown_grammar"
+          }
+        ]
+      },
+      "expected": "Для [ФИО_99] и Иванова Ивана Ивановича.",
+      "baseline_exact": false,
+      "corrected_exact": false,
+      "outside_unchanged": true,
+      "baseline_ms": 0.003100023604929447,
+      "corrected_ms": 0.011399970389902592
+    },
+    {
+      "id": "phone-no-inflection",
+      "baseline": "Для Иванов Иван Иванович указан +7 900 000-00-00.",
+      "corrected": {
+        "text": "Для Иванова Ивана Ивановича указан +7 900 000-00-00.",
+        "changed": 1,
+        "unknown": 0,
+        "fallback": false,
+        "notes": []
+      },
+      "expected": "Для Иванова Ивана Ивановича указан +7 900 000-00-00.",
+      "baseline_exact": false,
+      "corrected_exact": true,
+      "outside_unchanged": true,
+      "baseline_ms": 0.00700005330145359,
+      "corrected_ms": 2.6983999414369464
+    },
+    {
+      "id": "ambiguous-surname-safe",
+      "baseline": "Для Петрова.",
+      "corrected": {
+        "text": "Для Петрова.",
+        "changed": 0,
+        "unknown": 1,
+        "fallback": false,
+        "notes": [
+          {
+            "offset": 4,
+            "reason": "unknown_grammar"
+          }
+        ]
+      },
+      "expected": null,
+      "baseline_exact": null,
+      "corrected_exact": null,
+      "outside_unchanged": true,
+      "baseline_ms": 0.002399901859462261,
+      "corrected_ms": 0.2340000355616212
+    }
+  ],
+  "masking": [
+    {
+      "id": "full-name",
+      "masked": "[ФИО_1] подал заявление.",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    },
+    {
+      "id": "two-people",
+      "masked": "[ФИО_1] передал заявление [ФИО_2].",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 1
+    },
+    {
+      "id": "same-person-cases",
+      "masked": "[ФИО_1] подал заявление. Копию передали [ФИО_1].",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 1
+    },
+    {
+      "id": "female-name",
+      "masked": "[ФИО_1] получила справку.",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    },
+    {
+      "id": "initials",
+      "masked": "[ФИО_1] запросил копию.",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    },
+    {
+      "id": "rare-name",
+      "masked": "Сотрудник [ФИО_1] Ван [ФИО_2] написал заявление.",
+      "tp": 0,
+      "fp": 2,
+      "fn": 1,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    },
+    {
+      "id": "lowercase",
+      "masked": "Сотрудник [ФИО_1] написал заявление.",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    },
+    {
+      "id": "no-person-legal",
+      "masked": "Суд применил ч. 1 ст. 62 ТК РФ: три рабочих дня, бесплатно.",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    },
+    {
+      "id": "no-person-ambiguous-words",
+      "masked": "Вера в закон и надежда на решение не заменяют доказательств.",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    },
+    {
+      "id": "different-first-names",
+      "masked": "[ФИО_1] и [ФИО_2] подали заявления.",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 1
+    },
+    {
+      "id": "same-spelling-different-people",
+      "masked": "Два разных работника: [ФИО_1] из отдела А и [ФИО_1] из отдела Б.",
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "identity_merges": 1,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 1
+    },
+    {
+      "id": "partial-name-same-person",
+      "masked": "[ФИО_1] подал заявление. Затем [ФИО_2] принёс копию.",
+      "tp": 1,
+      "fp": 1,
+      "fn": 1,
+      "identity_merges": 0,
+      "identity_splits": 0,
+      "identity_pairs_evaluated": 0
+    }
+  ],
+  "summary": {
+    "restoration_cases": 16,
+    "grammar_cases": 15,
+    "baseline_exact": 1,
+    "corrected_exact": 11,
+    "outside_unchanged": 16,
+    "corrected_p90_ms": 4.774200031533837,
+    "detection_tp": 13,
+    "detection_fp": 3,
+    "detection_fn": 2,
+    "detection_precision": 0.8125,
+    "detection_recall": 0.8666666666666667,
+    "identity_merges": 1,
+    "identity_splits": 0,
+    "limitation": "authored synthetic development; no population inference; rules/dictionary only"
+  }
+}

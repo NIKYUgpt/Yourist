@@ -29,6 +29,7 @@ from app.modules.assistant.context import contextualize, fallback_query
 from app.modules.assistant.models import Answer, Dialog, Question, QuestionSource, QuestionStatus
 from app.modules.assistant.verifier import RANK, Verification, needs_revision, revision, verify
 from app.modules.deid.api import DeidClient
+from app.modules.deid.identity import PersonResolution
 from app.modules.deid.service import DeidResult, reidentify, summary
 from app.modules.search.retrieval import Hit, search, search_issues
 
@@ -138,11 +139,19 @@ class Pipeline:
         """Модель второго прохода деперсонализации, если он включён."""
         return self.ai.resolve(Task.DEID)[1] if self.ai.config.deid_llm else None
 
-    async def ask(self, user_id: uuid.UUID, text: str, on: date) -> Outcome:
+    async def ask(
+        self,
+        user_id: uuid.UUID,
+        text: str,
+        on: date,
+        *,
+        person_resolution: PersonResolution | None = None,
+    ) -> Outcome:
         timer = Timer()
-        deid: DeidResult = await self.deid.deidentify(
-            text, self.deid_model(), **self.deid_context()
-        )
+        context = self.deid_context()
+        if person_resolution is not None:
+            context["person_resolution"] = person_resolution
+        deid: DeidResult = await self.deid.deidentify(text, self.deid_model(), **context)
         trace = {"deid": {"ms": timer.ms, "found": summary(deid.entities), "llm": deid.llm}}
         return await self.answer(user_id, deid, on, QuestionSource.TEXT, trace)
 

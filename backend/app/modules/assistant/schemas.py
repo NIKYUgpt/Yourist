@@ -5,11 +5,13 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.modules.assistant.models import QuestionSource, QuestionStatus
+from app.modules.deid.identity import PersonResolution
 
 
 class QuestionIn(BaseModel):
     text: str = Field(min_length=3, max_length=4000)
     dialog_id: uuid.UUID | None = None
+    person_resolution: PersonResolution | None = None
     on: date | None = Field(
         None, alias="date", description="На какую дату отвечать; по умолчанию — сегодня (МСК)"
     )

@@ -99,9 +99,20 @@ def paired_family_bootstrap(
     """Повторы усредняются внутри случая, семьи ресемплируются целиком."""
     by_case = defaultdict(lambda: defaultdict(list))
     families = {}
+    repeat_ids = defaultdict(lambda: defaultdict(set))
+    use_repeat_ids = any("repeat" in row for row in rows if row["variant"] in (a, b))
     for row in rows:
         if row["variant"] not in (a, b):
             continue
+        if row["case"] in families and families[row["case"]] != row["family"]:
+            raise ValueError("inconsistent case family")
+        if use_repeat_ids:
+            if "repeat" not in row:
+                raise ValueError("missing repeat ID")
+            repeats = repeat_ids[row["case"]][row["variant"]]
+            if row["repeat"] in repeats:
+                raise ValueError("duplicate case/variant/repeat")
+            repeats.add(row["repeat"])
         if row["solution_pass"] is None:
             return {"status": "unresolved", "difference": None, "ci95": None}
         by_case[row["case"]][row["variant"]].append(float(row["solution_pass"]))
@@ -110,6 +121,8 @@ def paired_family_bootstrap(
     for case, methods in by_case.items():
         if set(methods) != {a, b} or len(methods[a]) != len(methods[b]):
             raise ValueError("unpaired comparison")
+        if use_repeat_ids and repeat_ids[case][a] != repeat_ids[case][b]:
+            raise ValueError("unpaired repeat IDs")
         groups[families[case]].append(statistics.mean(methods[b]) - statistics.mean(methods[a]))
     if len(groups) < 2:
         return {"status": "insufficient_families", "difference": None, "ci95": None}
@@ -133,6 +146,20 @@ def summarize(rows: list[dict]) -> dict:
     for variant in sorted({r["variant"] for r in rows}):
         selected = [r for r in rows if r["variant"] == variant]
         times = [r["elapsed_ms"] for r in selected]
+        attempts = [attempt for row in selected for attempt in row["attempts"]]
+        chats = [attempt for attempt in attempts if attempt["operation"] == "chat"]
+        tokens = {}
+        for field in ("prompt_tokens", "completion_tokens"):
+            values = [
+                (attempt.get("result", {}).get("usage") or {}).get(field) for attempt in chats
+            ]
+            observed = sum(value for value in values if value is not None)
+            missing = sum(value is None for value in values)
+            tokens[field] = {
+                "total": observed if not missing else None,
+                "observed": observed,
+                "missing_calls": missing,
+            }
         result[variant] = {
             "quality": quality_bounds([r["solution_pass"] for r in selected]),
             "operational_failures": sum(r["status"] != "ok" for r in selected),
@@ -145,6 +172,8 @@ def summarize(rows: list[dict]) -> dict:
             "navigation_degraded": sum(r.get("navigation_degraded", False) for r in selected),
             "navigation_no_sources": sum(r.get("navigation_no_sources", False) for r in selected),
             "model_calls": sum(len(r["attempts"]) for r in selected),
+            "chat_tokens": tokens,
+            "embedding_calls_without_usage": sum(a["operation"] == "embed" for a in attempts),
             "money": None,
             "money_status": "local_energy_and_amortization_not_measured",
         }

@@ -70,11 +70,18 @@ def find(text: str) -> list[Entity]:
         while j + 1 < len(tokens) and text[tokens[j].end : tokens[j + 1].start].strip() == "":
             j += 1
         chain = tokens[i : j + 1]
-        if len(chain) >= 2:
-            anchor = any(t.patronymic or t.first_name >= SINGLE_WORD_SCORE for t in chain)
-            if anchor and all(t.person > 0 for t in chain):
-                found.append(Entity(chain[0].start, chain[-1].end, PERSON, DICTIONARY))
-                used.update(range(i, j + 1))
+        # Заглавное слово должности перед ФИО не должно разбивать имя на три
+        # независимых сущности: рассматриваем непрерывные словарные подпоследовательности.
+        run_start = 0
+        for offset in range(len(chain) + 1):
+            if offset < len(chain) and chain[offset].person > 0:
+                continue
+            run = chain[run_start:offset]
+            anchor = any(t.patronymic or t.first_name >= SINGLE_WORD_SCORE for t in run)
+            if len(run) >= 2 and anchor:
+                found.append(Entity(run[0].start, run[-1].end, PERSON, DICTIONARY))
+                used.update(range(i + run_start, i + offset))
+            run_start = offset + 1
         i = j + 1
 
     # фамилия с инициалами до или после

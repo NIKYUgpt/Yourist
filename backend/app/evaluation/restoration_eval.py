@@ -13,6 +13,7 @@ from pathlib import Path
 from app.evaluation.answer_dataset import fingerprint, write_json
 from app.evaluation.answer_metrics import nearest_rank
 from app.modules.deid import names, rules
+from app.modules.deid.identity import IdentityRequired
 from app.modules.deid.restoration import restore_grammar
 from app.modules.deid.service import _PLACEHOLDER, _select, deidentify, reidentify
 
@@ -47,6 +48,7 @@ async def evaluate(data: dict) -> dict:
                 Path("app/modules/deid/restoration.py"),
                 Path("app/modules/deid/service.py"),
                 Path("app/modules/deid/names.py"),
+                Path("app/modules/deid/identity.py"),
             ]
         },
         "restoration": [],
@@ -86,8 +88,13 @@ async def evaluate(data: dict) -> dict:
             last[item["text"]] = end
             expected[start, end, "ФИО"] = item["person"]
         found = _select([*rules.find(case["text"]), *names.find(case["text"])])
-        masked = await deidentify(case["text"])
-        labels = [m.group() for m in _PLACEHOLDER.finditer(masked.text)]
+        clarification = None
+        try:
+            masked_text = (await deidentify(case["text"])).text
+        except IdentityRequired as exc:
+            clarification = exc.detail
+            masked_text = clarification["masked_text"]
+        labels = [m.group() for m in _PLACEHOLDER.finditer(masked_text)]
         if len(found) != len(labels):
             raise ValueError("detection/label alignment failed")
         predicted = {
@@ -101,13 +108,19 @@ async def evaluate(data: dict) -> dict:
         result["masking"].append(
             {
                 "id": case["id"],
-                "masked": masked.text,
+                "masked": masked_text,
+                "clarification_required": clarification is not None,
                 "tp": len(shared),
                 "fp": len(predicted.keys() - expected.keys()),
                 "fn": len(expected.keys() - predicted.keys()),
-                "identity_merges": merges,
-                "identity_splits": splits,
-                "identity_pairs_evaluated": len(shared) * (len(shared) - 1) // 2,
+                "identity_merges": merges if clarification is None else None,
+                "identity_splits": splits if clarification is None else None,
+                "identity_pairs_evaluated": len(shared) * (len(shared) - 1) // 2
+                if clarification is None
+                else 0,
+                "identity_pairs_unresolved": len(shared) * (len(shared) - 1) // 2
+                if clarification is not None
+                else 0,
             }
         )
     restoration, masking = result["restoration"], result["masking"]
@@ -124,8 +137,11 @@ async def evaluate(data: dict) -> dict:
         "detection_fn": fn,
         "detection_precision": tp / (tp + fp) if tp + fp else None,
         "detection_recall": tp / (tp + fn) if tp + fn else None,
-        "identity_merges": sum(r["identity_merges"] for r in masking),
-        "identity_splits": sum(r["identity_splits"] for r in masking),
+        "identity_merges": sum(r["identity_merges"] or 0 for r in masking),
+        "identity_splits": sum(r["identity_splits"] or 0 for r in masking),
+        "identity_clarifications": sum(r["clarification_required"] for r in masking),
+        "identity_pairs_evaluated": sum(r["identity_pairs_evaluated"] for r in masking),
+        "identity_pairs_unresolved": sum(r["identity_pairs_unresolved"] for r in masking),
         "limitation": (
             "authored synthetic development; no population inference; rules/dictionary only"
         ),
