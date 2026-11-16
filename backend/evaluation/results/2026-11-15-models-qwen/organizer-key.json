@@ -1,0 +1,37 @@
+{
+  "report_sha256": "c775f47e84c915d6c1e9ea07d6a01d86f228824389c24946e7a85d623108deb3",
+  "mapping": {
+    "response-0001": {
+      "row_index": 0,
+      "response_sha256": "c40ec2826d81f0d9da8a59ed9284ac52ef8692c79787b7fe483cc61bd3a9a3ae"
+    },
+    "response-0002": {
+      "row_index": 6,
+      "response_sha256": "8af3ce17d07a0fc0a8e78142d92eac6073e16e16211c6a4c4ea4f1a6a1ea9852"
+    },
+    "response-0003": {
+      "row_index": 4,
+      "response_sha256": "1de5c4f27072ecf5b1f6d2a86eb8e464eb43e1c67f7acbdcda8ca0e92bf34859"
+    },
+    "response-0004": {
+      "row_index": 2,
+      "response_sha256": "4bf479c3792d1fcb7e9f7049f296a10b89a34af2c3191f16b42844018ca2454d"
+    },
+    "response-0005": {
+      "row_index": 7,
+      "response_sha256": "8fa771052669b9a63abee1493a151ddf960c07008d796c9d18c16fc001cab321"
+    },
+    "response-0006": {
+      "row_index": 5,
+      "response_sha256": "988f5c2e24cf349d279fafefc7c6f8007389bd65b0758aa10c251d88ac31c85b"
+    },
+    "response-0007": {
+      "row_index": 1,
+      "response_sha256": "0c36538b7e6e3123f9fcb14e6903e20d69fc35fd2bca1edbc73c60c552f0e091"
+    },
+    "response-0008": {
+      "row_index": 3,
+      "response_sha256": "f3a1a7caef835c74ee46cd032332f0ca75cfb5a51cd8db8a0aa5efbdf35bf577"
+    }
+  }
+}
